@@ -7,14 +7,30 @@ from models.user_models import UserPreference, UserProfile, ContentInteraction
 
 class UserPreferenceService:
     def __init__(self):
+        # Check if we are in a read-only environment (like Vercel)
         self.data_dir = "user_data"
+        try:
+            os.makedirs(self.data_dir, exist_ok=True)
+            # Try writing a test file to verify write permissions
+            test_file = os.path.join(self.data_dir, ".test_write")
+            with open(test_file, 'w') as f:
+                f.write("test")
+            os.remove(test_file)
+        except (OSError, PermissionError):
+            # Fallback to /tmp for Vercel/Serverless environments
+            print("⚠️ Read-only filesystem detected. Using /tmp for user data.")
+            self.data_dir = "/tmp/user_data"
+            
         self.preferences_file = "user_preferences.json"
         self.profiles_file = "user_profiles.json"
         self._ensure_data_directory()
         
     def _ensure_data_directory(self):
         """Create data directory if it doesn't exist"""
-        os.makedirs(self.data_dir, exist_ok=True)
+        try:
+            os.makedirs(self.data_dir, exist_ok=True)
+        except Exception as e:
+            print(f"❌ Failed to create data directory {self.data_dir}: {e}")
         
     def _load_data(self, filename: str) -> Dict:
         """Load data from JSON file"""
