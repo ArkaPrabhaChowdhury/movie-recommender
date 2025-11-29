@@ -1,0 +1,72 @@
+{
+  "user_1758657627119_zxitw01hb": {
+    "user_id": "user_1758657627119_zxitw01hb",
+    "preferred_genres": [
+      "animation",
+      "action",
+      "fantasy",
+      "drama"
+    ],
+    "preferred_languages": [
+      "hindi",
+      "hi",
+      "en"
+    ],
+    "preferred_content_types": [
+      "movie",
+      "tv"
+    ],
+    "liked_actors": [],
+    "liked_directors": [],
+    "total_interactions": 4,
+    "total_liked": 2,
+    "total_disliked": 0,
+    "total_watchlisted": 2,
+    "total_watched": 0,
+    "created_at": "2025-09-24T01:48:09.554962",
+    "updated_at": "2025-09-24T01:48:11.791003",
+    "last_activity": "2025-09-24T01:45:47.745628"
+  },
+  "user_1763541377114_3ixhhgquf": {
+    "user_id": "user_1763541377114_3ixhhgquf",
+    "preferred_genres": [],
+    "preferred_languages": [],
+    "preferred_content_types": [],
+    "liked_actors": [],
+    "liked_directors": [],
+    "total_interactions": 1,
+    "total_liked": 0,
+    "total_disliked": 0,
+    "total_watchlisted": 0,
+    "total_watched": 1,
+    "created_at": "2025-11-19T14:10:47.429690",
+    "updated_at": "2025-11-19T14:10:47.429703",
+    "last_activity": "2025-11-19T14:06:39.544156"
+  },
+  "user_1763989782411_ve1edqq67": {
+    "user_id": "user_1763989782411_ve1edqq67",
+    "preferred_genres": [
+      "comedy",
+      "drama",
+      "action",
+      "family"
+    ],
+    "preferred_languages": [
+      "en",
+      "hi"
+    ],
+    "preferred_content_types": [
+      "movie"
+    ],
+    "liked_actors": [],
+    "liked_directors": [],
+    "total_interactions": 4,
+    "total_liked": 4,
+    "total_disliked": 0,
+    "total_watchlisted": 0,
+    "total_watched": 0,
+    "created_at": "2025-11-29T20:46:39.919132",
+    "updated_at": "2025-11-29T20:52:58.498861",
+    "last_activity": "2025-11-29T20:37:17.923755"
+  }
+}

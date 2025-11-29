@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0d1117;
+    color: #fff;
+  }
+}
+
+/* 🎨 Teal & Dark Theme Color System */
+:root {
+  /* Primary - Teal (Main brand color) */
+  --color-primary-900: hsl(180, 65%, 25%);
+  --color-primary-700: hsl(180, 60%, 35%);
+  --color-primary-600: hsl(180, 55%, 42%);
+  --color-primary-500: hsl(180, 50%, 50%);
+  --color-primary-400: hsl(180, 55%, 60%);
+  --color-primary-300: hsl(180, 60%, 70%);
+
+  /* Accent - Coral/Rose (Warm contrast for CTAs and highlights) */
+  --color-accent-600: hsl(350, 70%, 55%);
+  --color-accent-500: hsl(350, 75%, 60%);
+  --color-accent-400: hsl(350, 80%, 65%);
+
+  /* Backgrounds - Matching #0d1117 base */
+  --color-bg-primary: #0d1117;
+  --color-bg-secondary: #161b22;
+  --color-bg-tertiary: #1f2428;
+  --color-bg-card: #161b22;
+  --color-bg-card-hover: #1f2428;
+  --color-bg-elevated: #21262d;
+
+  /* Borders */
+  --color-border-primary: #30363d;
+  --color-border-secondary: #21262d;
+  --color-border-accent: hsl(180, 55%, 42%);
+
+  /* Text */
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #8b949e;
+  --color-text-tertiary: #6e7681;
+  --color-text-link: hsl(180, 55%, 60%);
+
+  /* Status Colors */
+  --color-success: hsl(140, 60%, 50%);
+  --color-warning: hsl(45, 90%, 55%);
+  --color-error: hsl(0, 70%, 60%);
+  --color-info: hsl(210, 70%, 60%);
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
