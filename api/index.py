@@ -6,3 +6,7 @@ backend_path = os.path.join(os.path.dirname(__file__), '../movie-recommender-bac
 sys.path.append(backend_path)
 
 from main import app
+
+# Fix for Vercel: FastAPI needs to know it's running behind the /api proxy
+# This strips the /api prefix from incoming requests so they match the defined routes
+app.root_path = "/api"
