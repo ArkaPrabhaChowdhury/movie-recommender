@@ -34,10 +34,11 @@ export const useContent = (filters) => {
       fetchContent();
     }
   }, [
-    filters?.selectedLanguage, 
-    filters?.selectedGenre, 
-    filters?.selectedContentType, 
-    filters?.selectedReleasePeriod
+    filters?.selectedLanguage,
+    filters?.selectedGenre,
+    filters?.selectedContentType,
+    filters?.selectedReleasePeriod,
+    filters?.sortBy
   ]);
 
   return { content, loading, error, refetch: fetchContent };

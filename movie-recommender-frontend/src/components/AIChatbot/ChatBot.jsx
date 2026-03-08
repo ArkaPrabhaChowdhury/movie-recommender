@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import { useAIChat } from '../../hooks/useAIChat';
+import { Bot, X, MessageSquare } from 'lucide-react';
 
 const ChatBot = ({ onRecommendationsReceived }) => {
   const {
@@ -40,9 +41,11 @@ const ChatBot = ({ onRecommendationsReceived }) => {
         }}
       >
         {isChatOpen ? (
-          <span className="text-white text-2xl">✕</span>
+          <X className="text-white mx-auto" size={24} />
         ) : (
-          <span className="text-white text-2xl">🤖</span>
+          <div className="flex items-center justify-center h-full">
+            <MessageSquare className="text-white" size={28} />
+          </div>
         )}
       </button >
 

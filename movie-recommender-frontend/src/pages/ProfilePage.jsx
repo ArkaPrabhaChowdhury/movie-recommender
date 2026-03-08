@@ -104,33 +104,6 @@ const ProfilePage = ({
                         </div>
                     </div>
 
-                    {/* Get Recommendations Button */}
-                    {hasPreferences && (
-                        <div className="mt-6 text-center">
-                            <button
-                                onClick={() => {
-                                    onGetPersonalizedRecommendations();
-                                    navigate('/');
-                                }}
-                                disabled={loading}
-                                className="px-8 py-3 rounded-md text-white font-medium transition-all duration-200 flex items-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={{ background: 'var(--color-primary-500)' }}
-                                onMouseEnter={(e) => !loading && (e.target.style.background = 'var(--color-primary-600)')}
-                                onMouseLeave={(e) => !loading && (e.target.style.background = 'var(--color-primary-500)')}
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        Getting Recommendations...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles size={20} /> Get Personalized Recommendations
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    )}
                 </div>
 
                 {/* Preferences Section */}

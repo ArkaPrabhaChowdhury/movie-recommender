@@ -1,6 +1,7 @@
 import { UI_CONFIG } from '../../config/constants';
 import { isRecentRelease } from '../../config/constants';
 import InteractionButtons from '../ContentCard/InteractionButtons';
+import { Star, Film, Tv } from 'lucide-react';
 
 const ContentCard = ({
   item,
@@ -9,6 +10,7 @@ const ContentCard = ({
   onWatchlist,
   onWatched,
   userInteractions = [],
+  interactionMap = {},
   showInteractionButtons = false
 }) => {
   // Add debug logging
@@ -46,6 +48,7 @@ const ContentCard = ({
             onWatchlist={onWatchlist}
             onWatched={onWatched}
             userInteractions={userInteractions}
+            interactionMap={interactionMap}
           />
         )}
 
@@ -83,15 +86,17 @@ const ContentCard = ({
 
         <div className="absolute top-2 right-2">
           {item.rating > 0 && (
-            <span className="px-2 py-1 text-xs rounded-full" style={{ background: 'rgba(0,0,0,0.8)', color: 'var(--color-accent-400)' }}>
-              ⭐ {item.rating.toFixed(1)}
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full font-bold shadow-lg border border-black/20" style={{ background: 'rgba(0,0,0,0.85)', color: 'var(--color-accent-400)' }}>
+              <Star size={12} fill="currentColor" />
+              <span>{item.rating.toFixed(1)}</span>
             </span>
           )}
         </div>
 
         <div className={`absolute ${showInteractionButtons ? 'top-12' : 'top-2'} right-2 flex flex-col gap-1`}>
-          <span className="px-2 py-1 text-white text-xs rounded-full font-medium" style={{ background: 'var(--color-primary-600)' }}>
-            {item.content_type === 'movie' ? '🎬' : '📺'} {item.content_type.toUpperCase()}
+          <span className="flex items-center gap-1.5 px-2.5 py-1 text-white text-[10px] rounded-full font-bold shadow-lg border border-black/20 tracking-wider" style={{ background: 'var(--color-primary-600)' }}>
+            {item.content_type === 'movie' ? <Film size={10} /> : <Tv size={10} />}
+            {item.content_type.toUpperCase()}
           </span>
         </div>
       </div>

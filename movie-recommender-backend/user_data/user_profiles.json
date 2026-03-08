@@ -2,15 +2,21 @@
   "user_1758657627119_zxitw01hb": {
     "user_id": "user_1758657627119_zxitw01hb",
     "preferred_genres": [
-      "animation",
+      "drama",
+      "thriller",
       "action",
+      "crime",
+      "action & adventure",
+      "mystery",
+      "animation",
       "fantasy",
-      "drama"
+      "sci-fi & fantasy",
+      "romance"
     ],
     "preferred_languages": [
-      "hindi",
       "hi",
-      "en"
+      "en",
+      "hindi"
     ],
     "preferred_content_types": [
       "movie",
@@ -18,14 +24,14 @@
     ],
     "liked_actors": [],
     "liked_directors": [],
-    "total_interactions": 4,
-    "total_liked": 2,
-    "total_disliked": 0,
-    "total_watchlisted": 2,
+    "total_interactions": 18,
+    "total_liked": 13,
+    "total_disliked": 1,
+    "total_watchlisted": 4,
     "total_watched": 0,
     "created_at": "2025-09-24T01:48:09.554962",
-    "updated_at": "2025-09-24T01:48:11.791003",
-    "last_activity": "2025-09-24T01:45:47.745628"
+    "updated_at": "2026-03-08T21:19:32.207293",
+    "last_activity": "2026-03-08T21:07:04.373511"
   },
   "user_1763541377114_3ixhhgquf": {
     "user_id": "user_1763541377114_3ixhhgquf",

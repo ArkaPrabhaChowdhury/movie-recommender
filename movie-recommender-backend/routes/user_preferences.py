@@ -64,8 +64,9 @@ async def get_user_profile(user_id: str):
                 "watched_items": len(watched_interactions),
                 "genre_distribution": genre_distribution
             },
-            "recent_activity": interactions[-10:],  # Last 10 interactions
-            "liked_content": liked_interactions[-5:]  # Last 5 liked items for display
+            "recent_activity": interactions[:10],  # Newest 10 interactions
+            "liked_content": liked_interactions[:5],  # Newest 5 liked items
+            "interaction_map": {f"{item['content_type']}_{item['content_id']}": item['action'] for item in interactions}
         }
         
     except Exception as e:

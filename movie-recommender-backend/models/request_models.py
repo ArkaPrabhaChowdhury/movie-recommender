@@ -7,6 +7,7 @@ class DiscoverRequest(BaseModel):
     language: Optional[str] = None
     content_type: Optional[str] = None
     release_period: Optional[str] = None
+    sort_by: Optional[str] = 'rating'
 
 class SearchRequest(BaseModel):
     query: str

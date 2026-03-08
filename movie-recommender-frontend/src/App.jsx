@@ -115,6 +115,8 @@ function App() {
                 setAiRecommendations={setAiRecommendations}
                 aiResponse={aiResponse}
                 setAiResponse={setAiResponse}
+                onGetPersonalizedRecommendations={handlePersonalizedRecommendations}
+                hasPreferences={hasPreferences}
               />
             }
           />

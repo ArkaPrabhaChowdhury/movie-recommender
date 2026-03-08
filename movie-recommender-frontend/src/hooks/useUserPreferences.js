@@ -26,7 +26,7 @@ export const useUserPreferences = () => {
 
   const loadUserProfile = async () => {
     if (!userId) return;
-    
+
     try {
       setLoading(true);
       const profile = await ApiService.getUserProfile(userId);
@@ -43,17 +43,43 @@ export const useUserPreferences = () => {
   const recordInteraction = async (contentData, action, rating = null) => {
     if (!userId || !contentData) return false;
 
+    const contentKey = `${contentData.content_type}_${contentData.id}`;
+    const currentAction = userProfile?.interaction_map?.[contentKey];
+    const isUndoing = currentAction === action;
+
+    // Optimistic update for instant UI feedback
+    if (userProfile) {
+      setUserProfile(prev => {
+        const newMap = { ...(prev?.interaction_map || {}) };
+        if (isUndoing) {
+          delete newMap[contentKey];
+        } else {
+          newMap[contentKey] = action;
+        }
+        return {
+          ...prev,
+          interaction_map: newMap
+        };
+      });
+    }
+
     try {
-      console.log(`📝 Recording ${action} for:`, contentData.title);
-      
-      const result = await ApiService.recordInteraction(userId, contentData, action, rating);
-      
-      // Reload profile after interaction
-      setTimeout(() => loadUserProfile(), 500);
-      
-      return result;
+      if (isUndoing) {
+        console.log(`🗑️ Removing ${action} (undo) for:`, contentData.title);
+        await ApiService.removeInteraction(userId, contentData.id, contentData.content_type);
+      } else {
+        console.log(`📝 Recording ${action} for:`, contentData.title);
+        await ApiService.recordInteraction(userId, contentData, action, rating);
+      }
+
+      // Reload full profile to sync everything (stats, recent_activity, etc)
+      await loadUserProfile();
+
+      return true;
     } catch (error) {
-      console.error('Error recording interaction:', error);
+      console.error(`Error ${isUndoing ? 'removing' : 'recording'} interaction:`, error);
+      // Revert optimistic update by reloading
+      await loadUserProfile();
       return false;
     }
   };
@@ -64,15 +90,15 @@ export const useUserPreferences = () => {
     try {
       setLoading(true);
       console.log('🎯 Getting personalized recommendations for:', userId);
-      
+
       const response = await ApiService.getPersonalizedRecommendations(userId, options);
-      
+
       const recommendations = response.recommendations || [];
       setPersonalizedRecommendations(recommendations);
-      
+
       console.log(`✨ Got ${recommendations.length} personalized recommendations`);
       console.log('Personalization level:', response.personalization_level);
-      
+
       return response;
     } catch (error) {
       console.error('Error getting personalized recommendations:', error);

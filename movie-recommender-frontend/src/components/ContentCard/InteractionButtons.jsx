@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Heart, ThumbsDown, Bookmark, CheckCircle, Plus, X } from 'lucide-react';
 
 const InteractionButtons = ({
   item,
@@ -6,30 +7,29 @@ const InteractionButtons = ({
   onDislike,
   onWatchlist,
   onWatched,
-  userInteractions = []
+  userInteractions = [],
+  interactionMap = {}
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Debug logging
-  console.log('InteractionButtons props:', {
-    itemTitle: item?.title,
-    hasOnLike: !!onLike,
-    hasOnDislike: !!onDislike,
-    hasOnWatchlist: !!onWatchlist,
-    hasOnWatched: !!onWatched,
-    userInteractionsCount: userInteractions.length
-  });
-
   // Check if user has already interacted with this content
   const getUserAction = () => {
+    // Check map first for high performance and full coverage
+    if (interactionMap && Object.keys(interactionMap).length > 0) {
+      const key = `${item.content_type}_${item.id}`;
+      if (interactionMap[key]) return interactionMap[key];
+    }
+
+    // Fallback to recent list
     const interaction = userInteractions.find(
       inter => inter.content_id === item.id && inter.content_type === item.content_type
     );
     return interaction?.action || null;
   };
 
-  const handleInteraction = async (action, rating = null) => {
+  const handleInteraction = async (e, action, rating = null) => {
+    e.stopPropagation();
     console.log('🎯 Button clicked:', action, 'for', item?.title);
 
     if (loading) {
@@ -74,7 +74,8 @@ const InteractionButtons = ({
     }
   };
 
-  const handleToggleExpanded = () => {
+  const handleToggleExpanded = (e) => {
+    e.stopPropagation();
     console.log('🎯 Toggle button clicked, expanded:', !isExpanded);
     setIsExpanded(!isExpanded);
   };
@@ -83,71 +84,74 @@ const InteractionButtons = ({
 
   return (
     <div className="absolute top-2 left-2 z-10">
-      {/* Debug indicator */}
-      <div className="absolute -top-6 left-0 bg-green-600 text-white text-xs px-1 rounded">
-        DEBUG
-      </div>
-
       {/* Main interaction button */}
       <button
         onClick={handleToggleExpanded}
-        className="w-8 h-8 bg-black/80 hover:bg-black/90 rounded-full flex items-center justify-center text-white transition-all duration-200 z-20"
         disabled={loading}
+        className="w-10 h-10 bg-black/60 backdrop-blur-md hover:bg-black/80 rounded-full flex items-center justify-center text-white border border-white/10 transition-all duration-300 shadow-lg z-20 group"
       >
         {loading ? (
-          <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
         ) : userAction ? (
-          <span className="text-sm">
-            {userAction === 'liked' && '❤️'}
-            {userAction === 'disliked' && '👎'}
-            {userAction === 'watchlisted' && '📌'}
-            {userAction === 'watched' && '✅'}
-          </span>
+          <div className="flex items-center justify-center transition-transform group-hover:scale-110">
+            {userAction === 'liked' && <Heart size={18} fill="currentColor" className="text-red-500" />}
+            {userAction === 'disliked' && <ThumbsDown size={18} className="text-gray-400" />}
+            {userAction === 'watchlisted' && <Bookmark size={18} fill="currentColor" className="text-blue-500" />}
+            {userAction === 'watched' && <CheckCircle size={18} className="text-green-500" />}
+          </div>
         ) : (
-          <span className="text-lg">+</span>
+          <Plus size={20} className="transition-transform group-hover:rotate-90" />
         )}
       </button>
 
       {/* Expanded interaction options */}
       {isExpanded && (
-        <div className="absolute top-10 left-0 bg-black/95 backdrop-blur-sm rounded-lg p-2 flex flex-col gap-1 min-w-[120px] z-50 shadow-lg border border-gray-700">
+        <div className="absolute top-12 left-0 bg-[#0d1117] backdrop-blur-xl rounded-xl p-1.5 flex flex-col gap-1 min-w-[140px] z-[60] shadow-2xl border border-gray-800 animate-in fade-in slide-in-from-top-2 duration-200">
           <button
-            onClick={() => handleInteraction('liked')}
-            className={`flex items-center gap-2 px-3 py-2 rounded text-sm hover:bg-white/10 transition-colors ${userAction === 'liked' ? 'bg-teal-600/30 text-red-400' : 'text-white'
+            onClick={(e) => handleInteraction(e, 'liked')}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'liked' ? 'bg-red-500/10 text-red-500 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            ❤️ Like
+            <Heart size={16} fill={userAction === 'liked' ? "currentColor" : "none"} />
+            <span>Like</span>
           </button>
 
           <button
-            onClick={() => handleInteraction('disliked')}
-            className={`flex items-center gap-2 px-3 py-2 rounded text-sm hover:bg-white/10 transition-colors ${userAction === 'disliked' ? 'bg-gray-600/30 text-gray-400' : 'text-white'
+            onClick={(e) => handleInteraction(e, 'disliked')}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'disliked' ? 'bg-gray-500/20 text-gray-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            👎 Dislike
+            <ThumbsDown size={16} fill={userAction === 'disliked' ? "currentColor" : "none"} />
+            <span>Dislike</span>
           </button>
 
           <button
-            onClick={() => handleInteraction('watchlisted')}
-            className={`flex items-center gap-2 px-3 py-2 rounded text-sm hover:bg-white/10 transition-colors ${userAction === 'watchlisted' ? 'bg-blue-600/30 text-blue-400' : 'text-white'
+            onClick={(e) => handleInteraction(e, 'watchlisted')}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'watchlisted' ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            📌 Watchlist
+            <Bookmark size={16} fill={userAction === 'watchlisted' ? "currentColor" : "none"} />
+            <span>Watchlist</span>
           </button>
 
           <button
-            onClick={() => handleInteraction('watched')}
-            className={`flex items-center gap-2 px-3 py-2 rounded text-sm hover:bg-white/10 transition-colors ${userAction === 'watched' ? 'bg-green-600/30 text-green-400' : 'text-white'
+            onClick={(e) => handleInteraction(e, 'watched')}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'watched' ? 'bg-green-500/10 text-green-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            ✅ Watched
+            <CheckCircle size={16} fill={userAction === 'watched' ? "currentColor" : "none"} />
+            <span>Watched</span>
           </button>
 
           <button
-            onClick={() => setIsExpanded(false)}
-            className="text-xs text-gray-400 hover:text-white mt-1 px-3 py-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(false);
+            }}
+            className="flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-white mt-1 py-2 border-t border-gray-800/50"
           >
-            Cancel
+            <X size={12} />
+            <span>Cancel</span>
           </button>
         </div>
       )}

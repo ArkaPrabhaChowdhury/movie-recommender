@@ -44,14 +44,14 @@ class RecommendationEngine:
     async def _run_recommendation_algorithms(self, context: Dict, limit: int) -> List[Dict]:
         """Run multiple recommendation algorithms and combine results"""
         
-        # Algorithm 1: Collaborative filtering (similar users)
-        collaborative_recs = await self._collaborative_filtering(context, limit // 3)
+        # Run algorithms in parallel
+        collab_task = self._collaborative_filtering(context, limit // 3)
+        content_task = self._content_based_filtering(context, limit // 3)
+        popular_task = self._popularity_based_filtering(context, limit // 3)
         
-        # Algorithm 2: Content-based filtering (similar content)
-        content_based_recs = await self._content_based_filtering(context, limit // 3)
+        results = await asyncio.gather(collab_task, content_task, popular_task)
         
-        # Algorithm 3: Popularity-based with user preferences
-        popular_recs = await self._popularity_based_filtering(context, limit // 3)
+        collaborative_recs, content_based_recs, popular_recs = results
         
         # Combine and deduplicate
         all_recommendations = collaborative_recs + content_based_recs + popular_recs
@@ -140,28 +140,36 @@ class RecommendationEngine:
             
             recommendations = []
             
-            # Get content based on user's preferred genres and languages
+            # Create tasks for all genre/language combinations
+            tasks = []
             for genre in preferred_genres:
                 for language in preferred_languages:
                     language_code = LANGUAGE_MAP.get(language, 'en')
-                    
-                    # Get content for this genre/language combination
-                    genre_content = await get_content_with_date_filtering(
+                    tasks.append(get_content_with_date_filtering(
                         language_code, "both", genre, "2years"
-                    )
-                    
-                    # Filter out already seen content
-                    seen_content_ids = [item["content_id"] for item in recent_liked]
-                    unseen_content = [
-                        item for item in genre_content 
-                        if item["id"] not in seen_content_ids
-                    ]
-                    
-                    # Add recommendation reason
-                    for item in unseen_content[:3]:  # Top 3 per genre/language
-                        item["recommendation_reason"] = f"You like {genre} content in {language}"
-                        item["content_score"] = item.get("rating", 0) * item.get("popularity", 1)
-                        recommendations.append(item)
+                    ))
+            
+            # Fetch all in parallel
+            results = await asyncio.gather(*tasks)
+            
+            seen_content_ids = [item["content_id"] for item in recent_liked]
+            
+            for i, genre_content in enumerate(results):
+                genre_idx = i // len(preferred_languages)
+                lang_idx = i % len(preferred_languages)
+                genre = preferred_genres[genre_idx]
+                language = preferred_languages[lang_idx]
+                
+                # Filter and score
+                unseen_content = [
+                    item for item in genre_content 
+                    if item["id"] not in seen_content_ids
+                ]
+                
+                for item in unseen_content[:3]:
+                    item["recommendation_reason"] = f"You like {genre} content in {language}"
+                    item["content_score"] = item.get("rating", 0) * item.get("popularity", 1)
+                    recommendations.append(item)
             
             # Sort by content score and return top results
             recommendations.sort(key=lambda x: x.get("content_score", 0), reverse=True)

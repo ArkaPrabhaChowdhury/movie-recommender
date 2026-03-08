@@ -85,13 +85,20 @@ def get_genre_id(genre: str, content_type: str) -> int:
     """Get genre ID based on content type (movie or tv)"""
     genre_lower = genre.lower()
     
+    if genre_lower == 'all':
+        return None
+        
     if content_type == 'tv':
         return TV_GENRE_MAP.get(genre_lower, MOVIE_GENRE_MAP.get(genre_lower, 28))
     else:  # movie or both
         return MOVIE_GENRE_MAP.get(genre_lower, 28)
 
 LANGUAGE_MAP = {
-    'hindi': 'hi', 'english': 'en', 'tamil': 'ta', 'telugu': 'te',
+    'any': None, 'Any': None, 'ANY': None,
+    'hindi': 'hi', 'Hindi': 'hi',
+    'english': 'en', 'English': 'en',
+    'tamil': 'ta', 'Tamil': 'ta',
+    'telugu': 'te', 'Telugu': 'te',
     'malayalam': 'ml', 'kannada': 'kn', 'bengali': 'bn', 'marathi': 'mr',
     'gujarati': 'gu', 'punjabi': 'pa', 'urdu': 'ur'
 }
@@ -113,18 +120,19 @@ INDIAN_OTT_PLATFORMS = {
     350: {"name": "Apple TV", "logo": "appletv.png", "color": "#000000"},
     2: {"name": "Apple iTunes", "logo": "apple.png", "color": "#A855F7"},
     3: {"name": "Google Play", "logo": "google.png", "color": "#4285F4"},
+    2100: {"name": "Amazon Prime (Ads)", "logo": "prime.png", "color": "#00A8E1"},
 }
 
 # API Limits and Timeouts
 API_CONFIG = {
     'TIMEOUT': 30.0,
-    'MAX_RESULTS_PER_TYPE': 20,
+    'MAX_RESULTS_PER_TYPE': 50,
     'MAX_STREAMING_PLATFORMS': 4,
     'MAX_SEARCH_RESULTS': 15,
     'MIN_VOTE_COUNT': {
-        'POPULAR': 10,
-        'RECENT': 5,
-        'SEARCH': 1
+        'POPULAR': 5,
+        'RECENT': 0,
+        'SEARCH': 0
     }
 }
 
@@ -145,12 +153,15 @@ def get_date_range(release_period: str):
     else:  # 'all' or any other value
         start_date = datetime(2000, 1, 1)  # Very old date for "all time"
     
-    return start_date.strftime('%Y-%m-%d'), today.strftime('%Y-%m-%d')
+    # End date slightly in the future to catch brand new releases
+    end_date = today + timedelta(days=7)
+    
+    return start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')
 
 # Default Values
 DEFAULTS = {
-    'GENRE': 'action',
-    'LANGUAGE': 'hindi', 
+    'GENRE': 'all',
+    'LANGUAGE': 'any', 
     'CONTENT_TYPE': 'both',
     'RELEASE_PERIOD': '6months'
 }

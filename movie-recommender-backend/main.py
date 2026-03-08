@@ -22,19 +22,22 @@ try:
     from routes.search import router as search_router
     from routes.ai_chat import router as ai_chat_router
     from routes.user_preferences import router as user_preferences_router  # NEW
+    from routes.details import router as details_router
     
     app.include_router(discovery_router)
     app.include_router(search_router)
     app.include_router(ai_chat_router)
     app.include_router(user_preferences_router)  # NEW
+    app.include_router(details_router)
     
-    print("✅ All routes loaded successfully")
+    print("[ OK ] All routes loaded successfully")
     print("  - Discovery routes: /discover")
     print("  - Search routes: /search")
     print("  - AI Chat routes: /ai-chat")
     print("  - User Preference routes: /user/*")  # NEW
+    print("  - Details routes: /details/*")
 except ImportError as e:
-    print(f"❌ Error importing routes: {e}")
+    print(f"[ ERROR ] Error importing routes: {e}")
 
 # --- Health Endpoints ---
 @app.get("/")

@@ -8,7 +8,7 @@ from utils.helpers import extract_filters_from_prompt
 
 router = APIRouter()
 
-async def get_content_with_date_filtering(language_code: str, content_type: str, genre: str, release_period: str):
+async def get_content_with_date_filtering(language_code: str, content_type: str, genre: str, release_period: str, sort_by: str = 'rating'):
     """Get content with date range filtering and correct genre IDs"""
     date_from, date_to = get_date_range(release_period)
     print(f"Date filtering: {date_from} to {date_to} (period: {release_period})")
@@ -58,8 +58,16 @@ async def get_content_with_date_filtering(language_code: str, content_type: str,
         ott_content.extend(tv_ott)
         print(f"Found {len(tv_ott)} TV shows with OTT availability")
     
-    # Sort by release date (newest first) and rating
-    ott_content.sort(key=lambda x: (x.get('release_date', ''), x.get('rating', 0)), reverse=True)
+    # Sort based on parameter
+    if sort_by == 'rating':
+        print("Sorting by rating (highest first)...")
+        ott_content.sort(key=lambda x: x.get('rating', 0), reverse=True)
+    elif sort_by == 'release_date':
+        print("Sorting by release date (newest first)...")
+        ott_content.sort(key=lambda x: x.get('release_date', ''), reverse=True)
+    else:
+        # Default: Sort by release date (newest first) and rating
+        ott_content.sort(key=lambda x: (x.get('release_date', ''), x.get('rating', 0)), reverse=True)
     
     print(f"Final OTT content: {len(ott_content)} items")
     return ott_content
@@ -72,19 +80,21 @@ async def discover_content(request: DiscoverRequest):
         
         # Use explicit parameters if provided
         if request.genre and request.language and request.content_type:
-            genre = request.genre
-            language = request.language
-            content_type = request.content_type
+            genre = request.genre.lower()
+            language = request.language.lower()
+            content_type = request.content_type.lower()
             release_period = request.release_period or DEFAULTS['RELEASE_PERIOD']
             print(f"Using explicit parameters - Genre: {genre}, Language: {language}, Content: {content_type}, Period: {release_period}")
         else:
             # Fallback to extraction
             genre, language, content_type = extract_filters_from_prompt(request.prompt)
+            genre = genre.lower()
+            language = language.lower()
             release_period = DEFAULTS['RELEASE_PERIOD']
             print(f"Extracted from prompt - Genre: {genre}, Language: {language}, Content: {content_type}")
         
-        # Get language code
-        language_code = LANGUAGE_MAP.get(language, 'hi')
+        # Get language code safely, default to None (Any) if not found
+        language_code = LANGUAGE_MAP.get(language, None)
         
         # Get genre IDs for debugging
         movie_genre_id = get_genre_id(genre, 'movie')
@@ -94,12 +104,18 @@ async def discover_content(request: DiscoverRequest):
         print(f"Movie genre ID: {movie_genre_id}, TV genre ID: {tv_genre_id}")
         
         # Get content with date filtering and correct genre IDs
-        content = await get_content_with_date_filtering(language_code, content_type, genre, release_period)
+        content = await get_content_with_date_filtering(
+            language_code, 
+            content_type, 
+            genre, 
+            release_period,
+            request.sort_by or 'rating'
+        )
         
         print(f"Returning {len(content)} OTT-available items")
         
         return {
-            "content": content[:25],
+            "content": content[:50],
             "total": len(content),
             "detected": {
                 "genre": genre,

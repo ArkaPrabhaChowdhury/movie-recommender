@@ -30,13 +30,14 @@ export const UI_CONFIG = {
 
 // Content Configuration
 export const LANGUAGES = [
+  { id: 'any', name: 'Any' },
   { id: 'hindi', name: 'Hindi' },
   { id: 'english', name: 'English' },
   { id: 'tamil', name: 'Tamil' },
   { id: 'telugu', name: 'Telugu' },
 ];
 
-export const GENRES = ['Action', 'Comedy', 'Drama', 'Thriller', 'Romance', 'Horror', 'Sci-Fi'];
+export const GENRES = ['All', 'Action', 'Comedy', 'Drama', 'Thriller', 'Romance', 'Horror', 'Sci-Fi'];
 
 export const CONTENT_TYPES = [
   { id: 'both', name: 'All' },
@@ -52,12 +53,18 @@ export const RELEASE_PERIODS = [
   { id: 'all', name: 'All time', months: null },
 ];
 
+export const SORT_OPTIONS = [
+  { id: 'rating', name: 'Rating (Top Rated)' },
+  { id: 'release_date', name: 'Date (Lately Released)' },
+];
+
 // Default Values
 export const DEFAULTS = {
-  LANGUAGE: 'hindi',
-  GENRE: 'action',
+  LANGUAGE: 'any',
+  GENRE: 'all',
   CONTENT_TYPE: 'both',
-  RELEASE_PERIOD: '6months'
+  RELEASE_PERIOD: '6months',
+  SORT_BY: 'rating'
 };
 
 // CSS Classes & Inline Styles

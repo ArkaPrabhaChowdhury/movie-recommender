@@ -1,0 +1,1670 @@
+{
+  "content": [
+    {
+      "id": 1629382,
+      "title": "Street Flow 3",
+      "poster": "https://image.tmdb.org/t/p/w500/vl50ruzFWxrbK4zFz0ySjC3TdyK.jpg",
+      "rating": 3.636,
+      "year": "2026",
+      "overview": "Grieving and facing the consequences of their crimes, the Traor\u00e9 brothers get one last chance to forge a new path.",
+      "content_type": "movie",
+      "release_date": "2026-03-04",
+      "genre_ids": [
+        18
+      ],
+      "original_language": "fr",
+      "popularity": 51.7167,
+      "vote_count": 11,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1389149,
+      "title": "Accused",
+      "poster": "https://image.tmdb.org/t/p/w500/eeP55mdqj4KpWtEPBvZJoxmnkXI.jpg",
+      "rating": 4.9,
+      "year": "2026",
+      "overview": "When a celebrated queer doctor in London is accused of sexual misconduct, her life unravels. Now under a storm of suspicion and scrutiny, her marriage fractures and the truth blurs. Her wife must decide whether to walk away, or fight for the woman the world is turning against.",
+      "content_type": "movie",
+      "release_date": "2026-02-27",
+      "genre_ids": [
+        53,
+        9648,
+        18
+      ],
+      "original_language": "hi",
+      "popularity": 54.0101,
+      "vote_count": 40,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 300054,
+      "title": "BAKI-DOU: The Invincible Samurai",
+      "poster": "https://image.tmdb.org/t/p/w500/frtzbwANetYd0M4zdrZ5gx0E89q.jpg",
+      "rating": 8.4,
+      "year": "2026",
+      "overview": "Baki and the strongest Underground Arena fighters face a threat of historical proportions: the resurrected Musashi Miyamoto, Japan's greatest samurai.",
+      "content_type": "tv",
+      "release_date": "2026-02-26",
+      "last_air_date": "2026-02-26",
+      "genre_ids": [
+        16,
+        10759
+      ],
+      "original_language": "ja",
+      "popularity": 108.3747,
+      "vote_count": 5,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1340110,
+      "title": "Redux Redux",
+      "poster": "https://image.tmdb.org/t/p/w500/9u7sUTYPPTxGCXbkcw8FTq50PnO.jpg",
+      "rating": 6.5,
+      "year": "2026",
+      "overview": "In an attempt to avenge her daughter\u2019s death, Irene Kelly travels through parallel universes, killing her daughter\u2019s murderer again and again. As she becomes consumed by vengeance, her humanity begins to slip away\u2014until the cycle is disrupted when she rescues Mia, a sharp-witted teenager already marked by the killer.",
+      "content_type": "movie",
+      "release_date": "2026-02-20",
+      "genre_ids": [
+        878,
+        9648,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 17.8293,
+      "vote_count": 34,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1428862,
+      "title": "Firebreak",
+      "poster": "https://image.tmdb.org/t/p/w500/knh3c8LzL9fMhjc5SZPAOotXyiy.jpg",
+      "rating": 6.297,
+      "year": "2026",
+      "overview": "Little Lide disappears in the forest while her family packs up their home. As a fire breaks out, her mother must race to reach her before the flames do.",
+      "content_type": "movie",
+      "release_date": "2026-02-19",
+      "genre_ids": [
+        53,
+        18
+      ],
+      "original_language": "es",
+      "popularity": 24.6975,
+      "vote_count": 69,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 799882,
+      "title": "The Bluff",
+      "poster": "https://image.tmdb.org/t/p/w500/sojEzvfxR2DBcDSJyAisX8TWjov.jpg",
+      "rating": 6.1,
+      "year": "2026",
+      "overview": "When her tranquil life on a remote island is shattered by the return of her vengeful former captain, a skilled ex-pirate must confront her bloody past and unleash her deadly talents to save her family from a ruthless siege.",
+      "content_type": "movie",
+      "release_date": "2026-02-17",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 245.9062,
+      "vote_count": 178,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1243460,
+      "title": "Joe's College Road Trip",
+      "poster": "https://image.tmdb.org/t/p/w500/jWGOCUlzF4aCVLwHoiuqWWfhcrA.jpg",
+      "rating": 5.7,
+      "year": "2026",
+      "overview": "To teach his sheltered grandson about the real world, Madea's foul-mouthed brother Joe takes the college-bound teen on a raucous cross-country road trip.",
+      "content_type": "movie",
+      "release_date": "2026-02-12",
+      "genre_ids": [
+        35
+      ],
+      "original_language": "en",
+      "popularity": 17.791,
+      "vote_count": 49,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1317672,
+      "title": "Love Me Love Me",
+      "poster": "https://image.tmdb.org/t/p/w500/xmoO861IKm1ycJ52mLGc3nwINKV.jpg",
+      "rating": 5.58,
+      "year": "2026",
+      "overview": "After her brother's death, June moves to Milan for a fresh start, finding comfort in Will, the perfect honor student at her new international school. But when his troubled best friend James\u2014hiding a dangerous life in clandestine MMA fights\u2014sparks a rivalry that quickly turns into irresistible attraction, June must choose between safety and a love that upends everything she thought she wanted.",
+      "content_type": "movie",
+      "release_date": "2026-02-12",
+      "genre_ids": [
+        10749,
+        18
+      ],
+      "original_language": "en",
+      "popularity": 28.1621,
+      "vote_count": 157,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1426964,
+      "title": "State of Fear",
+      "poster": "https://image.tmdb.org/t/p/w500/3Eaqedg8MAlnP51GYY8MCSIdTnV.jpg",
+      "rating": 5.38,
+      "year": "2026",
+      "overview": "As S\u00e3o Paulo erupts in an unprecedented wave of violence, a lawyer with underworld ties must strike a deal with the police to rescue her kidnapped niece.",
+      "content_type": "movie",
+      "release_date": "2026-02-10",
+      "genre_ids": [
+        28,
+        53,
+        80,
+        18
+      ],
+      "original_language": "pt",
+      "popularity": 42.7158,
+      "vote_count": 54,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1168190,
+      "title": "The Wrecking Crew",
+      "poster": "https://image.tmdb.org/t/p/w500/gbVwHl4YPSq6BcC92TQpe7qUTh6.jpg",
+      "rating": 6.917,
+      "year": "2026",
+      "overview": "Estranged half-brothers Jonny and James reunite after their father's mysterious death. As they search for the truth, buried secrets reveal a conspiracy threatening to tear their family apart.",
+      "content_type": "movie",
+      "release_date": "2026-01-28",
+      "genre_ids": [
+        28,
+        35,
+        80,
+        9648
+      ],
+      "original_language": "en",
+      "popularity": 83.2216,
+      "vote_count": 733,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1032892,
+      "title": "In the Blink of an Eye",
+      "poster": "https://image.tmdb.org/t/p/w500/4vWqIdoBavo1htxmxlScDniOS9C.jpg",
+      "rating": 4.538,
+      "year": "2026",
+      "overview": "Three storylines, spanning thousands of years, intersect and reflect on hope, connection, and the circle of life.",
+      "content_type": "movie",
+      "release_date": "2026-01-26",
+      "genre_ids": [
+        18,
+        878
+      ],
+      "original_language": "en",
+      "popularity": 86.6932,
+      "vote_count": 52,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "JioHotstar",
+            "logo": "/kVqjgpcwvDJOhCupjcLzwwtOp52.jpg",
+            "color": "#6B7280"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 224372,
+      "title": "A Knight of the Seven Kingdoms",
+      "poster": "https://image.tmdb.org/t/p/w500/k8yARbD9iYn2nRX2HvsopfKDN2r.jpg",
+      "rating": 8.468,
+      "year": "2026",
+      "overview": "A century before the events of Game of Thrones, two unlikely heroes wandered Westeros: a young, naive but courageous knight, Ser Duncan the Tall, and his diminutive squire, Egg. Set in an age when the Targaryen line still holds the Iron Throne and the last dragon has not yet passed from living memory, great destinies, powerful foes, and dangerous exploits await these improbable and incomparable friends.",
+      "content_type": "tv",
+      "release_date": "2026-01-18",
+      "last_air_date": "2026-02-22",
+      "genre_ids": [
+        18,
+        10765,
+        10759
+      ],
+      "original_language": "en",
+      "popularity": 143.3767,
+      "vote_count": 605,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "JioHotstar",
+            "logo": "/kVqjgpcwvDJOhCupjcLzwwtOp52.jpg",
+            "color": "#6B7280"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1272837,
+      "title": "28 Years Later: The Bone Temple",
+      "poster": "https://image.tmdb.org/t/p/w500/kK1BGkG3KAvWB0WMV1DfOx9yTMZ.jpg",
+      "rating": 7.211,
+      "year": "2026",
+      "overview": "Dr. Kelson finds himself in a shocking new relationship - with consequences that could change the world as they know it - and Spike's encounter with Jimmy Crystal becomes a nightmare he can't escape.",
+      "content_type": "movie",
+      "release_date": "2026-01-14",
+      "genre_ids": [
+        27,
+        53,
+        878
+      ],
+      "original_language": "en",
+      "popularity": 74.7312,
+      "vote_count": 744,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1306368,
+      "title": "The Rip",
+      "poster": "https://image.tmdb.org/t/p/w500/4wsYWH73Hb1B6noGIFaRQSAkuXj.jpg",
+      "rating": 7.074,
+      "year": "2026",
+      "overview": "Trust frays when a team of Miami cops discovers millions in cash inside a run-down stash house, calling everyone \u2014 and everything \u2014 into question.",
+      "content_type": "movie",
+      "release_date": "2026-01-13",
+      "genre_ids": [
+        28,
+        53,
+        80
+      ],
+      "original_language": "en",
+      "popularity": 43.9919,
+      "vote_count": 1306,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1584215,
+      "title": "The Internship",
+      "poster": "https://image.tmdb.org/t/p/w500/fYqSOkix4rbDiZW0ACNnvZCpT6X.jpg",
+      "rating": 6.25,
+      "year": "2026",
+      "overview": "A CIA-trained assassin recruits other graduates from her secret childhood program, The Internship, to violently destroy the organization. The CIA fights back with deadly force.",
+      "content_type": "movie",
+      "release_date": "2026-01-13",
+      "genre_ids": [
+        28
+      ],
+      "original_language": "en",
+      "popularity": 36.5121,
+      "vote_count": 52,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1034716,
+      "title": "People We Meet on Vacation",
+      "poster": "https://image.tmdb.org/t/p/w500/kOrJqRyt1pklNgDwJMjzN1GuNXS.jpg",
+      "rating": 7.028,
+      "year": "2026",
+      "overview": "Poppy's a free spirit. Alex loves a plan. After years of summer vacations, these polar-opposite pals wonder if they could be a perfect romantic match.",
+      "content_type": "movie",
+      "release_date": "2026-01-06",
+      "genre_ids": [
+        10749,
+        35,
+        18
+      ],
+      "original_language": "en",
+      "popularity": 16.9126,
+      "vote_count": 483,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1315303,
+      "title": "Primate",
+      "poster": "https://image.tmdb.org/t/p/w500/z97hrgI5wbGbZvSVkBfAeBnFKAg.jpg",
+      "rating": 6.568,
+      "year": "2026",
+      "overview": "Lucy, a college student, along with her friends, spend their vacation at her family's home in Hawaii, which includes her pet chimpanzee, Ben. However, when Ben contracts rabies after being bitten by a rabid animal, the group must fight for their lives in order to avoid the now-violent chimp.",
+      "content_type": "movie",
+      "release_date": "2026-01-01",
+      "genre_ids": [
+        27,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 31.0799,
+      "vote_count": 436,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1196946,
+      "title": "Ikkis",
+      "poster": "https://image.tmdb.org/t/p/w500/8PWu0V10nMqG5SrA13wLRXTD2fH.jpg",
+      "rating": 5.9,
+      "year": "2026",
+      "overview": "Second Lieutenant and India's youngest Param Vir Chakra recipient, Arun Khetarpal, gave his life fighting for his battalion and the country during the 1971 Battle of Basantar. Ikkis also takes a reflective look at the futility of war through the eyes of Khetarpal's father, who visits his ancestral home in Sargodha and Alma Mater for reunion, which now happens to be in post-partition Pakistan, 30 years later.",
+      "content_type": "movie",
+      "release_date": "2026-01-01",
+      "genre_ids": [
+        36,
+        10752,
+        18
+      ],
+      "original_language": "hi",
+      "popularity": 30.6306,
+      "vote_count": 10,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1234731,
+      "title": "Anaconda",
+      "poster": "https://image.tmdb.org/t/p/w500/qxMv3HwAB3XPuwNLMhVRg795Ktp.jpg",
+      "rating": 5.8,
+      "year": "2025",
+      "overview": "A group of friends facing mid-life crises head to the rainforest with the intention of remaking their favorite movie from their youth, only to find themselves in a fight for their lives against natural disasters, giant snakes and violent criminals.",
+      "content_type": "movie",
+      "release_date": "2025-12-24",
+      "genre_ids": [
+        12,
+        35,
+        27,
+        28
+      ],
+      "original_language": "en",
+      "popularity": 48.0722,
+      "vote_count": 713,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1368166,
+      "title": "The Housemaid",
+      "poster": "https://image.tmdb.org/t/p/w500/cWsBscZzwu5brg9YjNkGewRUvJX.jpg",
+      "rating": 7.256,
+      "year": "2025",
+      "overview": "Trying to escape her past, Millie Calloway accepts a job as a live-in housemaid for the wealthy Nina and Andrew Winchester. But what begins as a dream job quickly unravels into something far more dangerous\u2014a sexy, seductive game of secrets, scandal, and power.",
+      "content_type": "movie",
+      "release_date": "2025-12-18",
+      "genre_ids": [
+        18,
+        9648,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 90.4131,
+      "vote_count": 1392,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 991494,
+      "title": "The SpongeBob Movie: Search for SquarePants",
+      "poster": "https://image.tmdb.org/t/p/w500/xJnOMMsFASxNiFnG7v3TNIQ3ife.jpg",
+      "rating": 6.758,
+      "year": "2025",
+      "overview": "Desperate to be a big guy, SpongeBob sets out to prove his bravery to Mr. Krabs by following The Flying Dutchman \u2013 a mysterious swashbuckling ghost pirate \u2013 on a seafaring adventure that takes him to the deepest depths of the deep sea, where no Sponge has gone before.",
+      "content_type": "movie",
+      "release_date": "2025-12-16",
+      "genre_ids": [
+        16,
+        10751,
+        35,
+        12,
+        14
+      ],
+      "original_language": "en",
+      "popularity": 40.0772,
+      "vote_count": 219,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1043197,
+      "title": "Dust Bunny",
+      "poster": "https://image.tmdb.org/t/p/w500/qa5aZpO8tQqhlDaE0flalS1TuIS.jpg",
+      "rating": 6.565,
+      "year": "2025",
+      "overview": "Ten-year-old Aurora asks her hitman neighbor to kill the monster under her bed that she claims ate her family. To protect her, he must battle an onslaught of assassins while accepting that some monsters are real.",
+      "content_type": "movie",
+      "release_date": "2025-12-11",
+      "genre_ids": [
+        14,
+        28,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 27.0228,
+      "vote_count": 187,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1291608,
+      "title": "Dhurandhar",
+      "poster": "https://image.tmdb.org/t/p/w500/8FHOtUpNIk5ZPEay2N2EY5lrxkv.jpg",
+      "rating": 6.912,
+      "year": "2025",
+      "overview": "A mysterious traveler slips into the heart of Karachi's underbelly and rises through its ranks with lethal precision, only to tear the notorious ISI-Underworld nexus apart from within.",
+      "content_type": "movie",
+      "release_date": "2025-12-05",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "original_language": "hi",
+      "popularity": 20.8975,
+      "vote_count": 210,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1228246,
+      "title": "Five Nights at Freddy's 2",
+      "poster": "https://image.tmdb.org/t/p/w500/udAxQEORq2I5wxI97N2TEqdhzBE.jpg",
+      "rating": 6.7,
+      "year": "2025",
+      "overview": "One year since the supernatural nightmare at Freddy Fazbear's Pizza, the stories about what transpired there have been twisted into a campy local legend, inspiring the town's first ever Fazfest. With the truth kept from her, Abby sneaks out to reconnect with Freddy, Bonnie, Chica, and Foxy, setting into motion a terrifying series of events that will reveal dark secrets about the real origin of Freddy's, and unleash a decades-hidden horror.",
+      "content_type": "movie",
+      "release_date": "2025-12-03",
+      "genre_ids": [
+        27,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 24.9481,
+      "vote_count": 788,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1180831,
+      "title": "Troll 2",
+      "poster": "https://image.tmdb.org/t/p/w500/p6xAExLNFbHcLfvSuvLPoM8aqZU.jpg",
+      "rating": 6.517,
+      "year": "2025",
+      "overview": "When a dangerous new troll unleashes devastation across their homeland, Nora, Andreas and Major Kris embark on their most perilous mission yet.",
+      "content_type": "movie",
+      "release_date": "2025-11-30",
+      "genre_ids": [
+        28,
+        14,
+        53
+      ],
+      "original_language": "no",
+      "popularity": 19.7687,
+      "vote_count": 422,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1401778,
+      "title": "Turbulence",
+      "poster": "https://image.tmdb.org/t/p/w500/jRuiKL4S9UpLma2ZlM47xIu2gbe.jpg",
+      "rating": 5.709,
+      "year": "2025",
+      "overview": "Young married couple Zach and Emmy decide to take a hot air balloon trip across the Italian Dolomites to rekindle their relationship. When they and pilot Harry are joined by a third passenger, Julia, events unfold in ways they could never imagine five thousand meters in the air.",
+      "content_type": "movie",
+      "release_date": "2025-11-26",
+      "genre_ids": [
+        53,
+        28,
+        12,
+        18,
+        14
+      ],
+      "original_language": "en",
+      "popularity": 152.807,
+      "vote_count": 55,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1228827,
+      "title": "Mastiii 4",
+      "poster": "https://image.tmdb.org/t/p/w500/99rpDOk540UDaCMlJSonpSvQCPm.jpg",
+      "rating": 6.273,
+      "year": "2025",
+      "overview": "Three frustrated husbands seek freedom from their dull marriages. A wild idea promises escape and excitement. But what follows is anything but expected.",
+      "content_type": "movie",
+      "release_date": "2025-11-21",
+      "genre_ids": [
+        35
+      ],
+      "original_language": "hi",
+      "popularity": 24.9651,
+      "vote_count": 11,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Jio Cinema",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#8B2874"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1208348,
+      "title": "Rental Family",
+      "poster": "https://image.tmdb.org/t/p/w500/nRrwqApUDFL8gLGyJFIdDkmoule.jpg",
+      "rating": 7.8,
+      "year": "2025",
+      "overview": "An American actor in Tokyo struggles to find purpose until he lands an unusual gig: working for a Japanese 'rental family' agency, playing stand-in roles for strangers. As he immerses himself in his clients' worlds, he begins to form genuine bonds that blur the lines between performance and reality.",
+      "content_type": "movie",
+      "release_date": "2025-11-20",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "original_language": "en",
+      "popularity": 17.7923,
+      "vote_count": 520,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "JioHotstar",
+            "logo": "/kVqjgpcwvDJOhCupjcLzwwtOp52.jpg",
+            "color": "#6B7280"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 967941,
+      "title": "Wicked: For Good",
+      "poster": "https://image.tmdb.org/t/p/w500/si9tolnefLSUKaqQEGz1bWArOaL.jpg",
+      "rating": 6.65,
+      "year": "2025",
+      "overview": "As an angry mob rises against the Wicked Witch, Glinda and Elphaba will need to come together one final time. With their singular friendship now the fulcrum of their futures, they will need to truly see each other, with honesty and empathy, if they are to change themselves, and all of Oz, for good.",
+      "content_type": "movie",
+      "release_date": "2025-11-19",
+      "genre_ids": [
+        14,
+        12,
+        10749
+      ],
+      "original_language": "en",
+      "popularity": 18.9053,
+      "vote_count": 849,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 628847,
+      "title": "Trap House",
+      "poster": "https://image.tmdb.org/t/p/w500/6tpAPeuuqbVnYWWPoOLEDLSBU7a.jpg",
+      "rating": 6.5,
+      "year": "2025",
+      "overview": "An undercover DEA agent and his partner embark on a game of cat and mouse with an audacious, and surprising group of thieves \u2013 their own rebellious teenagers, who have begun robbing from a dangerous cartel, using their parents' tactics and top-secret intel to do it.",
+      "content_type": "movie",
+      "release_date": "2025-11-14",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "original_language": "en",
+      "popularity": 27.8593,
+      "vote_count": 226,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1310568,
+      "title": "Murder at the Embassy",
+      "poster": "https://image.tmdb.org/t/p/w500/3DBmBItPdy0A2ol59jgHhS54Lua.jpg",
+      "rating": 5.8,
+      "year": "2025",
+      "overview": "1934. Private detective Miranda Green investigates a murder perpetrated in the British Embassy in Cairo, where a top secret document was stolen, risking to jeopardize both Buckingham Palace and the peace of the world. All those present in this closed place are suspected: the American photographer, the English student, the American actress, the Egyptian security guard, the ambassador interpreter, the Egyptian gardener and - why not? \u2014 the Ambassador himself. But who would have expected that a small group of Nazis would be behind a plot, risking to jeopardize both Buckingham Palace and the peace of the world?",
+      "content_type": "movie",
+      "release_date": "2025-11-14",
+      "genre_ids": [
+        9648,
+        53,
+        28
+      ],
+      "original_language": "en",
+      "popularity": 30.9288,
+      "vote_count": 37,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1548092,
+      "title": "The Follies",
+      "poster": "https://image.tmdb.org/t/p/w500/gVGV5fXrG1NSZvhzhPCxxRk9ap9.jpg",
+      "rating": 6.1,
+      "year": "2025",
+      "overview": "Six women share a common 'friend': madness. It visits us all, pushes us to decide reality, to make daring decisions and to transform our lives.",
+      "content_type": "movie",
+      "release_date": "2025-11-13",
+      "genre_ids": [
+        18
+      ],
+      "original_language": "es",
+      "popularity": 19.3751,
+      "vote_count": 22,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 425274,
+      "title": "Now You See Me: Now You Don't",
+      "poster": "https://image.tmdb.org/t/p/w500/oD3Eey4e4Z259XLm3eD3WGcoJAh.jpg",
+      "rating": 6.537,
+      "year": "2025",
+      "overview": "The original Four Horsemen reunite with a new generation of illusionists to take on powerful diamond heiress Veronika Vanderberg, who leads a criminal empire built on money laundering and trafficking. The new and old magicians must overcome their differences to work together on their most ambitious heist yet.",
+      "content_type": "movie",
+      "release_date": "2025-11-12",
+      "genre_ids": [
+        53,
+        80,
+        9648
+      ],
+      "original_language": "en",
+      "popularity": 38.5561,
+      "vote_count": 1159,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 798645,
+      "title": "The Running Man",
+      "poster": "https://image.tmdb.org/t/p/w500/dKL78O9zxczVgjtNcQ9UkbYLzqX.jpg",
+      "rating": 6.786,
+      "year": "2025",
+      "overview": "Desperate to save his sick daughter, working-class Ben Richards is convinced by The Running Man's charming but ruthless producer to enter the deadly competition game as a last resort. But Ben's defiance, instincts, and grit turn him into an unexpected fan favorite \u2014 and a threat to the entire system. As ratings skyrocket, so does the danger, and Ben must outwit not just the Hunters, but a nation addicted to watching him fall.",
+      "content_type": "movie",
+      "release_date": "2025-11-11",
+      "genre_ids": [
+        28,
+        53,
+        878
+      ],
+      "original_language": "en",
+      "popularity": 33.8511,
+      "vote_count": 1223,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1363123,
+      "title": "The Family Plan 2",
+      "poster": "https://image.tmdb.org/t/p/w500/semFxuYx6HcrkZzslgAkBqfJvZk.jpg",
+      "rating": 6.546,
+      "year": "2025",
+      "overview": "Now that Dan's assassin days are behind him, all he wants for Christmas is quality time with his kids. But when he learns his daughter has her own plans, he books a family trip to London\u2014putting them all in the crosshairs of an unexpected enemy.",
+      "content_type": "movie",
+      "release_date": "2025-11-11",
+      "genre_ids": [
+        28,
+        35
+      ],
+      "original_language": "en",
+      "popularity": 19.2975,
+      "vote_count": 508,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV",
+            "logo": "/mcbz1LgtErU9p4UdbZ0rG6RTWHX.jpg",
+            "color": "#000000"
+          },
+          {
+            "name": "Apple TV Amazon Channel",
+            "logo": "/mHrYMgnZIp6lgW2aXg7ix9zGOnA.jpg",
+            "color": "#6B7280"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1214931,
+      "title": "Nuremberg",
+      "poster": "https://image.tmdb.org/t/p/w500/7cWTGH2svfNHWVRjsfKIBob9pDj.jpg",
+      "rating": 7.335,
+      "year": "2025",
+      "overview": "In postwar Germany, an American psychiatrist must determine whether Nazi prisoners are fit to go on trial for war crimes, and finds himself in a complex battle of intellect and ethics with Hermann G\u00f6ring, Hitler's right-hand man.",
+      "content_type": "movie",
+      "release_date": "2025-11-06",
+      "genre_ids": [
+        36,
+        18
+      ],
+      "original_language": "en",
+      "popularity": 22.8795,
+      "vote_count": 653,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1248226,
+      "title": "Playdate",
+      "poster": "https://image.tmdb.org/t/p/w500/fGodXWqJkkkbSebPIlxLSygV8GY.jpg",
+      "rating": 6.019,
+      "year": "2025",
+      "overview": "When out-of-work accountant Brian joins stay-at-home dad Jeff for a playdate with their sons, he expects a laid-back afternoon. Instead, they're chased by mercenaries, and Brian\u2014totally unprepared\u2014must survive one absurd obstacle after another.",
+      "content_type": "movie",
+      "release_date": "2025-11-04",
+      "genre_ids": [
+        28,
+        35,
+        10751
+      ],
+      "original_language": "en",
+      "popularity": 16.0527,
+      "vote_count": 530,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1511417,
+      "title": "B\u0101hubali: The Epic",
+      "poster": "https://image.tmdb.org/t/p/w500/z9YIo2qscyaXYgRqIdRJtND3bw8.jpg",
+      "rating": 5.953,
+      "year": "2025",
+      "overview": "When a mysterious child is found by a tribal couple near a roaring waterfall, they raise him as their own. As he grows, Sivudu is drawn to the world beyond the cliffs, where he discovers the ancient kingdom of Mahishmati, ruled by a cruel tyrant, haunted by rebellion, and bound to his past. What begins as a quest for love soon unravels a legacy of betrayal, sacrifice, and a forgotten prince.",
+      "content_type": "movie",
+      "release_date": "2025-10-29",
+      "genre_ids": [
+        28,
+        18
+      ],
+      "original_language": "te",
+      "popularity": 43.6469,
+      "vote_count": 32,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 701387,
+      "title": "Bugonia",
+      "poster": "https://image.tmdb.org/t/p/w500/rSdOua3wKMEaFWDcKAYWRjXQWOt.jpg",
+      "rating": 7.347,
+      "year": "2025",
+      "overview": "Two conspiracy obsessed young men kidnap the high-powered CEO of a major company, convinced that she is an alien intent on destroying planet Earth.",
+      "content_type": "movie",
+      "release_date": "2025-10-23",
+      "genre_ids": [
+        878,
+        53,
+        35
+      ],
+      "original_language": "en",
+      "popularity": 19.2661,
+      "vote_count": 1547,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1223601,
+      "title": "Sisu: Road to Revenge",
+      "poster": "https://image.tmdb.org/t/p/w500/jNsttCWZyPtW66MjhUozBzVsRb7.jpg",
+      "rating": 7.34,
+      "year": "2025",
+      "overview": "Returning to the house where his family was brutally murdered during the war, \"the man who refuses to die\" dismantles it, loads it on a truck, and is determined to rebuild it somewhere safe in their honor. When the commander who killed his family comes back hellbent on finishing the job, a relentless, eye-popping cross-country chase ensues.",
+      "content_type": "movie",
+      "release_date": "2025-10-21",
+      "genre_ids": [
+        28,
+        10752
+      ],
+      "original_language": "fi",
+      "popularity": 34.802,
+      "vote_count": 581,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Zee5 (Rent)",
+            "logo": "/gP67NRy1ShUJilrzMsbOmEmdmcv.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1062722,
+      "title": "Frankenstein",
+      "poster": "https://image.tmdb.org/t/p/w500/g4JtvGlQO7DByTI6frUobqvSL3R.jpg",
+      "rating": 7.7,
+      "year": "2025",
+      "overview": "Dr. Victor Frankenstein, a brilliant but egotistical scientist, brings a creature to life in a monstrous experiment that ultimately leads to the undoing of both the creator and his tragic creation.",
+      "content_type": "movie",
+      "release_date": "2025-10-17",
+      "genre_ids": [
+        18,
+        14,
+        27
+      ],
+      "original_language": "en",
+      "popularity": 32.9833,
+      "vote_count": 3046,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1156594,
+      "title": "Our Fault",
+      "poster": "https://image.tmdb.org/t/p/w500/yzqHt4m1SeY9FbPrfZ0C2Hi9x1s.jpg",
+      "rating": 7.359,
+      "year": "2025",
+      "overview": "Jenna and Lion's wedding brings about the long-awaited reunion between Noah and Nick after their breakup. Nick's inability to forgive Noah stands as an insurmountable barrier. He, heir to his grandfather's businesses, and she, starting her professional life, resist fueling a flame that's still alive. But now that their paths have crossed again, will love be stronger than resentment?",
+      "content_type": "movie",
+      "release_date": "2025-10-15",
+      "genre_ids": [
+        10749,
+        18
+      ],
+      "original_language": "es",
+      "popularity": 20.9946,
+      "vote_count": 619,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1242419,
+      "title": "Roofman",
+      "poster": "https://image.tmdb.org/t/p/w500/wXDFtcnYtevleGzCmAD2ReQnJ4l.jpg",
+      "rating": 7.1,
+      "year": "2025",
+      "overview": "A former Army Ranger and struggling father turns to robbing McDonald\u2019s restaurants by cutting holes in their roofs, earning him the nickname \"Roofman.\" After escaping prison, he secretly lives inside a Toys \u201cR\u201d Us for six months, surviving undetected while planning his next move. But when he falls for a divorced mom drawn to his undeniable charm, his double life begins to unravel, setting off a compelling and suspenseful game of cat and mouse as his past closes in.",
+      "content_type": "movie",
+      "release_date": "2025-10-08",
+      "genre_ids": [
+        80,
+        35,
+        18
+      ],
+      "original_language": "en",
+      "popularity": 15.5253,
+      "vote_count": 589,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Lionsgate Play",
+            "logo": "/e2hCUg2Z3sJ6yWF9NLU24SIKeWa.jpg",
+            "color": "#6B7280"
+          },
+          {
+            "name": "Lionsgate Play Apple TV Channel",
+            "logo": "/p8i1zUcZYQ7qU6RrGvGbDItvcx4.jpg",
+            "color": "#6B7280"
+          },
+          {
+            "name": "Lionsgate Play Amazon Channel",
+            "logo": "/yVbjPWEbsStanRAxwKMDARVOvsn.jpg",
+            "color": "#6B7280"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 533533,
+      "title": "TRON: Ares",
+      "poster": "https://image.tmdb.org/t/p/w500/chpWmskl3aKm1aTZqUHRCtviwPy.jpg",
+      "rating": 6.476,
+      "year": "2025",
+      "overview": "A highly sophisticated Program called Ares is sent from the digital world into the real world on a dangerous mission, marking humankind's first encounter with A.I. beings.",
+      "content_type": "movie",
+      "release_date": "2025-10-08",
+      "genre_ids": [
+        878,
+        12,
+        28
+      ],
+      "original_language": "en",
+      "popularity": 23.1061,
+      "vote_count": 1240,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "JioHotstar",
+            "logo": "/kVqjgpcwvDJOhCupjcLzwwtOp52.jpg",
+            "color": "#6B7280"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1386827,
+      "title": "Coyotes",
+      "poster": "https://image.tmdb.org/t/p/w500/fSzs9ZXYcrln0FRrjGIPCjuB6En.jpg",
+      "rating": 5.469,
+      "year": "2025",
+      "overview": "Trapped in their Hollywood Hills home, a family fights for survival when caught between a raging wildfire and a pack of savage coyotes.",
+      "content_type": "movie",
+      "release_date": "2025-10-02",
+      "genre_ids": [
+        27,
+        35
+      ],
+      "original_language": "en",
+      "popularity": 27.6562,
+      "vote_count": 48,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1083637,
+      "title": "Kantara - A Legend: Chapter 1",
+      "poster": "https://image.tmdb.org/t/p/w500/ehQPboTPaIMkMUOoNOh8e7pZ5Rp.jpg",
+      "rating": 7.0,
+      "year": "2025",
+      "overview": "During the Kadamba reign, King Vijayendra, the ruler of the fictional feudatory land of Bangra, meets his final fate while venturing into the mystical forest of Kantara. Witnessing this, his son Rajashekara seals the borders of their realm. Later, Prince Kulashekara reopens them through a brutal massacre. The protagonist, Berme, in search of prosperity, crosses the divide and ignites a conflict of faith, power, and destiny between the Kingdom and Nature.",
+      "content_type": "movie",
+      "release_date": "2025-10-01",
+      "genre_ids": [
+        28,
+        18,
+        14
+      ],
+      "original_language": "kn",
+      "popularity": 21.2853,
+      "vote_count": 63,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1054867,
+      "title": "One Battle After Another",
+      "poster": "https://image.tmdb.org/t/p/w500/lbBWwxBht4JFP5PsuJ5onpMqugW.jpg",
+      "rating": 7.413,
+      "year": "2025",
+      "overview": "Washed-up revolutionary Bob exists in a state of stoned paranoia, surviving off-grid with his spirited, self-reliant daughter, Willa. When his evil nemesis resurfaces after 16 years and she goes missing, the former radical scrambles to find her, father and daughter both battling the consequences of his past.",
+      "content_type": "movie",
+      "release_date": "2025-09-23",
+      "genre_ids": [
+        53,
+        80,
+        28
+      ],
+      "original_language": "en",
+      "popularity": 41.6092,
+      "vote_count": 2977,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 1252037,
+      "title": "The Tank",
+      "poster": "https://image.tmdb.org/t/p/w500/65Jr1JAgWlu9em8zHhAfrNJJQBt.jpg",
+      "rating": 7.087,
+      "year": "2025",
+      "overview": "A German Tiger tank crew is sent on a dangerous mission to rescue the missing officer Paul von Hardenburg from a top-secret bunker behind enemy lines. As they make their way through the lethal no-man's land, they must confront not only the enemy, but also their own fears and inner demons. Fueled by the Wehrmacht's methamphetamine, their mission increasingly becomes a journey into the heart of darkness.",
+      "content_type": "movie",
+      "release_date": "2025-09-18",
+      "genre_ids": [
+        10752,
+        28,
+        18
+      ],
+      "original_language": "de",
+      "popularity": 24.5036,
+      "vote_count": 363,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 982843,
+      "title": "The Great Flood",
+      "poster": "https://image.tmdb.org/t/p/w500/1tUOZQDgZaGqZtrB21MieiXARL2.jpg",
+      "rating": 5.994,
+      "year": "2025",
+      "overview": "When a raging flood traps a researcher and her young son, a call to a crucial mission puts their escape \u2014 and the future of humanity \u2014 on the line.",
+      "content_type": "movie",
+      "release_date": "2025-09-18",
+      "genre_ids": [
+        878,
+        12,
+        18
+      ],
+      "original_language": "ko",
+      "popularity": 20.6089,
+      "vote_count": 613,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Netflix",
+            "logo": "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg",
+            "color": "#E50914"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    },
+    {
+      "id": 604079,
+      "title": "The Long Walk",
+      "poster": "https://image.tmdb.org/t/p/w500/wobVTa99eW0ht6c1rNNzLkazPtR.jpg",
+      "rating": 6.944,
+      "year": "2025",
+      "overview": "In a dystopian near-future America, fifty teenage boys take part in a deadly annual walking contest, forced to maintain a minimum pace or be executed, until only one survivor remains.",
+      "content_type": "movie",
+      "release_date": "2025-09-10",
+      "genre_ids": [
+        878,
+        53,
+        27
+      ],
+      "original_language": "en",
+      "popularity": 15.5003,
+      "vote_count": 1198,
+      "streaming": {
+        "available_on": [
+          {
+            "name": "Amazon Prime",
+            "logo": "/pvske1MyAoymrs5bguRfVqYiM9a.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Amazon Prime (Ads)",
+            "logo": "/8aBqoNeGGr0oSA85iopgNZUOTOc.jpg",
+            "color": "#00A8E1"
+          },
+          {
+            "name": "Apple TV Store (Rent)",
+            "logo": "/SPnB1qiCkYfirS2it3hZORwGVn.jpg",
+            "color": "#F59E0B"
+          },
+          {
+            "name": "Amazon Video (Rent)",
+            "logo": "/qR6FKvnPBx2O37FDg8PNM7efwF3.jpg",
+            "color": "#F59E0B"
+          }
+        ],
+        "rent": [],
+        "buy": []
+      }
+    }
+  ],
+  "total": 70,
+  "detected": {
+    "genre": "all",
+    "language": "any",
+    "content_type": "both",
+    "release_period": "6months"
+  },
+  "debug": {
+    "language_code": null,
+    "movie_genre_id": null,
+    "tv_genre_id": null,
+    "date_range": [
+      "2025-09-07",
+      "2026-03-13"
+    ],
+    "explicit_params": true,
+    "content_breakdown": {
+      "movies": 48,
+      "tv_shows": 22
+    }
+  }
+}
