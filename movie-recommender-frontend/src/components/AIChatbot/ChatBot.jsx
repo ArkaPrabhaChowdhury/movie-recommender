@@ -52,7 +52,7 @@ const ChatBot = ({ onRecommendationsReceived }) => {
       {/* Chat Window */}
       {
         isChatOpen && (
-          <div className="fixed bottom-24 right-6 z-40 w-96 h-[500px] rounded-lg shadow-2xl flex flex-col" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-primary)' }}>
+          <div className="fixed bottom-24 right-6 z-40 w-84 md:w-96 h-[500px] rounded-lg shadow-2xl flex flex-col" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-primary)' }}>
             {/* Chat Header */}
             <div className="p-4 border-b flex justify-between items-center" style={{ borderColor: 'var(--color-border-primary)' }}>
               <div>

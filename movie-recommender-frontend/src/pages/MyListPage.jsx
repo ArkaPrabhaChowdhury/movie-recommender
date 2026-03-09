@@ -119,7 +119,7 @@ const MyListPage = ({
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === tab.id
+                                    className={`flex items-center justify-center gap-2 px-6 py-2 w-1/2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === tab.id
                                         ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20'
                                         : 'text-gray-400 hover:text-white'
                                         }`}
@@ -175,7 +175,7 @@ const MyListPage = ({
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-xs font-bold text-gray-400 focus:outline-none focus:border-teal-500/50 uppercase tracking-widest cursor-pointer"
+                                className="bg-gray-900 border border-gray-800 rounded-xl px-2 py-2 text-xs font-bold text-gray-400 focus:outline-none focus:border-teal-500/50 uppercase tracking-widest cursor-pointer"
                             >
                                 <option value="newest">Newest Added</option>
                                 <option value="rating">Top Rated</option>

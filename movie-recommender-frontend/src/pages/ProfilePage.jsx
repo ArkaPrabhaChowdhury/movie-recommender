@@ -46,12 +46,12 @@ const ProfilePage = ({
                             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
                         >
                             <ArrowLeft size={20} />
-                            <span className="font-medium">Back to Home</span>
+                            <span className="font-medium hidden md:block">Back to Home</span>
                         </button>
                         <h1 className="text-2xl font-bold" style={{ color: 'var(--color-primary-500)' }}>
                             Your Profile
                         </h1>
-                        <div className="w-32"></div> {/* Spacer for centering */}
+                        <div className="md:w-32"></div> {/* Spacer for centering */}
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@ const ProfilePage = ({
                 {/* Profile Header */}
                 <div className="rounded-lg p-8 mb-8" style={{ background: 'var(--color-bg-elevated)' }}>
                     <div className="flex items-center gap-6 mb-6">
-                        <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ background: 'var(--color-bg-secondary)' }}>
+                        <div className="w-24 h-24 rounded-full flex items-center justify-center hidden md:flex" style={{ background: 'var(--color-bg-secondary)' }}>
                             <User size={48} className="text-teal-500" />
                         </div>
                         <div>
