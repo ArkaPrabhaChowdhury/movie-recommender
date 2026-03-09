@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ContentCard from './ContentCard';
 import ContentDetailsModal from '../ContentCard/ContentDetailsModal';
 import LoadingSpinner from '../UI/LoadingSpinner';
@@ -8,6 +8,9 @@ import { UI_CONFIG } from '../../config/constants';
 const ContentGrid = ({
   content,
   loading,
+  loadingMore,
+  hasMore,
+  onLoadMore,
   isGlobalSearch,
   isAIRecommendationMode,
   isPersonalizedMode,
@@ -21,12 +24,37 @@ const ContentGrid = ({
   interactionMap = {}
 }) => {
   const [selectedContent, setSelectedContent] = useState(null);
+  const observerRef = useRef(null);
 
-  if (loading) {
+  // Set up intersection observer for infinite scroll
+  useEffect(() => {
+    if (loading || !onLoadMore || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          onLoadMore();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [loading, loadingMore, hasMore, onLoadMore]);
+
+  if (loading && content.length === 0) {
     return <LoadingSpinner />;
   }
 
-  if (content.length === 0) {
+  if (content.length === 0 && !loading) {
     let emptyMessage;
     if (isGlobalSearch) {
       emptyMessage = `No OTT content found for "${searchQuery}". Try a different search term.`;
@@ -44,8 +72,8 @@ const ContentGrid = ({
   return (
     <>
       <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6`}>
-        {content.map((item) => (
-          <div key={`${item.content_type}-${item.id}`} onClick={() => setSelectedContent(item)}>
+        {content.map((item, index) => (
+          <div key={`${item.content_type}-${item.id}-${index}`} onClick={() => setSelectedContent(item)}>
             <ContentCard
               item={item}
               showInteractionButtons={showInteractionButtons}
@@ -59,6 +87,13 @@ const ContentGrid = ({
           </div>
         ))}
       </div>
+
+      {/* Sentinel for infinite scroll */}
+      {hasMore && (
+        <div ref={observerRef} className="py-12 flex justify-center">
+          {loadingMore && <LoadingSpinner size="sm" />}
+        </div>
+      )}
 
       {selectedContent && (
         <ContentDetailsModal

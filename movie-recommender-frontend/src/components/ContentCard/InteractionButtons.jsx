@@ -81,6 +81,7 @@ const InteractionButtons = ({
   };
 
   const userAction = getUserAction();
+  const hasAction = (action) => Array.isArray(userAction) ? userAction.includes(action) : userAction === action;
 
   return (
     <div className="absolute top-2 left-2 z-10">
@@ -92,12 +93,13 @@ const InteractionButtons = ({
       >
         {loading ? (
           <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-        ) : userAction ? (
+        ) : userAction && (Array.isArray(userAction) ? userAction.length > 0 : true) ? (
           <div className="flex items-center justify-center transition-transform group-hover:scale-110">
-            {userAction === 'liked' && <Heart size={18} fill="currentColor" className="text-red-500" />}
-            {userAction === 'disliked' && <ThumbsDown size={18} className="text-gray-400" />}
-            {userAction === 'watchlisted' && <Bookmark size={18} fill="currentColor" className="text-blue-500" />}
-            {userAction === 'watched' && <CheckCircle size={18} className="text-green-500" />}
+            {hasAction('liked') ? <Heart size={18} fill="currentColor" className="text-red-500" /> :
+              hasAction('watchlisted') ? <Bookmark size={18} fill="currentColor" className="text-blue-500" /> :
+                hasAction('watched') ? <CheckCircle size={18} className="text-green-500" /> :
+                  hasAction('disliked') ? <ThumbsDown size={18} className="text-gray-400" /> :
+                    <Plus size={20} />}
           </div>
         ) : (
           <Plus size={20} className="transition-transform group-hover:rotate-90" />
@@ -109,37 +111,37 @@ const InteractionButtons = ({
         <div className="absolute top-12 left-0 bg-[#0d1117] backdrop-blur-xl rounded-xl p-1.5 flex flex-col gap-1 min-w-[140px] z-[60] shadow-2xl border border-gray-800 animate-in fade-in slide-in-from-top-2 duration-200">
           <button
             onClick={(e) => handleInteraction(e, 'liked')}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'liked' ? 'bg-red-500/10 text-red-500 font-medium' : 'text-gray-300 hover:bg-white/5'
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${hasAction('liked') ? 'bg-red-500/10 text-red-500 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            <Heart size={16} fill={userAction === 'liked' ? "currentColor" : "none"} />
+            <Heart size={16} fill={hasAction('liked') ? "currentColor" : "none"} />
             <span>Like</span>
           </button>
 
           <button
             onClick={(e) => handleInteraction(e, 'disliked')}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'disliked' ? 'bg-gray-500/20 text-gray-400 font-medium' : 'text-gray-300 hover:bg-white/5'
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${hasAction('disliked') ? 'bg-gray-500/20 text-gray-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            <ThumbsDown size={16} fill={userAction === 'disliked' ? "currentColor" : "none"} />
+            <ThumbsDown size={16} fill={hasAction('disliked') ? "currentColor" : "none"} />
             <span>Dislike</span>
           </button>
 
           <button
             onClick={(e) => handleInteraction(e, 'watchlisted')}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'watchlisted' ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-gray-300 hover:bg-white/5'
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${hasAction('watchlisted') ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            <Bookmark size={16} fill={userAction === 'watchlisted' ? "currentColor" : "none"} />
+            <Bookmark size={16} fill={hasAction('watchlisted') ? "currentColor" : "none"} />
             <span>Watchlist</span>
           </button>
 
           <button
             onClick={(e) => handleInteraction(e, 'watched')}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${userAction === 'watched' ? 'bg-green-500/10 text-green-400 font-medium' : 'text-gray-300 hover:bg-white/5'
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${hasAction('watched') ? 'bg-green-500/10 text-green-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            <CheckCircle size={16} fill={userAction === 'watched' ? "currentColor" : "none"} />
+            <CheckCircle size={16} fill={hasAction('watched') ? "currentColor" : "none"} />
             <span>Watched</span>
           </button>
 

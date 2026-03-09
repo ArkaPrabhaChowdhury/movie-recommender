@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, X } from 'lucide-react';
+import { User, X, Bookmark } from 'lucide-react';
 import { UI_CONFIG, API_CONFIG } from '../../config/constants';
 
 const Header = ({
@@ -149,6 +149,30 @@ const Header = ({
               )}
             </div>
 
+            {/* My List Button */}
+            {userId && (
+              <button
+                onClick={() => navigate('/my-list')}
+                className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200"
+                style={{
+                  background: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border-primary)',
+                  color: 'var(--color-text-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--color-primary-500)';
+                  e.currentTarget.style.borderColor = 'var(--color-primary-500)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'var(--color-bg-secondary)';
+                  e.currentTarget.style.borderColor = 'var(--color-border-primary)';
+                }}
+              >
+                <Bookmark size={18} />
+                <span className="font-medium">My List</span>
+              </button>
+            )}
+
             {/* Profile Button */}
             {userId && (
               <button
@@ -160,15 +184,15 @@ const Header = ({
                   color: 'var(--color-text-primary)'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--color-primary-500)';
-                  e.target.style.borderColor = 'var(--color-primary-500)';
+                  e.currentTarget.style.background = 'var(--color-primary-500)';
+                  e.currentTarget.style.borderColor = 'var(--color-primary-500)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'var(--color-bg-secondary)';
-                  e.target.style.borderColor = 'var(--color-border-primary)';
+                  e.currentTarget.style.background = 'var(--color-bg-secondary)';
+                  e.currentTarget.style.borderColor = 'var(--color-border-primary)';
                 }}
               >
-                <User size={20} />
+                <User size={18} />
                 <span className="font-medium">Profile</span>
               </button>
             )}

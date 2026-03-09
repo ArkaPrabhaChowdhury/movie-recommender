@@ -78,7 +78,11 @@ const ProfilePage = ({
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="rounded-lg p-6 text-center transition-transform hover:scale-105" style={{ background: 'var(--color-bg-secondary)' }}>
+                        <div
+                            className="rounded-lg p-6 text-center transition-all hover:scale-105 cursor-pointer hover:bg-white/5 border border-transparent hover:border-red-500/30"
+                            style={{ background: 'var(--color-bg-secondary)' }}
+                            onClick={() => navigate('/my-list?tab=watchlist')}
+                        >
                             <div className="text-4xl font-bold mb-2" style={{ color: 'var(--color-accent-red)' }}>
                                 {stats?.liked_content || 0}
                             </div>
@@ -86,7 +90,11 @@ const ProfilePage = ({
                                 <Heart size={16} className="text-red-400" /> Liked Content
                             </div>
                         </div>
-                        <div className="rounded-lg p-6 text-center transition-transform hover:scale-105" style={{ background: 'var(--color-bg-secondary)' }}>
+                        <div
+                            className="rounded-lg p-6 text-center transition-all hover:scale-105 cursor-pointer hover:bg-white/5 border border-transparent hover:border-blue-500/30"
+                            style={{ background: 'var(--color-bg-secondary)' }}
+                            onClick={() => navigate('/my-list?tab=watchlist')}
+                        >
                             <div className="text-4xl font-bold mb-2" style={{ color: 'var(--color-primary-400)' }}>
                                 {stats?.watchlist_items || 0}
                             </div>
@@ -94,12 +102,16 @@ const ProfilePage = ({
                                 <Bookmark size={16} className="text-blue-400" /> Watchlist Items
                             </div>
                         </div>
-                        <div className="rounded-lg p-6 text-center transition-transform hover:scale-105" style={{ background: 'var(--color-bg-secondary)' }}>
+                        <div
+                            className="rounded-lg p-6 text-center transition-all hover:scale-105 cursor-pointer hover:bg-white/5 border border-transparent hover:border-green-500/30"
+                            style={{ background: 'var(--color-bg-secondary)' }}
+                            onClick={() => navigate('/my-list?tab=history')}
+                        >
                             <div className="text-4xl font-bold mb-2" style={{ color: 'var(--color-accent-green)' }}>
-                                {stats?.total_interactions || 0}
+                                {stats?.watched_items || 0}
                             </div>
                             <div className="text-sm flex items-center justify-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
-                                <Zap size={16} className="text-yellow-400" /> Total Interactions
+                                <Zap size={16} className="text-yellow-400" /> Watched Items
                             </div>
                         </div>
                     </div>
@@ -179,9 +191,17 @@ const ProfilePage = ({
                 {/* Recent Activity */}
                 {userProfile.recent_activity && userProfile.recent_activity.length > 0 && (
                     <div className="mt-8 rounded-lg p-6" style={{ background: 'var(--color-bg-elevated)' }}>
-                        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                            <Smartphone size={20} /> Recent Activity
-                        </h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                                <Smartphone size={20} /> Recent Activity
+                            </h3>
+                            <button
+                                onClick={() => navigate('/my-list?tab=history')}
+                                className="text-sm font-medium text-teal-500 hover:text-teal-400 transition-colors"
+                            >
+                                See All
+                            </button>
+                        </div>
                         <div className="space-y-3">
                             {userProfile.recent_activity.map((activity, index) => (
                                 <div

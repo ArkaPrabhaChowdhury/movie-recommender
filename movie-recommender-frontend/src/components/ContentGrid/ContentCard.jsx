@@ -13,15 +13,6 @@ const ContentCard = ({
   interactionMap = {},
   showInteractionButtons = false
 }) => {
-  // Add debug logging
-  console.log('ContentCard props:', {
-    title: item.title,
-    showInteractionButtons,
-    hasOnLike: !!onLike,
-    hasOnDislike: !!onDislike,
-    hasOnWatchlist: !!onWatchlist,
-    hasOnWatched: !!onWatched
-  });
 
   return (
     <div className={`group cursor-pointer transition-all duration-${UI_CONFIG.ANIMATION_DURATION.NORMAL} hover:scale-105`}>
@@ -119,6 +110,14 @@ const ContentCard = ({
               </span>
             ))}
           </div>
+        )}
+
+        {/* Recommendation reason tag below title */}
+        {item.recommendation_reason && (
+          <p className="text-[10px] mt-1.5 line-clamp-1 font-medium"
+            style={{ color: 'var(--color-primary-400)' }}>
+            ✦ {item.recommendation_reason}
+          </p>
         )}
       </div>
     </div>

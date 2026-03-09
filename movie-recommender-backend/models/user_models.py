@@ -31,6 +31,7 @@ class ContentInteraction(BaseModel):
     language: str
     actors: List[str] = []
     directors: List[str] = []
+    poster: Optional[str] = None
     timestamp: datetime = datetime.now()
 
 class RecommendationRequest(BaseModel):

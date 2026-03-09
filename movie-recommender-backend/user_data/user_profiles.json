@@ -4,14 +4,14 @@
     "preferred_genres": [
       "drama",
       "thriller",
-      "action",
       "crime",
+      "action",
+      "comedy",
+      "fantasy",
       "action & adventure",
       "mystery",
-      "animation",
-      "fantasy",
-      "sci-fi & fantasy",
-      "romance"
+      "romance",
+      "horror"
     ],
     "preferred_languages": [
       "hi",
@@ -24,14 +24,14 @@
     ],
     "liked_actors": [],
     "liked_directors": [],
-    "total_interactions": 18,
-    "total_liked": 13,
-    "total_disliked": 1,
-    "total_watchlisted": 4,
-    "total_watched": 0,
+    "total_interactions": 28,
+    "total_liked": 17,
+    "total_disliked": 2,
+    "total_watchlisted": 6,
+    "total_watched": 3,
     "created_at": "2025-09-24T01:48:09.554962",
-    "updated_at": "2026-03-08T21:19:32.207293",
-    "last_activity": "2026-03-08T21:07:04.373511"
+    "updated_at": "2026-03-09T17:22:15.463543",
+    "last_activity": "2026-03-09T17:05:04.319670"
   },
   "user_1763541377114_3ixhhgquf": {
     "user_id": "user_1763541377114_3ixhhgquf",
@@ -74,5 +74,28 @@
     "created_at": "2025-11-29T20:46:39.919132",
     "updated_at": "2025-11-29T20:52:58.498861",
     "last_activity": "2025-11-29T20:37:17.923755"
+  },
+  "user_1772995394692_pox7089hw": {
+    "user_id": "user_1772995394692_pox7089hw",
+    "preferred_genres": [
+      "horror",
+      "thriller"
+    ],
+    "preferred_languages": [
+      "en"
+    ],
+    "preferred_content_types": [
+      "movie"
+    ],
+    "liked_actors": [],
+    "liked_directors": [],
+    "total_interactions": 1,
+    "total_liked": 1,
+    "total_disliked": 0,
+    "total_watchlisted": 0,
+    "total_watched": 0,
+    "created_at": "2026-03-09T00:13:37.770614",
+    "updated_at": "2026-03-09T00:13:37.770626",
+    "last_activity": "2026-03-09T00:09:43.424074"
   }
 }

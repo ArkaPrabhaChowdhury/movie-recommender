@@ -14,7 +14,7 @@ export const API_CONFIG = {
 
 // UI Configuration
 export const UI_CONFIG = {
-  APP_NAME: 'MOVIEFLIX',
+  APP_NAME: 'SPOTLIGHT',
   GRID_BREAKPOINTS: {
     SM: 'sm:grid-cols-3',
     MD: 'md:grid-cols-4',

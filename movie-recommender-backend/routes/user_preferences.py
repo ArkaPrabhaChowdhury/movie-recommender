@@ -55,6 +55,15 @@ async def get_user_profile(user_id: str):
             for genre in interaction.get("genres", []):
                 genre_distribution[genre] = genre_distribution.get(genre, 0) + 1
         
+        # Map all actions per content item (some items might have multiple actions like 'liked' and 'watched')
+        interaction_map = {}
+        for item in reversed(interactions): # Oldest to newest
+            key = f"{item['content_type']}_{item['content_id']}"
+            if key not in interaction_map:
+                interaction_map[key] = []
+            if item['action'] not in interaction_map[key]:
+                interaction_map[key].append(item['action'])
+                
         return {
             "profile": profile,
             "stats": {
@@ -66,7 +75,7 @@ async def get_user_profile(user_id: str):
             },
             "recent_activity": interactions[:10],  # Newest 10 interactions
             "liked_content": liked_interactions[:5],  # Newest 5 liked items
-            "interaction_map": {f"{item['content_type']}_{item['content_id']}": item['action'] for item in interactions}
+            "interaction_map": interaction_map
         }
         
     except Exception as e:
@@ -139,8 +148,23 @@ async def get_user_watchlist(user_id: str):
         print(f"❌ Error getting watchlist: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/user/{user_id}/history")
+async def get_user_history(user_id: str):
+    """Get user's watch history"""
+    try:
+        interactions = await preference_service.get_user_interactions(user_id, action="watched")
+        
+        return {
+            "history": interactions,
+            "total_count": len(interactions)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error getting history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.delete("/user/{user_id}/interaction/{content_id}")
-async def remove_user_interaction(user_id: str, content_id: int, content_type: str):
+async def remove_user_interaction(user_id: str, content_id: int, content_type: str, action: str = None):
     """Remove a specific user interaction"""
     try:
         preferences_data = preference_service._load_data(preference_service.preferences_file)
@@ -148,9 +172,15 @@ async def remove_user_interaction(user_id: str, content_id: int, content_type: s
         if user_id in preferences_data:
             # Remove the interaction
             original_count = len(preferences_data[user_id])
+            
+            # Use action filter if provided for precision
             preferences_data[user_id] = [
                 item for item in preferences_data[user_id]
-                if not (item["content_id"] == content_id and item["content_type"] == content_type)
+                if not (
+                    item["content_id"] == content_id and 
+                    item["content_type"] == content_type and 
+                    (action is None or item["action"] == action)
+                )
             ]
             removed_count = original_count - len(preferences_data[user_id])
             

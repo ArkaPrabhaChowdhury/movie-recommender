@@ -41,7 +41,7 @@ class ApiService {
     return data;
   }
   // Browse / discover — cached for 6 h per unique filter combo
-  static async discover(filters) {
+  static async discover(filters, page = 1) {
     const contentDescription = this.getContentDescription(filters.selectedContentType);
     const prompt = `suggest ${filters.selectedGenre} ${contentDescription} in ${filters.selectedLanguage}`;
     const payload = {
@@ -50,13 +50,14 @@ class ApiService {
       language: filters.selectedLanguage,
       content_type: filters.selectedContentType,
       release_period: filters.selectedReleasePeriod,
-      sort_by: filters.sortBy || 'rating'
+      sort_by: filters.sortBy || 'rating',
+      page
     };
 
     const cacheKey = ApiCache.makeKey('discover', payload);
     const cached = ApiCache.get(cacheKey);
     if (cached) {
-      console.log('[Cache HIT] discover:', filters.selectedGenre, filters.selectedLanguage);
+      console.log(`[Cache HIT] discover: p${page}`, filters.selectedGenre, filters.selectedLanguage);
       return cached;
     }
 
@@ -102,7 +103,7 @@ class ApiService {
       user_id: userId,
       content_id: contentData.id,
       content_type: contentData.content_type,
-      title: contentData.title,
+      title: contentData.title || contentData.name,
       action: action,
       rating: rating,
 
@@ -119,6 +120,7 @@ class ApiService {
       tmdb_rating: contentData.rating || contentData.vote_average || 0,
       overview: contentData.overview || '',
       popularity: contentData.popularity || 0,
+      poster: contentData.poster || null,
 
       // Placeholder for cast/crew (would need additional TMDB API calls)
       actors: contentData.actors || [],
@@ -166,6 +168,14 @@ class ApiService {
     return this.request(`/user/${userId}/profile`);
   }
 
+  static async getWatchlist(userId) {
+    return this.request(`/user/${userId}/watchlist`);
+  }
+
+  static async getHistory(userId) {
+    return this.request(`/user/${userId}/history`);
+  }
+
   static async getPersonalizedRecommendations(userId, options = {}) {
     return this.request('/user/recommendations', {
       method: 'POST',
@@ -179,8 +189,12 @@ class ApiService {
     });
   }
 
-  static async removeInteraction(userId, contentId, contentType) {
-    return this.request(`/user/${userId}/interaction/${contentId}?content_type=${contentType}`, {
+  static async removeInteraction(userId, contentId, contentType, action = null) {
+    let url = `/user/${userId}/interaction/${contentId}?content_type=${contentType}`;
+    if (action) {
+      url += `&action=${action}`;
+    }
+    return this.request(url, {
       method: 'DELETE',
     });
   }

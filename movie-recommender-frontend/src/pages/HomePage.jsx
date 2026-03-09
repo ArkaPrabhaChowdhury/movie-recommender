@@ -56,7 +56,13 @@ const HomePage = ({
         sortBy: selectedSortBy
     } : null;
 
-    const { content, loading } = useContent(filters);
+    const {
+        content,
+        loading,
+        loadingMore,
+        hasMore,
+        loadMore
+    } = useContent(filters);
 
     const handleAIRecommendations = (recommendations, response) => {
         console.log('Received AI recommendations:', recommendations.length);
@@ -187,6 +193,9 @@ const HomePage = ({
             <ContentGrid
                 content={displayContent}
                 loading={isDisplayLoading}
+                loadingMore={displayMode === 'normal' ? loadingMore : false}
+                hasMore={displayMode === 'normal' ? hasMore : false}
+                onLoadMore={displayMode === 'normal' ? loadMore : null}
                 isGlobalSearch={displayMode === 'search'}
                 isAIRecommendationMode={displayMode === 'ai'}
                 isPersonalizedMode={displayMode === 'personalized'}

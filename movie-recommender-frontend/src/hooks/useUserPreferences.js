@@ -44,17 +44,28 @@ export const useUserPreferences = () => {
     if (!userId || !contentData) return false;
 
     const contentKey = `${contentData.content_type}_${contentData.id}`;
-    const currentAction = userProfile?.interaction_map?.[contentKey];
-    const isUndoing = currentAction === action;
+    const currentActions = userProfile?.interaction_map?.[contentKey] || [];
+    const isUndoing = Array.isArray(currentActions) ? currentActions.includes(action) : currentActions === action;
 
     // Optimistic update for instant UI feedback
     if (userProfile) {
       setUserProfile(prev => {
         const newMap = { ...(prev?.interaction_map || {}) };
         if (isUndoing) {
-          delete newMap[contentKey];
+          // Remove from list
+          if (Array.isArray(newMap[contentKey])) {
+            newMap[contentKey] = newMap[contentKey].filter(a => a !== action);
+          } else {
+            delete newMap[contentKey];
+          }
         } else {
-          newMap[contentKey] = action;
+          // Add to list
+          if (!Array.isArray(newMap[contentKey])) {
+            newMap[contentKey] = [];
+          }
+          if (!newMap[contentKey].includes(action)) {
+            newMap[contentKey] = [...newMap[contentKey], action];
+          }
         }
         return {
           ...prev,
@@ -66,7 +77,7 @@ export const useUserPreferences = () => {
     try {
       if (isUndoing) {
         console.log(`🗑️ Removing ${action} (undo) for:`, contentData.title);
-        await ApiService.removeInteraction(userId, contentData.id, contentData.content_type);
+        await ApiService.removeInteraction(userId, contentData.id, contentData.content_type, action);
       } else {
         console.log(`📝 Recording ${action} for:`, contentData.title);
         await ApiService.recordInteraction(userId, contentData, action, rating);

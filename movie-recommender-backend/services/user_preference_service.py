@@ -73,16 +73,34 @@ class UserPreferenceService:
                 "release_date": getattr(interaction, 'release_date', ''),
                 "tmdb_rating": getattr(interaction, 'tmdb_rating', 0),
                 "overview": getattr(interaction, 'overview', ''),
-                "popularity": getattr(interaction, 'popularity', 0)
+                "popularity": getattr(interaction, 'popularity', 0),
+                "poster": getattr(interaction, 'poster', None)
             }
             
             print(f"💾 Storing interaction data: {interaction_dict}")
             
-            # Remove existing interaction for same content (to update)
+            # Define mutually exclusive sets to ensure data integrity
+            # E.g., You can't both like and dislike, and if you watch it, it usually leaves the watchlist
+            exclusive_sets = [
+                {"liked", "disliked"},
+                {"watchlisted", "watched"}
+            ]
+            
+            new_action = interaction.action
+            actions_to_remove = {new_action} # Always update interactions of the same action type
+            
+            # If the action is part of an exclusive set, remove other actions from THAT set
+            for s in exclusive_sets:
+                if new_action in s:
+                    actions_to_remove.update(s)
+
+            # Remove existing interactions that are incompatible with the new one
+            # This allows a piece of content to be both 'liked' AND 'watched' simultaneously
             preferences_data[user_id] = [
                 item for item in preferences_data[user_id] 
                 if not (item["content_id"] == interaction.content_id and 
-                       item["content_type"] == interaction.content_type)
+                       item["content_type"] == interaction.content_type and
+                       item["action"] in actions_to_remove)
             ]
             
             # Add new interaction
@@ -173,8 +191,8 @@ class UserPreferenceService:
                 "preferred_genres": [genre for genre, count in genre_counter.most_common(10) if count >= 1],
                 "preferred_languages": [lang for lang, count in language_counter.most_common(5) if count >= 1],
                 "preferred_content_types": [ct for ct, count in content_type_counter.most_common(3)],
-                "liked_actors": [actor for actor, count in actor_counter.most_common(20) if count >= 2],
-                "liked_directors": [director for director, count in director_counter.most_common(10) if count >= 2],
+                "liked_actors": [actor for actor, count in actor_counter.most_common(20) if count >= 1],
+                "liked_directors": [director for director, count in director_counter.most_common(10) if count >= 1],
                 
                 # Statistics
                 "total_interactions": len(user_interactions),
@@ -220,19 +238,29 @@ class UserPreferenceService:
         return interactions
     
     async def get_recommendation_context(self, user_id: str) -> Dict:
-        """Get context for AI recommendations"""
+        """Get enriched context for the recommendation engine."""
         profile = await self.get_user_profile(user_id)
         recent_interactions = await self.get_user_interactions(user_id)
-        
-        # Get recent liked content
+
+        # All liked items (up to 50) with their stored overview / metadata
         recent_liked = [
-            item for item in recent_interactions[-50:] 
+            {
+                "content_id": item["content_id"],
+                "content_type": item["content_type"],
+                "title": item["title"],
+                "overview": item.get("overview", ""),
+                "genres": item.get("genres", []),
+                "language": item.get("language", ""),
+                "actors": item.get("actors", []),
+                "directors": item.get("directors", []),
+            }
+            for item in recent_interactions
             if item["action"] == "liked"
-        ]
-        
+        ][:50]
+
         return {
             "profile": profile,
-            "recent_liked": recent_liked[-20:],  # Last 20 liked items
+            "recent_liked": recent_liked,
             "total_interactions": len(recent_interactions),
-            "has_preferences": bool(profile.get("preferred_genres", []))
+            "has_preferences": bool(profile.get("preferred_genres", [])),
         }

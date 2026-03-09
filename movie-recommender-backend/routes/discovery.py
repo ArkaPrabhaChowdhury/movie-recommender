@@ -8,7 +8,7 @@ from utils.helpers import extract_filters_from_prompt
 
 router = APIRouter()
 
-async def get_content_with_date_filtering(language_code: str, content_type: str, genre: str, release_period: str, sort_by: str = 'rating'):
+async def get_content_with_date_filtering(language_code: str, content_type: str, genre: str, release_period: str, sort_by: str = 'rating', page: int = 1):
     """Get content with date range filtering and correct genre IDs"""
     date_from, date_to = get_date_range(release_period)
     print(f"Date filtering: {date_from} to {date_to} (period: {release_period})")
@@ -19,8 +19,8 @@ async def get_content_with_date_filtering(language_code: str, content_type: str,
     if content_type == 'both':
         print("Fetching BOTH movies and TV shows with date filtering...")
         
-        movies_task = TMDBService.fetch_movies(language_code, genre, date_from, date_to)
-        tv_shows_task = TMDBService.fetch_tv_shows(language_code, genre, date_from, date_to)
+        movies_task = TMDBService.fetch_movies(language_code, genre, date_from, date_to, page)
+        tv_shows_task = TMDBService.fetch_tv_shows(language_code, genre, date_from, date_to, page)
         
         movies, tv_shows = await asyncio.gather(movies_task, tv_shows_task)
         
@@ -30,12 +30,12 @@ async def get_content_with_date_filtering(language_code: str, content_type: str,
         
     elif content_type == 'movie':
         print("Fetching ONLY movies with date filtering...")
-        movies = await TMDBService.fetch_movies(language_code, genre, date_from, date_to)
+        movies = await TMDBService.fetch_movies(language_code, genre, date_from, date_to, page)
         all_content.extend(movies)
         
     elif content_type == 'tv':
         print("Fetching ONLY TV shows with date filtering...")
-        tv_shows = await TMDBService.fetch_tv_shows(language_code, genre, date_from, date_to)
+        tv_shows = await TMDBService.fetch_tv_shows(language_code, genre, date_from, date_to, page)
         all_content.extend(tv_shows)
     
     print(f"Total content found before OTT filtering: {len(all_content)}")
@@ -109,13 +109,14 @@ async def discover_content(request: DiscoverRequest):
             content_type, 
             genre, 
             release_period,
-            request.sort_by or 'rating'
+            request.sort_by or 'rating',
+            request.page or 1
         )
         
         print(f"Returning {len(content)} OTT-available items")
         
         return {
-            "content": content[:50],
+            "content": content,
             "total": len(content),
             "detected": {
                 "genre": genre,

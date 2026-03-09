@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
+import MyListPage from './pages/MyListPage';
 import { useGlobalSearch } from './hooks/useGlobalSearch';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { API_CONFIG } from './config/constants';
@@ -128,6 +129,19 @@ function App() {
                 onGetPersonalizedRecommendations={handlePersonalizedRecommendations}
                 hasPreferences={hasPreferences}
                 loading={preferencesLoading}
+              />
+            }
+          />
+          <Route
+            path="/my-list"
+            element={
+              <MyListPage
+                userId={userId}
+                userProfile={userProfile}
+                likeContent={likeContent}
+                dislikeContent={dislikeContent}
+                addToWatchlist={addToWatchlist}
+                markAsWatched={markAsWatched}
               />
             }
           />

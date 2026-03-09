@@ -7,7 +7,7 @@ from config.constants import (
 
 class TMDBService:
     @staticmethod
-    async def fetch_movies(language_code: str, genre: str, date_from: str, date_to: str):
+    async def fetch_movies(language_code: str, genre: str, date_from: str, date_to: str, page: int = 1):
         """Fetch movies with date filtering and correct genre ID"""
         movies = []
         movie_genre_id = get_genre_id(genre, 'movie')
@@ -20,7 +20,9 @@ class TMDBService:
                 
                 # Fetch multiple pages to ensure enough OTT-available content survives the filter
                 all_raw_movies = []
-                for page in range(1, 4):  # Fetch 3 pages (60 movies)
+                # Fetch 3-page chunks based on overall requested page
+                start_tmdb_page = (page - 1) * 3 + 1
+                for tmdb_page in range(start_tmdb_page, start_tmdb_page + 3): 
                     params = {
                         "api_key": TMDB_API_KEY,
                         "with_genres": movie_genre_id,
@@ -31,7 +33,7 @@ class TMDBService:
                         "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['POPULAR'],
                         "watch_region": "IN",
                         "with_watch_monetization_types": "flatrate|rent|buy|ads",
-                        "page": page
+                        "page": tmdb_page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
                     response = await client.get(f"{TMDB_API_URL}/discover/movie", params=params)
@@ -99,7 +101,7 @@ class TMDBService:
         return movies[:API_CONFIG['MAX_RESULTS_PER_TYPE']]
 
     @staticmethod
-    async def fetch_tv_shows(language_code: str, genre: str, date_from: str, date_to: str):
+    async def fetch_tv_shows(language_code: str, genre: str, date_from: str, date_to: str, page: int = 1):
         """Fetch TV shows with recent episodes/seasons using hybrid approach"""
         tv_shows = []
         tv_shows_dict = {}  # Use dict to avoid duplicates
@@ -113,7 +115,7 @@ class TMDBService:
                 try:
                     on_air_response = await client.get(f"{TMDB_API_URL}/tv/on_the_air", params={
                         "api_key": TMDB_API_KEY,
-                        "page": 1
+                        "page": page
                     })
                     
                     if on_air_response.status_code == 200:
@@ -139,7 +141,7 @@ class TMDBService:
                         "sort_by": "popularity.desc",
                         "watch_region": "IN",
                         "with_watch_monetization_types": "flatrate|rent|buy|ads",
-                        "page": 1
+                        "page": page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
                     discover_response = await client.get(f"{TMDB_API_URL}/discover/tv", params=params)
@@ -157,7 +159,7 @@ class TMDBService:
                 try:
                     airing_today_response = await client.get(f"{TMDB_API_URL}/tv/airing_today", params={
                         "api_key": TMDB_API_KEY,
-                        "page": 1
+                        "page": page
                     })
                     
                     if airing_today_response.status_code == 200:
@@ -233,7 +235,7 @@ class TMDBService:
                         "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['RECENT'],
                         "watch_region": "IN",
                         "with_watch_monetization_types": "flatrate|rent|buy|ads",
-                        "page": 1
+                        "page": page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
                     new_shows_response = await client.get(f"{TMDB_API_URL}/discover/tv", params=params)
