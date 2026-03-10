@@ -62,7 +62,7 @@ const HomePage = ({
         loadingMore,
         hasMore,
         loadMore
-    } = useContent(filters);
+    } = useContent(filters, userId);
 
     const handleAIRecommendations = (recommendations, response) => {
         console.log('Received AI recommendations:', recommendations.length);
@@ -207,6 +207,7 @@ const HomePage = ({
                 onWatched={markAsWatched}
                 userInteractions={userProfile?.recent_activity || []}
                 interactionMap={userProfile?.interaction_map || {}}
+                subscribedProviders={userProfile?.profile?.subscribed_providers || []}
             />
 
             {/* AI Chat Bot */}

@@ -21,7 +21,8 @@ const ContentGrid = ({
   onWatchlist,
   onWatched,
   userInteractions,
-  interactionMap = {}
+  interactionMap = {},
+  subscribedProviders = []
 }) => {
   const [selectedContent, setSelectedContent] = useState(null);
   const observerRef = useRef(null);
@@ -83,6 +84,7 @@ const ContentGrid = ({
               onWatched={onWatched}
               userInteractions={userInteractions}
               interactionMap={interactionMap}
+              subscribedProviders={subscribedProviders}
             />
           </div>
         ))}
@@ -107,6 +109,7 @@ const ContentGrid = ({
           onWatched={onWatched}
           userInteractions={userInteractions}
           interactionMap={interactionMap}
+          subscribedProviders={subscribedProviders}
         />
       )}
     </>

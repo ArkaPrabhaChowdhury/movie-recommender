@@ -46,12 +46,14 @@ class StreamingService:
                                 if provider_id in INDIAN_OTT_PLATFORMS:
                                     ott_info = INDIAN_OTT_PLATFORMS[provider_id]
                                     streaming_platforms.append({
+                                        "id": provider_id,
                                         "name": ott_info["name"],
                                         "logo": provider.get('logo_path', ''),
                                         "color": ott_info["color"]
                                     })
                                 else:
                                     streaming_platforms.append({
+                                        "id": provider_id,
                                         "name": provider_name,
                                         "logo": provider.get('logo_path', ''),
                                         "color": "#6B7280"
@@ -61,6 +63,7 @@ class StreamingService:
                         if 'rent' in india_providers:
                             for provider in india_providers['rent']:
                                 streaming_platforms.append({
+                                    "id": provider['provider_id'],
                                     "name": f"{provider['provider_name']} (Rent)",
                                     "logo": provider.get('logo_path', ''),
                                     "color": "#F59E0B"
@@ -71,6 +74,7 @@ class StreamingService:
                             content_item = content_items[i].copy()
                             content_item["streaming"] = {
                                 "available_on": streaming_platforms[:API_CONFIG['MAX_STREAMING_PLATFORMS']],
+                                "tmdb_link": india_providers.get('link'),
                                 "rent": [],
                                 "buy": []
                             }

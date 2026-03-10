@@ -25,6 +25,19 @@ class UserPreferenceService:
         self.profiles_file = "user_profiles.json"
         self._ensure_data_directory()
         
+        # Initialize Supabase if configured
+        from config.constants import SUPABASE_URL, SUPABASE_KEY
+        self.use_supabase = bool(SUPABASE_URL and SUPABASE_KEY)
+        if self.use_supabase:
+            try:
+                from supabase import create_client, Client
+                self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+                print("🚀 Connected to Supabase Successfully!")
+            except Exception as e:
+                print(f"⚠️ Failed to connect to Supabase: {e}. Falling back to local files.")
+                self.use_supabase = False
+
+        
     def _ensure_data_directory(self):
         """Create data directory if it doesn't exist"""
         try:
@@ -33,7 +46,24 @@ class UserPreferenceService:
             print(f"❌ Failed to create data directory {self.data_dir}: {e}")
         
     def _load_data(self, filename: str) -> Dict:
-        """Load data from JSON file"""
+        """Load data from JSON file or Supabase"""
+        if self.use_supabase:
+            try:
+                # We store both profiles and preferences in a single Supabase table called 'user_data'
+                # Columns: user_id (text PK), profile (jsonb), preferences (jsonb)
+                response = self.supabase.table('user_data').select('*').execute()
+                data_dict = {}
+                for row in response.data:
+                    user_id = row['user_id']
+                    if filename == self.profiles_file and row.get('profile'):
+                        data_dict[user_id] = row['profile']
+                    elif filename == self.preferences_file and row.get('preferences'):
+                        data_dict[user_id] = row['preferences']
+                return data_dict
+            except Exception as e:
+                print(f"❌ Supabase load error: {e}")
+                # Fallback to local files on error
+
         filepath = os.path.join(self.data_dir, filename)
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
@@ -41,7 +71,22 @@ class UserPreferenceService:
         return {}
     
     def _save_data(self, filename: str, data: Dict):
-        """Save data to JSON file"""
+        """Save data to JSON file or Supabase"""
+        if self.use_supabase:
+            try:
+                for user_id, content in data.items():
+                    # Upsert each user's data into the Supabase table
+                    update_payload = {"user_id": user_id}
+                    if filename == self.profiles_file:
+                        update_payload["profile"] = content
+                    else:
+                        update_payload["preferences"] = content
+                        
+                    self.supabase.table('user_data').upsert(update_payload).execute()
+            except Exception as e:
+                print(f"❌ Supabase save error: {e}")
+                # Fallback to local files so data isn't lost
+                
         filepath = os.path.join(self.data_dir, filename)
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False, default=str)
@@ -193,6 +238,8 @@ class UserPreferenceService:
                 "preferred_content_types": [ct for ct, count in content_type_counter.most_common(3)],
                 "liked_actors": [actor for actor, count in actor_counter.most_common(20) if count >= 1],
                 "liked_directors": [director for director, count in director_counter.most_common(10) if count >= 1],
+                # Preserve manually-set subscription list
+                "subscribed_providers": profiles_data.get(user_id, {}).get("subscribed_providers", []),
                 
                 # Statistics
                 "total_interactions": len(user_interactions),
@@ -217,6 +264,38 @@ class UserPreferenceService:
             
         except Exception as e:
             print(f"❌ Error updating profile: {e}")
+
+    async def save_user_subscriptions(self, user_id: str, provider_ids: List[int]) -> bool:
+        """Persist the user's chosen OTT platform IDs without touching other profile fields."""
+        try:
+            profiles_data = self._load_data(self.profiles_file)
+            if user_id not in profiles_data:
+                # Bootstrap a minimal profile so the key exists
+                profiles_data[user_id] = {
+                    "user_id": user_id,
+                    "preferred_genres": [],
+                    "preferred_languages": [],
+                    "preferred_content_types": [],
+                    "liked_actors": [],
+                    "liked_directors": [],
+                    "subscribed_providers": provider_ids,
+                    "total_interactions": 0,
+                    "total_liked": 0,
+                    "total_disliked": 0,
+                    "total_watchlisted": 0,
+                    "total_watched": 0,
+                    "created_at": datetime.now().isoformat(),
+                    "updated_at": datetime.now().isoformat()
+                }
+            else:
+                profiles_data[user_id]["subscribed_providers"] = provider_ids
+                profiles_data[user_id]["updated_at"] = datetime.now().isoformat()
+            self._save_data(self.profiles_file, profiles_data)
+            print(f"✅ Saved {len(provider_ids)} subscriptions for {user_id}")
+            return True
+        except Exception as e:
+            print(f"❌ Error saving subscriptions: {e}")
+            return False
     
     # ... rest of existing methods remain the same ...
     async def get_user_profile(self, user_id: str) -> Dict:

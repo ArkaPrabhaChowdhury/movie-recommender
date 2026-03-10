@@ -433,3 +433,45 @@ class TMDBService:
                 print(f"Error fetching details: {e}")
                 return None
 
+    @staticmethod
+    async def get_watch_providers(region: str = "IN"):
+        """Fetch all streaming platforms available in a region from TMDB."""
+        logo_base = "https://image.tmdb.org/t/p/w92"
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            try:
+                movie_resp, tv_resp = await asyncio.gather(
+                    client.get(f"{TMDB_API_URL}/watch/providers/movie",
+                               params={"api_key": TMDB_API_KEY, "watch_region": region}),
+                    client.get(f"{TMDB_API_URL}/watch/providers/tv",
+                               params={"api_key": TMDB_API_KEY, "watch_region": region})
+                )
+
+                providers: dict = {}
+
+                for resp in (movie_resp, tv_resp):
+                    if resp.status_code == 200:
+                        for p in resp.json().get("results", []):
+                            pid = p["provider_id"]
+                            if pid not in providers:
+                                providers[pid] = {
+                                    "id": pid,
+                                    "name": p["provider_name"],
+                                    "logo": f"{logo_base}{p['logo_path']}" if p.get("logo_path") else None,
+                                    "display_priorities": p.get("display_priorities", {})
+                                }
+
+                sorted_providers = sorted(
+                    providers.values(),
+                    key=lambda x: x["display_priorities"].get(region, 999)
+                )
+                # Strip internal field before returning
+                for p in sorted_providers:
+                    p.pop("display_priorities", None)
+
+                print(f"✅ Fetched {len(sorted_providers)} watch providers for region {region}")
+                return sorted_providers
+
+            except Exception as e:
+                print(f"❌ Error fetching watch providers: {e}")
+                return []
+

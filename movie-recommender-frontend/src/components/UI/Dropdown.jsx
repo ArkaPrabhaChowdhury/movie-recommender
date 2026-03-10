@@ -28,9 +28,8 @@ const Dropdown = ({ label, options, selected, onSelect, icon: Icon }) => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gray-800/40 border border-gray-700 hover:border-teal-500/50 hover:bg-gray-800/60 transition-all text-sm font-medium ${
-          isOpen ? 'border-teal-500 ring-4 ring-teal-500/10 bg-gray-800/80' : ''
-        }`}
+        className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gray-800/40 border border-gray-700 hover:border-teal-500/50 hover:bg-gray-800/60 transition-all text-sm font-medium ${isOpen ? 'border-teal-500 ring-4 ring-teal-500/10 bg-gray-800/80' : ''
+          }`}
       >
         {Icon && <Icon size={16} className="text-teal-400" />}
         <span className="text-gray-400 font-normal">{label}:</span>
@@ -53,16 +52,15 @@ const Dropdown = ({ label, options, selected, onSelect, icon: Icon }) => {
                     onSelect(id);
                     setIsOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center justify-between mb-0.5 last:mb-0 ${
-                    isSelected 
-                      ? 'bg-teal-500/10 text-teal-400 font-semibold' 
-                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center justify-between mb-0.5 last:mb-0 ${isSelected
+                    ? 'bg-teal-500/10 text-teal-400 font-semibold'
+                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                    }`}
                 >
                   {name}
                   {isSelected && (
                     <div className="flex items-center justify-center w-5 h-5 rounded-full bg-teal-500/20">
-                        <div className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
+                      <div className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
                     </div>
                   )}
                 </button>

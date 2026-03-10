@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/api';
+import ApiCache from '../services/apiCache';
+import { supabase } from '../services/supabaseClient';
+
 
 export const useUserPreferences = () => {
   const [userId, setUserId] = useState(null);
@@ -7,14 +10,43 @@ export const useUserPreferences = () => {
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Initialize user ID (in real app, this would come from authentication)
+  // Initialize user ID from Supabase Auth, fallback to anonymous local storage
   useEffect(() => {
-    let storedUserId = localStorage.getItem('movie_app_user_id');
-    if (!storedUserId) {
-      storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('movie_app_user_id', storedUserId);
-    }
-    setUserId(storedUserId);
+    const setAnonymousId = () => {
+      let storedUserId = localStorage.getItem('movie_app_user_id');
+      if (!storedUserId) {
+        storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('movie_app_user_id', storedUserId);
+      }
+      setUserId(storedUserId);
+    };
+
+    const initializeAuth = async () => {
+      if (!supabase) {
+        setAnonymousId();
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        setAnonymousId();
+      }
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          setUserId(session.user.id);
+        } else {
+          setAnonymousId();
+          setUserProfile(null); // Clear profile on logout
+        }
+      });
+
+      return () => subscription?.unsubscribe();
+    };
+
+    initializeAuth();
   }, []);
 
   // Load user profile when userId is available
@@ -125,6 +157,25 @@ export const useUserPreferences = () => {
   const addToWatchlist = (contentData) => recordInteraction(contentData, 'watchlisted');
   const markAsWatched = (contentData, rating = null) => recordInteraction(contentData, 'watched', rating);
 
+  const updateSubscriptions = async (providerIds) => {
+    if (!userId) return false;
+    // Optimistic update
+    setUserProfile(prev => prev ? {
+      ...prev,
+      profile: { ...prev.profile, subscribed_providers: providerIds }
+    } : prev);
+    try {
+      await ApiService.saveUserSubscriptions(userId, providerIds);
+      // Bust discover cache so home page re-fetches with the new filter
+      ApiCache.clear();
+      return true;
+    } catch (err) {
+      console.error('Failed to save subscriptions:', err);
+      loadUserProfile(); // revert
+      return false;
+    }
+  };
+
   return {
     userId,
     userProfile,
@@ -137,6 +188,7 @@ export const useUserPreferences = () => {
     markAsWatched,
     getPersonalizedRecommendations,
     loadUserProfile,
+    updateSubscriptions,
     hasPreferences: userProfile?.profile?.preferred_genres?.length > 0
   };
 };

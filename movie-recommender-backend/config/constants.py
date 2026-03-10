@@ -13,6 +13,8 @@ load_dotenv()
 TMDB_API_KEY = os.getenv('TMDB_API_KEY', '120b28e3a6abbe3a6837a90885401cb8')
 OLLAMA_API_URL = os.getenv('OLLAMA_API_URL', 'http://localhost:11434/api/generate')
 TMDB_API_URL = os.getenv('TMDB_API_URL', 'https://api.themoviedb.org/3')
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
 # Server Configuration
 SERVER_CONFIG = {

@@ -4,7 +4,7 @@ import ApiService from '../../services/api';
 import { UI_CONFIG } from '../../config/constants';
 import InteractionButtons from './InteractionButtons';
 
-const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, onDislike, onWatchlist, onWatched, userInteractions, interactionMap = {} }) => {
+const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, onDislike, onWatchlist, onWatched, userInteractions, interactionMap = {}, subscribedProviders = [] }) => {
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -48,6 +48,39 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
     }, [isOpen]);
 
     if (!isOpen) return null;
+
+    // Filter available platforms based on user subscriptions
+    const displayedPlatforms = details?.streaming?.available_on?.filter(p =>
+        subscribedProviders.length === 0 || subscribedProviders.includes(p.id)
+    ) || [];
+
+    // Construct a direct watch link based on the top available platform
+    const getPlatformWatchLink = (platformName, title) => {
+        if (!platformName || !title) return null;
+        const encodedTitle = encodeURIComponent(title);
+        const name = platformName.toLowerCase();
+
+        if (name.includes('netflix')) return `https://www.netflix.com/search?q=${encodedTitle}`;
+        if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_40?phrase=${encodedTitle}`;
+        if (name.includes('hotstar')) return `https://www.hotstar.com/in/explore?searchQuery=${encodedTitle}`;
+        if (name.includes('jio')) return `https://www.jiocinema.com/search?q=${encodedTitle}`;
+        if (name.includes('sony')) return `https://www.sonyliv.com/search?query=${encodedTitle}`;
+        if (name.includes('zee5')) return `https://www.zee5.com/search?q=${encodedTitle}`;
+        if (name.includes('hoichoi')) return `https://www.hoichoi.tv/search?q=${encodedTitle}`;
+        if (name.includes('apple')) return `https://tv.apple.com/in/search?q=${encodedTitle}`;
+        if (name.includes('crunchyroll')) return `https://www.crunchyroll.com/search?q=${encodedTitle}`;
+        if (name.includes('sun nxt')) return `https://www.sunnxt.com/search?q=${encodedTitle}`;
+        if (name.includes('aha')) return `https://www.aha.video/search?q=${encodedTitle}`;
+        if (name.includes('voot')) return `https://www.voot.com/search?q=${encodedTitle}`;
+        if (name.includes('eros')) return `https://erosnow.com/search?q=${encodedTitle}`;
+        if (name.includes('alt')) return `https://www.altt.co.in/search?searchKeyword=${encodedTitle}`;
+        if (name.includes('lionsgate')) return `https://lionsgateplay.com/in/search?q=${encodedTitle}`;
+        return null;
+    };
+
+    const watchNowLink = displayedPlatforms.length > 0
+        ? (getPlatformWatchLink(displayedPlatforms[0].name, details?.title) || details?.streaming?.tmdb_link)
+        : details?.streaming?.tmdb_link;
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10 bg-black/80 backdrop-blur-sm">
@@ -153,8 +186,7 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
                                         <p className="text-gray-400 text-lg italic mb-6">"{details.tagline}"</p>
                                     )}
 
-                                    {/* Actions / Buttons */}
-                                    <div className="flex flex-wrap items-center gap-4 mb-6 relative h-10">
+                                    <div className="flex items-center gap-2">
                                         <InteractionButtons
                                             item={details}
                                             onLike={onLike}
@@ -186,14 +218,19 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
                                     </div>
 
                                     {/* Available On */}
-                                    {details.streaming && details.streaming.available_on && details.streaming.available_on.length > 0 && (
+                                    {displayedPlatforms.length > 0 && (
                                         <div className="mb-10">
-                                            <h3 className="text-white text-lg font-semibold mb-4">Available On</h3>
+                                            <h3 className="text-white text-lg font-semibold mb-4">Watch now on</h3>
                                             <div className="flex flex-wrap gap-3">
-                                                {details.streaming.available_on.map((platform, idx) => (
-                                                    <div key={idx} className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm hover:scale-105 transition-transform" style={{ backgroundColor: `${platform.color}15`, border: `1px solid ${platform.color}30` }}>
-                                                        <span className="font-medium text-sm text-white">{platform.name}</span>
-                                                    </div>
+                                                {displayedPlatforms.map((platform, idx) => (
+                                                    <a key={idx}
+                                                        href={getPlatformWatchLink(platform.name, details?.title) || details?.streaming?.tmdb_link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm hover:scale-105 transition-transform"
+                                                        style={{ backgroundColor: `${platform.color}15`, border: `1px solid ${platform.color}30` }}>
+                                                        <span className="font-medium text-sm text-white hover:text-teal-400 transition-colors">{platform.name}</span>
+                                                    </a>
                                                 ))}
                                             </div>
                                         </div>

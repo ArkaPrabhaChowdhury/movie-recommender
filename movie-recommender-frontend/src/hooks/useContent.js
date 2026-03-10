@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import ApiService from '../services/api';
 
-export const useContent = (filters) => {
+export const useContent = (filters, userId = null) => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -9,7 +9,6 @@ export const useContent = (filters) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // Use a ref to track the last filters used to avoid race conditions
   const lastFiltersRef = useRef(null);
 
   const fetchContent = useCallback(async (pageNum = 1, isLoadMore = false) => {
@@ -27,7 +26,7 @@ export const useContent = (filters) => {
     setError(null);
 
     try {
-      const data = await ApiService.discover(filters, pageNum);
+      const data = await ApiService.discover(filters, pageNum, userId);
       const newContent = data.content || [];
 
       if (isLoadMore) {
@@ -54,7 +53,7 @@ export const useContent = (filters) => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [filters]);
+  }, [filters, userId]);
 
   const loadMore = useCallback(() => {
     if (!loading && !loadingMore && hasMore) {

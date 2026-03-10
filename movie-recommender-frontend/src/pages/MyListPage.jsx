@@ -203,6 +203,7 @@ const MyListPage = ({
                         onWatched={markAsWatched}
                         userInteractions={userProfile?.recent_activity || []}
                         interactionMap={userProfile?.interaction_map || {}}
+                        subscribedProviders={userProfile?.profile?.subscribed_providers || []}
                     />
                 ) : (
                     <div className="py-20 flex flex-col items-center justify-center text-center max-w-sm mx-auto">

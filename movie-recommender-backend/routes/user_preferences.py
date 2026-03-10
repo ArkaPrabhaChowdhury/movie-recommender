@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from typing import List
 from models.user_models import ContentInteraction, RecommendationRequest
 from services.user_preference_service import UserPreferenceService
 from services.recommendation_engine import RecommendationEngine
@@ -206,4 +207,31 @@ async def remove_user_interaction(user_id: str, content_id: int, content_type: s
             
     except Exception as e:
         print(f"❌ Error removing interaction: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ── Watch Providers ──────────────────────────────────────────────────────────
+
+@router.get("/watch/providers")
+async def get_watch_providers(region: str = "IN"):
+    """Return the list of streaming platforms available in the given region."""
+    try:
+        providers = await TMDBService.get_watch_providers(region)
+        return providers
+    except Exception as e:
+        print(f"❌ Error fetching providers: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/user/{user_id}/subscriptions")
+async def save_user_subscriptions(user_id: str, provider_ids: List[int]):
+    """Save the OTT platforms a user is subscribed to."""
+    try:
+        success = await preference_service.save_user_subscriptions(user_id, provider_ids)
+        if success:
+            return {"status": "success", "saved": len(provider_ids)}
+        raise HTTPException(status_code=500, detail="Failed to save subscriptions")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error saving subscriptions: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, X, Bookmark, Search, ArrowLeft } from 'lucide-react';
+import { User, X, Bookmark, Search, ArrowLeft, LogIn, LogOut } from 'lucide-react';
 import { UI_CONFIG, API_CONFIG } from '../../config/constants';
+import { supabase } from '../../services/supabaseClient';
 
 const Header = ({
   searchQuery,
@@ -13,6 +14,30 @@ const Header = ({
 }) => {
   const navigate = useNavigate();
   const [isSearchMobileOpen, setIsSearchMobileOpen] = useState(false);
+
+  const isAnonymous = !userId || userId.startsWith('user_');
+
+  const handleLogin = async () => {
+    try {
+      if (!supabase) return alert("Supabase not configured. Check your .env file!");
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+    } catch (e) {
+      console.error("Login failed:", e);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (supabase) await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Logout failed:", e);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-sm border-b" style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border-primary)' }}>
@@ -121,6 +146,25 @@ const Header = ({
                       <User size={20} className="group-hover:scale-110 transition-transform" />
                       <span className="hidden lg:inline ml-2 font-bold text-sm">Profile</span>
                     </button>
+                    {!isAnonymous ? (
+                      <button
+                        onClick={handleLogout}
+                        className="group flex items-center justify-center p-2 sm:px-4 sm:py-2 rounded-xl transition-all border border-gray-800 bg-gray-900/50 hover:bg-red-500 hover:border-red-500 text-gray-300 hover:text-white"
+                        title="Sign Out"
+                      >
+                        <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+                        <span className="hidden lg:inline ml-2 font-bold text-sm">Sign Out</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleLogin}
+                        className="group flex items-center justify-center p-2 sm:px-4 sm:py-2 rounded-xl transition-all border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500 hover:border-teal-500 text-teal-400 hover:text-black"
+                        title="Login with Google"
+                      >
+                        <LogIn size={20} className="group-hover:scale-110 transition-transform" />
+                        <span className="hidden lg:inline ml-2 font-bold text-sm">Login</span>
+                      </button>
+                    )}
                   </>
                 )}
               </div>

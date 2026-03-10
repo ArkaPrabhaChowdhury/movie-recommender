@@ -3,12 +3,18 @@ import asyncio
 from models.request_models import DiscoverRequest
 from services.tmdb_service import TMDBService
 from services.streaming_service import StreamingService
+from services.user_preference_service import UserPreferenceService
 from config.constants import LANGUAGE_MAP, get_date_range, get_genre_id, DEFAULTS
 from utils.helpers import extract_filters_from_prompt
 
 router = APIRouter()
+_pref_service = UserPreferenceService()
 
-async def get_content_with_date_filtering(language_code: str, content_type: str, genre: str, release_period: str, sort_by: str = 'rating', page: int = 1):
+async def get_content_with_date_filtering(
+    language_code: str, content_type: str, genre: str,
+    release_period: str, sort_by: str = 'rating',
+    page: int = 1, user_id: str = None
+):
     """Get content with date range filtering and correct genre IDs"""
     date_from, date_to = get_date_range(release_period)
     print(f"Date filtering: {date_from} to {date_to} (period: {release_period})")
@@ -58,6 +64,24 @@ async def get_content_with_date_filtering(language_code: str, content_type: str,
         ott_content.extend(tv_ott)
         print(f"Found {len(tv_ott)} TV shows with OTT availability")
     
+    # --- Subscription filter -------------------------------------------
+    if user_id:
+        try:
+            profile_data = await _pref_service.get_user_profile(user_id)
+            sub_ids = set(profile_data.get("subscribed_providers", []))
+            if sub_ids:
+                before = len(ott_content)
+                ott_content = [
+                    item for item in ott_content
+                    if any(
+                        p.get("id") in sub_ids
+                        for p in item.get("streaming", {}).get("available_on", [])
+                    )
+                ]
+                print(f"🎯 Subscription filter: {before} → {len(ott_content)} items")
+        except Exception as sub_err:
+            print(f"⚠️ Subscription filter error (skipped): {sub_err}")
+
     # Sort based on parameter
     if sort_by == 'rating':
         print("Sorting by rating (highest first)...")
@@ -66,9 +90,8 @@ async def get_content_with_date_filtering(language_code: str, content_type: str,
         print("Sorting by release date (newest first)...")
         ott_content.sort(key=lambda x: x.get('release_date', ''), reverse=True)
     else:
-        # Default: Sort by release date (newest first) and rating
         ott_content.sort(key=lambda x: (x.get('release_date', ''), x.get('rating', 0)), reverse=True)
-    
+
     print(f"Final OTT content: {len(ott_content)} items")
     return ott_content
 
@@ -105,12 +128,13 @@ async def discover_content(request: DiscoverRequest):
         
         # Get content with date filtering and correct genre IDs
         content = await get_content_with_date_filtering(
-            language_code, 
-            content_type, 
-            genre, 
+            language_code,
+            content_type,
+            genre,
             release_period,
             request.sort_by or 'rating',
-            request.page or 1
+            request.page or 1,
+            request.user_id
         )
         
         print(f"Returning {len(content)} OTT-available items")

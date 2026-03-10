@@ -12,7 +12,7 @@ class OllamaService:
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(OLLAMA_API_URL, json={
-                    "model": "llama3.1:latest",
+                    "model": "gemma3:latest",
                     "prompt": prompt,
                     "stream": False,
                     "temperature": temperature,

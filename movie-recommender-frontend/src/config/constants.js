@@ -54,8 +54,8 @@ export const RELEASE_PERIODS = [
 ];
 
 export const SORT_OPTIONS = [
-  { id: 'rating', name: 'Rating (Top Rated)' },
-  { id: 'release_date', name: 'Date (Lately Released)' },
+  { id: 'rating', name: 'Rating' },
+  { id: 'release_date', name: 'Date' },
 ];
 
 // Default Values

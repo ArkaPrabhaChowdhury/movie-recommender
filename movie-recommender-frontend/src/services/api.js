@@ -41,10 +41,11 @@ class ApiService {
     return data;
   }
   // Browse / discover — cached for 6 h per unique filter combo
-  static async discover(filters, page = 1) {
+  static async discover(filters, page = 1, userId = null) {
     const contentDescription = this.getContentDescription(filters.selectedContentType);
     const prompt = `suggest ${filters.selectedGenre} ${contentDescription} in ${filters.selectedLanguage}`;
     const payload = {
+      user_id: userId,
       prompt,
       genre: filters.selectedGenre,
       language: filters.selectedLanguage,
@@ -194,8 +195,24 @@ class ApiService {
     if (action) {
       url += `&action=${action}`;
     }
-    return this.request(url, {
-      method: 'DELETE',
+    return this.request(url, { method: 'DELETE' });
+  }
+
+  /** Fetch streaming platforms available in a region (cached 24 h). */
+  static async getWatchProviders(region = 'IN') {
+    const cacheKey = `watch_providers_${region}`;
+    const cached = ApiCache.get(cacheKey);
+    if (cached) return cached;
+    const data = await this.request(`/watch/providers?region=${region}`);
+    ApiCache.set(cacheKey, data, 24 * 60 * 60 * 1000);
+    return data;
+  }
+
+  /** Persist a user's chosen OTT platform IDs on the backend. */
+  static async saveUserSubscriptions(userId, providerIds) {
+    return this.request(`/user/${userId}/subscriptions`, {
+      method: 'POST',
+      body: JSON.stringify(providerIds),
     });
   }
 

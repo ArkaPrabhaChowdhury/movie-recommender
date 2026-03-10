@@ -38,6 +38,7 @@ function App() {
     addToWatchlist,
     markAsWatched,
     getPersonalizedRecommendations,
+    updateSubscriptions,
     hasPreferences
   } = useUserPreferences();
 
@@ -129,6 +130,7 @@ function App() {
                 onGetPersonalizedRecommendations={handlePersonalizedRecommendations}
                 hasPreferences={hasPreferences}
                 loading={preferencesLoading}
+                updateSubscriptions={updateSubscriptions}
               />
             }
           />

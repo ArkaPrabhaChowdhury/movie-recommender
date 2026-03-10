@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 
 class DiscoverRequest(BaseModel):
+    user_id: Optional[str] = None
     prompt: str
     genre: Optional[str] = None
     language: Optional[str] = None
@@ -11,6 +12,7 @@ class DiscoverRequest(BaseModel):
     page: Optional[int] = 1
 
 class SearchRequest(BaseModel):
+    user_id: Optional[str] = None
     query: str
 
 class AIChatRequest(BaseModel):

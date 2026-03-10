@@ -11,8 +11,12 @@ const ContentCard = ({
   onWatched,
   userInteractions = [],
   interactionMap = {},
-  showInteractionButtons = false
+  showInteractionButtons = false,
+  subscribedProviders = []
 }) => {
+  const displayedPlatforms = item.streaming?.available_on?.filter(p =>
+    subscribedProviders.length === 0 || subscribedProviders.includes(p.id)
+  ) || [];
 
   return (
     <div className={`group cursor-pointer transition-all duration-${UI_CONFIG.ANIMATION_DURATION.NORMAL} hover:scale-105`}>
@@ -51,11 +55,11 @@ const ContentCard = ({
             </h3>
             <p className="text-xs text-gray-300 mb-2">{item.year}</p>
 
-            {item.streaming && item.streaming.available_on && item.streaming.available_on.length > 0 && (
+            {displayedPlatforms.length > 0 && (
               <div className="mb-2">
                 <p className="text-xs text-gray-400 mb-1">Watch on:</p>
                 <div className="flex flex-wrap gap-1">
-                  {item.streaming.available_on.slice(0, 3).map((platform, index) => (
+                  {displayedPlatforms.slice(0, 3).map((platform, index) => (
                     <span
                       key={index}
                       className="px-2 py-1 text-xs rounded-full text-white font-medium"
@@ -64,9 +68,9 @@ const ContentCard = ({
                       {platform.name}
                     </span>
                   ))}
-                  {item.streaming.available_on.length > 3 && (
+                  {displayedPlatforms.length > 3 && (
                     <span className="px-2 py-1 text-xs rounded-full bg-gray-600 text-white">
-                      +{item.streaming.available_on.length - 3}
+                      +{displayedPlatforms.length - 3}
                     </span>
                   )}
                 </div>
@@ -98,9 +102,9 @@ const ContentCard = ({
         </h3>
         <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>{item.year}</p>
 
-        {item.streaming && item.streaming.available_on && item.streaming.available_on.length > 0 && (
+        {displayedPlatforms.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
-            {item.streaming.available_on.slice(0, 2).map((platform, index) => (
+            {displayedPlatforms.slice(0, 2).map((platform, index) => (
               <span
                 key={index}
                 className="text-xs px-1 py-0.5 rounded text-white"
