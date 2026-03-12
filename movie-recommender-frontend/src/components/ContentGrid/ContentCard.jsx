@@ -89,7 +89,7 @@ const ContentCard = ({
           )}
         </div>
 
-        <div className={`absolute ${showInteractionButtons ? 'top-12' : 'top-2'} right-2 flex flex-col gap-1`}>
+        <div className={`absolute ${showInteractionButtons ? 'top-10.5' : 'top-2'} right-2 flex flex-col gap-1`}>
           <span className="flex items-center gap-1.5 px-2.5 py-1 text-white text-[10px] rounded-full font-bold shadow-lg border border-black/20 tracking-wider" style={{ background: 'var(--color-primary-600)' }}>
             {item.content_type === 'movie' ? <Film size={10} /> : <Tv size={10} />}
             {item.content_type.toUpperCase()}
