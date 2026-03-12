@@ -31,12 +31,11 @@ class TMDBService:
                         "primary_release_date.lte": date_to,
                         "sort_by": "popularity.desc",
                         "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['POPULAR'],
-                        "watch_region": "IN",
-                        "with_watch_monetization_types": "flatrate|rent|buy|ads",
                         "page": tmdb_page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
-                    response = await client.get(f"{TMDB_API_URL}/discover/movie", params=params)
+                    url = f"{TMDB_API_URL}/discover/movie"
+                    response = await client.get(url, params=params)
                     if response.status_code == 200:
                         all_raw_movies.extend(response.json().get('results', []))
                     else:
@@ -70,8 +69,6 @@ class TMDBService:
                         "primary_release_date.lte": date_to,
                         "sort_by": "release_date.desc",
                         "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['RECENT'],
-                        "watch_region": "IN",
-                        "with_watch_monetization_types": "flatrate|rent|buy|ads",
                         "page": 1
                     }
                     params = {k: v for k, v in params.items() if v is not None}
@@ -139,8 +136,6 @@ class TMDBService:
                         "air_date.gte": date_from,
                         "air_date.lte": date_to,
                         "sort_by": "popularity.desc",
-                        "watch_region": "IN",
-                        "with_watch_monetization_types": "flatrate|rent|buy|ads",
                         "page": page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
@@ -217,34 +212,26 @@ class TMDBService:
                 for result in details_results:
                     if result:
                         tv_shows.append(result)
-                        try:
-                            print(f"[ OK ] Added: {result['title']} (last aired: {result['last_air_date']})")
-                        except UnicodeEncodeError:
-                            print(f"[ OK ] Added: (TV Show title has unicode) (last aired: {result['last_air_date']})")
                 
-                # If still not enough shows, add new shows from discover (by first_air_date)
-                if len(tv_shows) < 15:
-                    print(f"Only found {len(tv_shows)} shows with recent episodes, supplementing with new shows")
+                # If still not enough shows or specifically requested, add popular shows from discover
+                if len(tv_shows) < 30:
+                    print(f"Supplementing with popular TV shows for language {language_code}")
                     params = {
                         "api_key": TMDB_API_KEY,
                         "with_genres": tv_genre_id,
                         "with_original_language": language_code,
-                        "first_air_date.gte": date_from,
-                        "first_air_date.lte": date_to,
                         "sort_by": "popularity.desc",
-                        "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['RECENT'],
-                        "watch_region": "IN",
-                        "with_watch_monetization_types": "flatrate|rent|buy|ads",
+                        "vote_count.gte": 5 if language_code != 'hi' else 0, # Hindi content sometimes has very few votes
                         "page": page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
-                    new_shows_response = await client.get(f"{TMDB_API_URL}/discover/tv", params=params)
+                    pop_response = await client.get(f"{TMDB_API_URL}/discover/tv", params=params)
                     
-                    if new_shows_response.status_code == 200:
-                        new_shows = new_shows_response.json().get('results', [])
+                    if pop_response.status_code == 200:
+                        pop_shows = pop_response.json().get('results', [])
                         existing_ids = {show['id'] for show in tv_shows}
                         
-                        for show in new_shows:
+                        for show in pop_shows:
                             if show['id'] not in existing_ids:
                                 tv_shows.append({
                                     "id": show['id'],

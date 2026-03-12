@@ -18,6 +18,7 @@ const ContentCard = ({
     subscribedProviders.length === 0 || subscribedProviders.includes(p.id)
   ) || [];
 
+  console.log(item)
   return (
     <div className={`group cursor-pointer transition-all duration-${UI_CONFIG.ANIMATION_DURATION.NORMAL} hover:scale-105`}>
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-lg" style={{ background: 'var(--color-bg-card)' }}>

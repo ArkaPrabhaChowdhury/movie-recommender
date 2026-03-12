@@ -1,48 +1,60 @@
 import httpx
 import json
 import re
+import os
 from config.constants import OLLAMA_API_URL
 
 class OllamaService:
     @staticmethod
     async def get_ai_response(prompt: str, temperature: float = 0.7) -> str:
-        """Get response from Ollama LLM with optimized settings"""
+        """Get response from Groq API (replacing Ollama LLM) with optimized settings"""
         try:
-            print(f"🔗 Connecting to Ollama at: {OLLAMA_API_URL}")
+            groq_api_key = os.getenv("GROQ_API_KEY")
+            if not groq_api_key:
+                print("❌ GROQ_API_KEY environment variable not found")
+                return ""
+
+            groq_url = "https://api.groq.com/openai/v1/chat/completions"
+            print(f"🔗 Connecting to Groq at: {groq_url}")
             
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(OLLAMA_API_URL, json={
-                    "model": "gemma3:latest",
-                    "prompt": prompt,
-                    "stream": False,
-                    "temperature": temperature,
-                    "options": {
-                        "num_predict": 300,
-                        "top_p": 0.9,
-                        "top_k": 40
-                    }
-                })
+            headers = {
+                "Authorization": f"Bearer {groq_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
+                    {"role": "system", "content": "You are a premium AI entertainment critic and recommendation engine. You provide insightful, accurate, and diverse content suggestions based on specific user data and constraints."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": temperature,
+                "max_tokens": 1500
+            }
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(groq_url, headers=headers, json=payload)
                 
-                print(f"📡 Ollama response status: {response.status_code}")
+                print(f"📡 Groq response status: {response.status_code}")
                 
                 if response.status_code == 200:
                     result = response.json()
-                    ai_text = result.get("response", "")
-                    print(f"✅ Ollama response received: {len(ai_text)} characters")
+                    ai_text = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+                    print(f"✅ Groq response received: {len(ai_text)} characters")
                     return ai_text
                 else:
-                    print(f"❌ Ollama error status: {response.status_code}")
-                    print(f"❌ Ollama error body: {response.text}")
+                    print(f"❌ Groq error status: {response.status_code}")
+                    print(f"❌ Groq error body: {response.text}")
                     return ""
                     
         except httpx.ConnectError as e:
-            print(f"❌ Cannot connect to Ollama: {e}")
+            print(f"❌ Cannot connect to Groq: {e}")
             return ""
         except httpx.TimeoutException as e:
-            print(f"⏱️ Ollama request timed out: {e}")
+            print(f"⏱️ Groq request timed out: {e}")
             return ""
         except Exception as e:
-            print(f"❌ Error calling Ollama: {e}")
+            print(f"❌ Error calling Groq: {e}")
             return ""
     
     @staticmethod

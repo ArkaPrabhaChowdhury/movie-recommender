@@ -64,23 +64,34 @@ async def get_content_with_date_filtering(
         ott_content.extend(tv_ott)
         print(f"Found {len(tv_ott)} TV shows with OTT availability")
     
-    # --- Subscription filter -------------------------------------------
+    # Mandatory filter: Only show content available on OTT in India
+    before_filter = len(ott_content)
+    ott_content = [item for item in ott_content if item.get("streaming", {}).get("platform_found")]
+    print(f"🛡️ OTT Filter: {before_filter} -> {len(ott_content)} items available on streaming")
+
+    # --- Subscription filter (Sub-filter of OTT) -----------------------
     if user_id:
         try:
             profile_data = await _pref_service.get_user_profile(user_id)
             sub_ids = set(profile_data.get("subscribed_providers", []))
             if sub_ids:
-                before = len(ott_content)
-                ott_content = [
-                    item for item in ott_content
-                    if any(
-                        p.get("id") in sub_ids
-                        for p in item.get("streaming", {}).get("available_on", [])
-                    )
-                ]
-                print(f"🎯 Subscription filter: {before} → {len(ott_content)} items")
+                filtered_content = []
+                for item in ott_content:
+                    all_platforms = item.get("streaming", {}).get("available_on", [])
+                    user_platforms = [
+                        p for p in all_platforms 
+                        if p.get("id") in sub_ids and not p.get("is_rent")
+                    ]
+                    if user_platforms:
+                        new_item = item.copy()
+                        new_item["streaming"] = item["streaming"].copy()
+                        new_item["streaming"]["available_on"] = user_platforms
+                        filtered_content.append(new_item)
+                
+                print(f"🎯 Subscription filter: {len(ott_content)} → {len(filtered_content)} items")
+                ott_content = filtered_content
         except Exception as sub_err:
-            print(f"⚠️ Subscription filter error (skipped): {sub_err}")
+            print(f"⚠️ Subscription filter error: {sub_err}")
 
     # Sort based on parameter
     if sort_by == 'rating':

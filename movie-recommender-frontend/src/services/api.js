@@ -99,7 +99,23 @@ class ApiService {
   static async recordInteraction(userId, contentData, action, rating = null) {
     console.log('📤 Recording interaction with data:', contentData);
 
-    // Extract comprehensive content data
+    // Genres can come in two formats:
+    //  1. Card object from discover: genre_ids: [28, 18, ...]  (raw IDs)
+    //  2. Details modal object:      genres: [{id: 18, name: "Drama"}, ...]
+    let genreNames = [];
+    if (contentData.genres && Array.isArray(contentData.genres) && contentData.genres.length > 0) {
+      if (typeof contentData.genres[0] === 'object') {
+        // Modal format: [{id, name}]
+        genreNames = contentData.genres.map(g => g.name).filter(Boolean);
+      } else {
+        // Already strings
+        genreNames = contentData.genres.filter(g => typeof g === 'string');
+      }
+    } else if (contentData.genre_ids && Array.isArray(contentData.genre_ids)) {
+      // Card format: convert IDs to names
+      genreNames = this.getGenreNames(contentData.genre_ids, contentData.content_type);
+    }
+
     const enhancedContentData = {
       user_id: userId,
       content_id: contentData.id,
@@ -108,27 +124,30 @@ class ApiService {
       action: action,
       rating: rating,
 
-      // Extract genres using genre_ids if available
-      genres: contentData.genre_ids ?
-        this.getGenreNames(contentData.genre_ids, contentData.content_type) :
-        [],
+      genres: genreNames,
 
-      // Language information
-      language: contentData.original_language || 'en',
+      // Language: prefer original_language (ISO code like "hi"), fallback to language field
+      language: contentData.original_language || contentData.language || 'en',
+
+      // Overview text — critical for TF-IDF recommendations
+      overview: contentData.overview || '',
 
       // Additional TMDB data
       release_date: contentData.release_date || contentData.first_air_date || '',
       tmdb_rating: contentData.rating || contentData.vote_average || 0,
-      overview: contentData.overview || '',
       popularity: contentData.popularity || 0,
       poster: contentData.poster || null,
 
-      // Placeholder for cast/crew (would need additional TMDB API calls)
       actors: contentData.actors || [],
       directors: contentData.directors || []
     };
 
-    console.log('📊 Enhanced interaction data:', enhancedContentData);
+    console.log('📊 Enhanced interaction data:', {
+      title: enhancedContentData.title,
+      language: enhancedContentData.language,
+      genres: enhancedContentData.genres,
+      hasOverview: !!enhancedContentData.overview
+    });
 
     return this.request('/user/interaction', {
       method: 'POST',

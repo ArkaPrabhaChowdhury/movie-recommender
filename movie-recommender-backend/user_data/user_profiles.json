@@ -36,22 +36,22 @@
   "ae1c464e-f2e3-4295-a054-660e5002fdbd": {
     "user_id": "ae1c464e-f2e3-4295-a054-660e5002fdbd",
     "preferred_genres": [
-      "action",
+      "drama",
       "thriller",
       "action & adventure",
-      "drama",
-      "fantasy",
+      "action",
       "comedy",
       "mystery",
       "horror",
-      "science fiction",
-      "animation"
+      "sci-fi & fantasy",
+      "crime",
+      "fantasy"
     ],
     "preferred_languages": [
+      "hi",
       "en",
       "ja",
-      "kn",
-      "hi"
+      "kn"
     ],
     "preferred_content_types": [
       "movie",
@@ -63,15 +63,75 @@
       8,
       119,
       232,
-      2336
+      2336,
+      315,
+      192,
+      2100,
+      10,
+      515
     ],
-    "total_interactions": 11,
-    "total_liked": 5,
-    "total_disliked": 0,
-    "total_watchlisted": 6,
-    "total_watched": 0,
+    "total_interactions": 28,
+    "total_liked": 16,
+    "total_disliked": 1,
+    "total_watchlisted": 10,
+    "total_watched": 1,
     "created_at": "2026-03-10T16:07:15.256479",
-    "updated_at": "2026-03-10T16:10:27.669008",
-    "last_activity": "2026-03-10T14:42:10.626819"
+    "updated_at": "2026-03-12T19:23:09.846774",
+    "last_activity": "2026-03-12T19:22:15.626001"
+  },
+  "test_user_ai_v4": {
+    "user_id": "test_user_ai_v4",
+    "created_at": "2026-03-12T14:01:14.852820",
+    "updated_at": "2026-03-12T14:47:15.016228",
+    "total_liked": 3,
+    "liked_actors": [],
+    "last_activity": "2026-03-12T14:47:13.903126",
+    "total_watched": 0,
+    "total_disliked": 0,
+    "liked_directors": [],
+    "preferred_genres": [
+      "sci-fi",
+      "drama",
+      "action",
+      "adventure",
+      "comedy",
+      "romance"
+    ],
+    "total_watchlisted": 0,
+    "total_interactions": 3,
+    "preferred_languages": [
+      "en"
+    ],
+    "subscribed_providers": [],
+    "preferred_content_types": [
+      "movie"
+    ]
+  },
+  "test_hindi_user_v5": {
+    "user_id": "test_hindi_user_v5",
+    "created_at": "2026-03-12T15:08:23.843010",
+    "updated_at": "2026-03-12T15:09:45.738250",
+    "total_liked": 4,
+    "liked_actors": [],
+    "last_activity": "2026-03-12T15:09:44.515647",
+    "total_watched": 0,
+    "total_disliked": 0,
+    "liked_directors": [],
+    "preferred_genres": [
+      "drama",
+      "crime",
+      "comedy",
+      "action"
+    ],
+    "total_watchlisted": 0,
+    "total_interactions": 4,
+    "preferred_languages": [
+      "hi"
+    ],
+    "subscribed_providers": [],
+    "preferred_content_types": [
+      "movie",
+      "tv"
+    ]
   }
 }

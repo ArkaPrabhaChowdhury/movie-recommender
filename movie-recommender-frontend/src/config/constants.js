@@ -64,7 +64,7 @@ export const DEFAULTS = {
   GENRE: 'all',
   CONTENT_TYPE: 'both',
   RELEASE_PERIOD: '6months',
-  SORT_BY: 'rating'
+  SORT_BY: 'Date'
 };
 
 // CSS Classes & Inline Styles

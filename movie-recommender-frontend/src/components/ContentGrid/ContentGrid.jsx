@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ContentCard from './ContentCard';
+import SkeletonCard from './SkeletonCard';
 import ContentDetailsModal from '../ContentCard/ContentDetailsModal';
-import LoadingSpinner from '../UI/LoadingSpinner';
 import EmptyState from '../UI/EmptyState';
 import { UI_CONFIG } from '../../config/constants';
+
+// Number of skeleton cards to show while loading
+const SKELETON_COUNT = 20;
 
 const ContentGrid = ({
   content,
@@ -51,8 +54,15 @@ const ContentGrid = ({
     };
   }, [loading, loadingMore, hasMore, onLoadMore]);
 
-  if (loading && content.length === 0) {
-    return <LoadingSpinner />;
+  // Show skeleton grid on every loading (initial load AND filter change)
+  if (loading) {
+    return (
+      <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6`}>
+        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    );
   }
 
   if (content.length === 0 && !loading) {
@@ -93,7 +103,13 @@ const ContentGrid = ({
       {/* Sentinel for infinite scroll */}
       {hasMore && (
         <div ref={observerRef} className="py-12 flex justify-center">
-          {loadingMore && <LoadingSpinner size="sm" />}
+          {loadingMore && (
+            <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6 w-full`}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 

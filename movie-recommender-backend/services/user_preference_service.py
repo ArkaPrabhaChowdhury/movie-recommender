@@ -188,48 +188,59 @@ class UserPreferenceService:
             print(f"  Liked: {len(liked_content)}, Disliked: {len(disliked_content)}")
             print(f"  Watchlisted: {len(watchlisted_content)}, Watched: {len(watched_content)}")
             
-            # Extract preferences from POSITIVE interactions (liked + watchlisted)
+            # ── Genre/actor/director: use liked + watchlisted (both signal intent)
             positive_content = liked_content + watchlisted_content
-            
+
+            # ── Language: Weighted signal from likes (3x), watched (2x), and watchlisted (1x).
+            # This more accurately reflects the user's request to focus on all their history.
+            language_signal_content = (
+                [(item, 3) for item in liked_content] +
+                [(item, 2) for item in watched_content] +
+                [(item, 1) for item in watchlisted_content]
+            )
+
             # Counters for analysis
             genre_counter = Counter()
             language_counter = Counter()
             content_type_counter = Counter()
             actor_counter = Counter()
             director_counter = Counter()
-            
+
             for item in positive_content:
-                # Count genres (with proper handling)
+                # Count genres
                 genres = item.get("genres", [])
                 if isinstance(genres, list):
                     for genre in genres:
                         if genre and isinstance(genre, str):
                             genre_counter[genre.lower().strip()] += 1
-                
-                # Count languages
-                language = item.get("language", "")
-                if language and isinstance(language, str):
-                    language_counter[language.lower().strip()] += 1
-                
+
                 # Count content types
                 content_type = item.get("content_type", "movie")
                 if content_type:
                     content_type_counter[content_type] += 1
-                
+
                 # Count actors
                 actors = item.get("actors", [])
                 if isinstance(actors, list):
                     for actor in actors:
                         if actor and isinstance(actor, str):
                             actor_counter[actor.strip()] += 1
-                
+
                 # Count directors
                 directors = item.get("directors", [])
                 if isinstance(directors, list):
                     for director in directors:
                         if director and isinstance(director, str):
                             director_counter[director.strip()] += 1
-            
+
+            # Language preference — weighted by likes (2x) + watched (1x) only
+            for item, weight in language_signal_content:
+                language = item.get("language", "")
+                if language and isinstance(language, str):
+                    language_counter[language.lower().strip()] += weight
+
+            print(f"  Language counts (likes×2 + watched×1): {dict(language_counter.most_common(5))}")
+
             # Create comprehensive profile
             profile = {
                 "user_id": user_id,
@@ -321,25 +332,31 @@ class UserPreferenceService:
         profile = await self.get_user_profile(user_id)
         recent_interactions = await self.get_user_interactions(user_id)
 
-        # All liked items (up to 50) with their stored overview / metadata
-        recent_liked = [
-            {
-                "content_id": item["content_id"],
-                "content_type": item["content_type"],
-                "title": item["title"],
-                "overview": item.get("overview", ""),
-                "genres": item.get("genres", []),
-                "language": item.get("language", ""),
-                "actors": item.get("actors", []),
-                "directors": item.get("directors", []),
-            }
-            for item in recent_interactions
-            if item["action"] == "liked"
-        ][:50]
+        # Helper to extract items by action
+        def get_items_by_action(action: str, limit: int = 50):
+            return [
+                {
+                    "content_id": item["content_id"],
+                    "content_type": item["content_type"],
+                    "title": item["title"],
+                    "overview": item.get("overview", ""),
+                    "genres": item.get("genres", []),
+                    "language": item.get("language", ""),
+                    "actors": item.get("actors", []),
+                    "directors": item.get("directors", []),
+                    "timestamp": item.get("timestamp", ""),
+                    "rating": item.get("rating", 0),
+                }
+                for item in recent_interactions
+                if item["action"] == action
+            ][:limit]
 
         return {
             "profile": profile,
-            "recent_liked": recent_liked,
+            "liked": get_items_by_action("liked"),
+            "watched": get_items_by_action("watched"),
+            "disliked": get_items_by_action("disliked"),
+            "watchlisted": get_items_by_action("watchlisted"),
             "total_interactions": len(recent_interactions),
             "has_preferences": bool(profile.get("preferred_genres", [])),
         }
