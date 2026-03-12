@@ -14,7 +14,7 @@ export const API_CONFIG = {
 
 // UI Configuration
 export const UI_CONFIG = {
-  APP_NAME: 'SPOTLIGHT',
+  APP_NAME: 'OTT SCOUT',
   GRID_BREAKPOINTS: {
     SM: 'sm:grid-cols-3',
     MD: 'md:grid-cols-4',
