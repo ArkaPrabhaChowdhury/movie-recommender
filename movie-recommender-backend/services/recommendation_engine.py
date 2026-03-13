@@ -63,8 +63,9 @@ class RecommendationEngine:
                 ]
 
             # 4. AI Reranking with Groq
-            # We fetch a larger pool (limit * 2) because some might be filtered out by OTT subscription check
-            recommended = await self._ai_rerank(context, fresh_candidates[:60], limit * 2)
+            # We fetch a larger pool (limit * 3) because many might be filtered out by OTT subscription check
+            # We take more candidates to ensure diversity in the AI selection
+            recommended = await self._ai_rerank(context, fresh_candidates[:100], limit * 3)
 
             # 5. Check OTT Availability for the selection (Optimization!)
             with_ott = await StreamingService.get_streaming_providers_batch(recommended, 'both')
@@ -115,39 +116,79 @@ class RecommendationEngine:
             return await self._get_trending_fallback(limit)
 
     async def _gather_candidates(self, context: Dict) -> List[Dict]:
-        """Fetch candidates according to user profile languages and genres."""
+        """Fetch candidates according to user profile languages and genres, balancing sources."""
         profile = context["profile"]
         genres = profile.get("preferred_genres", ["action", "drama"])[:3]
         languages = profile.get("preferred_languages", ["en"])[:4]
         
+        # We'll collect candidates in groups to balance them later
+        source_groups = {
+            "global_trending": [],
+            "language_trending": [],
+            "genre_discovery": [],
+            "similar": []
+        }
+        
         tasks = []
         # 1. Global Trending
-        tasks.append(self._fetch_trending())
+        tasks.append(("global_trending", self._fetch_trending()))
         
         # 2. Per Language & Genre Discovery
         for lang in languages:
-            tasks.append(self._fetch_trending(lang))
+            tasks.append(("language_trending", self._fetch_trending(lang)))
             for genre in genres:
-                tasks.append(self._fetch_discover(genre, lang))
+                tasks.append(("genre_discovery", self._fetch_discover(genre, lang)))
         
         # 3. Similar to Liked
         for item in context.get("liked", [])[:5]:
-            tasks.append(self._fetch_similar(item["content_id"], item["content_type"]))
+            tasks.append(("similar", self._fetch_similar(item["content_id"], item["content_type"])))
             
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Execute all tasks
+        api_results = await asyncio.gather(*[t[1] for t in tasks], return_exceptions=True)
         
+        # Sort results into groups
+        for (group_name, _), res in zip(tasks, api_results):
+            if isinstance(res, list):
+                source_groups[group_name].extend(res)
+        
+        # Deduplicate and balance
         candidates = []
         seen_ids = set()
-        for res in results:
-            if isinstance(res, list):
-                for item in res:
-                    if item['id'] not in seen_ids:
-                        candidates.append(item)
-                        seen_ids.add(item['id'])
         
-        # Simple popularity sort for AI context
-        candidates.sort(key=lambda x: x.get("popularity", 0), reverse=True)
+        # Helper to add item if not seen
+        def add_item(item):
+            if item['id'] not in seen_ids:
+                candidates.append(item)
+                seen_ids.add(item['id'])
+                return True
+            return False
+
+        # THE BALANCING ACT:
+        # Instead of global popularity sort, we take items from each source group in a round-robin or weighted way.
+        # This prevents English Global Trending from drowning out Hindi niche genres.
+        
+        # Prioritize Language Specific Trending and Genre Discovery
+        lang_items = source_groups["language_trending"]
+        genre_items = source_groups["genre_discovery"]
+        similar_items = source_groups["similar"]
+        global_items = source_groups["global_trending"]
+        
+        # 1. First, take some from language trending (most relevant)
+        for item in lang_items[:40]: add_item(item)
+        
+        # 2. Then take some from genre discovery
+        for item in genre_items[:60]: add_item(item)
+        
+        # 3. Then take some from similar
+        for item in similar_items[:40]: add_item(item)
+        
+        # 4. Finally, fill with global trending if needed
+        for item in global_items[:30]: add_item(item)
+        
+        # Print stats for debugging
         print(f"📦 Gathered {len(candidates)} candidates following profile: {languages} / {genres}")
+        print(f"   Sources: Lang({len(lang_items)}) Genre({len(genre_items)}) Similar({len(similar_items)}) Global({len(global_items)})")
+        
         return candidates
 
     async def _ai_rerank(self, context: Dict, candidates: List[Dict], limit: int) -> List[Dict]:
@@ -162,10 +203,14 @@ class RecommendationEngine:
         disliked_titles = [item["title"] for item in context.get("disliked", [])[:10]]
         
         candidate_list = ""
-        for i, c in enumerate(candidates[:60]):
+        # Increase the window we show to the AI
+        for i, c in enumerate(candidates[:100]):
             genre_str = ", ".join(c.get("genres", []))
             lang = c.get("original_language", "en")
-            candidate_list += f"[{i}] {c['title']} ({c.get('year', 'N/A')}) [Lang: {lang}] - {genre_str}. Overview: {c.get('overview', '')[:80]}...\n"
+            title = c.get("title", "Unknown")
+            year = c.get("year", "N/A")
+            overview = c.get("overview", "")[:120]
+            candidate_list += f"[{i}] {title} ({year}) [Lang: {lang}] - {genre_str}. Overview: {overview}...\n"
 
         prompt = f"""
         You are a premium movie recommendation AI.
@@ -195,7 +240,7 @@ class RecommendationEngine:
         Example reasons: "Action-packed thriller", "Intense mystery drama", "Hilarious romantic comedy".
         """
 
-        print(f"🤖 AI Reranking {len(candidates[:60])} candidates...")
+        print(f"🤖 AI Reranking {len(candidates[:100])} candidates...")
         ai_response = await OllamaService.get_ai_response(prompt, temperature=0.1)
         
         try:

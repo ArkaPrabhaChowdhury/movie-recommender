@@ -14,15 +14,13 @@ class TMDBService:
         
         async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
             try:
-                print(f"Fetching movies from {date_from} to {date_to} with genre ID {movie_genre_id}")
-                
                 print(f"Fetching movies from {date_from} to {date_to} with genre ID {movie_genre_id} and lang {language_code}")
                 
                 # Fetch multiple pages to ensure enough OTT-available content survives the filter
                 all_raw_movies = []
-                # Fetch 3-page chunks based on overall requested page
-                start_tmdb_page = (page - 1) * 3 + 1
-                for tmdb_page in range(start_tmdb_page, start_tmdb_page + 3): 
+                # Fetch 2-page chunks based on overall requested page (reduced from 3 to be faster but still deep)
+                start_tmdb_page = (page - 1) * 2 + 1
+                for tmdb_page in range(start_tmdb_page, start_tmdb_page + 2): 
                     params = {
                         "api_key": TMDB_API_KEY,
                         "with_genres": movie_genre_id,
@@ -30,7 +28,7 @@ class TMDBService:
                         "primary_release_date.gte": date_from,
                         "primary_release_date.lte": date_to,
                         "sort_by": "popularity.desc",
-                        "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['POPULAR'],
+                        "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['POPULAR'] if language_code != 'hi' else 0,
                         "page": tmdb_page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
@@ -59,27 +57,24 @@ class TMDBService:
                             "vote_count": movie.get('vote_count', 0)
                         })
                 
-                # If not enough movies, try with recent releases (already covered by 3 pages of popular mostly, but depth helps)
-                if len(movies) < 15:
+                # If not enough movies, supplement with popular movies (ignoring dates)
+                if len(movies) < 20:
+                    print(f"Supplementing with popular movies for language {language_code}")
                     params = {
                         "api_key": TMDB_API_KEY,
                         "with_genres": movie_genre_id,
                         "with_original_language": language_code,
-                        "primary_release_date.gte": date_from,
-                        "primary_release_date.lte": date_to,
-                        "sort_by": "release_date.desc",
-                        "vote_count.gte": API_CONFIG['MIN_VOTE_COUNT']['RECENT'],
-                        "page": 1
+                        "sort_by": "popularity.desc",
+                        "vote_count.gte": 0,
+                        "page": page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
-                    recent_response = await client.get(f"{TMDB_API_URL}/discover/movie", params=params)
+                    pop_response = await client.get(f"{TMDB_API_URL}/discover/movie", params=params)
                     
-                    if recent_response.status_code == 200:
-                        recent_movies = recent_response.json().get('results', [])
-                        print(f"Found {len(recent_movies)} additional movies")
-                        
+                    if pop_response.status_code == 200:
+                        pop_movies = pop_response.json().get('results', [])
                         existing_ids = {movie['id'] for movie in movies}
-                        for movie in recent_movies:
+                        for movie in pop_movies:
                             if movie['id'] not in existing_ids:
                                 movies.append({
                                     "id": movie['id'],
@@ -89,7 +84,11 @@ class TMDBService:
                                     "year": movie.get('release_date', '')[:4] if movie.get('release_date') else '',
                                     "overview": movie.get('overview', ''),
                                     "content_type": "movie",
-                                    "release_date": movie.get('release_date', '')
+                                    "release_date": movie.get('release_date', ''),
+                                    "genre_ids": movie.get('genre_ids', []),
+                                    "original_language": movie.get('original_language', 'en'),
+                                    "popularity": movie.get('popularity', 0),
+                                    "vote_count": movie.get('vote_count', 0)
                                 })
             
             except Exception as e:
@@ -99,35 +98,16 @@ class TMDBService:
 
     @staticmethod
     async def fetch_tv_shows(language_code: str, genre: str, date_from: str, date_to: str, page: int = 1):
-        """Fetch TV shows with recent episodes/seasons using hybrid approach"""
+        """Fetch TV shows with a robust multi-source approach"""
         tv_shows = []
-        tv_shows_dict = {}  # Use dict to avoid duplicates
+        tv_shows_dict = {}
         tv_genre_id = get_genre_id(genre, 'tv')
         
         async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
             try:
-                print(f"Fetching TV shows from {date_from} to {date_to} with genre ID {tv_genre_id}")
+                print(f"Fetching TV shows with genre ID {tv_genre_id} and lang {language_code}")
                 
-                # Approach 1: Get shows currently on the air
-                try:
-                    on_air_response = await client.get(f"{TMDB_API_URL}/tv/on_the_air", params={
-                        "api_key": TMDB_API_KEY,
-                        "page": page
-                    })
-                    
-                    if on_air_response.status_code == 200:
-                        on_air_shows = on_air_response.json().get('results', [])
-                        print(f"Found {len(on_air_shows)} shows currently on the air")
-                        
-                        for show in on_air_shows:
-                            lang_match = language_code is None or show.get('original_language') == language_code
-                            genre_match = tv_genre_id is None or tv_genre_id in show.get('genre_ids', [])
-                            if lang_match and genre_match:
-                                tv_shows_dict[show['id']] = show
-                except Exception as e:
-                    print(f"Error fetching on_the_air shows: {e}")
-                
-                # Approach 2: Use discover with air_date to catch shows with recent episodes
+                # Approach 1: Discover with broad air_date filter (essential for language-specific TV)
                 try:
                     params = {
                         "api_key": TMDB_API_KEY,
@@ -143,85 +123,58 @@ class TMDBService:
                     
                     if discover_response.status_code == 200:
                         discover_shows = discover_response.json().get('results', [])
-                        print(f"Found {len(discover_shows)} shows from discover with air_date filter")
-                        
                         for show in discover_shows:
                             tv_shows_dict[show['id']] = show
                 except Exception as e:
                     print(f"Error fetching discover shows: {e}")
                 
-                # Approach 3: Get recently aired shows (airing_today)
+                # Approach 2: Get shows currently on the air (often misses language specifics unless filtered)
                 try:
-                    airing_today_response = await client.get(f"{TMDB_API_URL}/tv/airing_today", params={
+                    on_air_response = await client.get(f"{TMDB_API_URL}/tv/on_the_air", params={
                         "api_key": TMDB_API_KEY,
                         "page": page
                     })
                     
-                    if airing_today_response.status_code == 200:
-                        airing_today_shows = airing_today_response.json().get('results', [])
-                        print(f"Found {len(airing_today_shows)} shows airing today")
-                        
-                        for show in airing_today_shows:
-                            lang_match = language_code is None or show.get('original_language') == language_code
-                            genre_match = tv_genre_id is None or tv_genre_id in show.get('genre_ids', [])
-                            if lang_match and genre_match:
-                                tv_shows_dict[show['id']] = show
+                    if on_air_response.status_code == 200:
+                        on_air_shows = on_air_response.json().get('results', [])
+                        for show in on_air_shows:
+                            # Strict filtering if language_code is provided
+                            if language_code and show.get('original_language') != language_code:
+                                continue
+                            if tv_genre_id and tv_genre_id not in show.get('genre_ids', []):
+                                continue
+                            tv_shows_dict[show['id']] = show
                 except Exception as e:
-                    print(f"Error fetching airing_today shows: {e}")
-                
-                # Now fetch details for each unique show and check last_air_date
-                print(f"Checking {len(tv_shows_dict)} unique shows for last_air_date")
-                
-                async def fetch_show_details(show_id, show):
-                    try:
-                        details_response = await client.get(f"{TMDB_API_URL}/tv/{show_id}", params={
-                            "api_key": TMDB_API_KEY
-                        })
-                        
-                        if details_response.status_code == 200:
-                            details = details_response.json()
-                            last_air_date = details.get('last_air_date', '')
-                            
-                            # Check if last air date is within our date range
-                            if last_air_date and last_air_date >= date_from and last_air_date <= date_to:
-                                return {
-                                    "id": show['id'],
-                                    "title": show.get('name', show.get('title', 'Unknown')),
-                                    "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{show['poster_path']}" if show.get('poster_path') else None,
-                                    "rating": show.get('vote_average', 0),
-                                    "year": show.get('first_air_date', '')[:4] if show.get('first_air_date') else '',
-                                    "overview": show.get('overview', ''),
-                                    "content_type": "tv",
-                                    "release_date": show.get('first_air_date', ''),
-                                    "last_air_date": last_air_date,
-                                    "genre_ids": show.get('genre_ids', []),
-                                    "original_language": show.get('original_language', 'en'),
-                                    "popularity": show.get('popularity', 0),
-                                    "vote_count": show.get('vote_count', 0)
-                                }
-                        return None
-                    except Exception as e:
-                        print(f"Error fetching details for show {show_id}: {e}")
-                        return None
+                    print(f"Error fetching on_the_air shows: {e}")
 
-                # Parallel fetch details
-                details_tasks = [fetch_show_details(sid, s) for sid, s in tv_shows_dict.items()]
-                details_results = await asyncio.gather(*details_tasks)
+                # Convert to list for easier processing
+                tv_shows = []
+                for show in tv_shows_dict.values():
+                    tv_shows.append({
+                        "id": show['id'],
+                        "title": show.get('name', show.get('title', 'Unknown')),
+                        "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{show['poster_path']}" if show.get('poster_path') else None,
+                        "rating": show.get('vote_average', 0),
+                        "year": show.get('first_air_date', '')[:4] if show.get('first_air_date') else '',
+                        "overview": show.get('overview', ''),
+                        "content_type": "tv",
+                        "release_date": show.get('first_air_date', ''),
+                        "genre_ids": show.get('genre_ids', []),
+                        "original_language": show.get('original_language', 'en'),
+                        "popularity": show.get('popularity', 0),
+                        "vote_count": show.get('vote_count', 0)
+                    })
                 
-                # Filter out None results and add to tv_shows
-                for result in details_results:
-                    if result:
-                        tv_shows.append(result)
-                
-                # If still not enough shows or specifically requested, add popular shows from discover
-                if len(tv_shows) < 30:
+                # If still not enough shows, supplement with popular shows (ignoring dates)
+                # VERY important for Hindi because many shows have old first_air_date but are still popular
+                if len(tv_shows) < 20:
                     print(f"Supplementing with popular TV shows for language {language_code}")
                     params = {
                         "api_key": TMDB_API_KEY,
                         "with_genres": tv_genre_id,
                         "with_original_language": language_code,
                         "sort_by": "popularity.desc",
-                        "vote_count.gte": 5 if language_code != 'hi' else 0, # Hindi content sometimes has very few votes
+                        "vote_count.gte": 0,
                         "page": page
                     }
                     params = {k: v for k, v in params.items() if v is not None}
@@ -230,7 +183,6 @@ class TMDBService:
                     if pop_response.status_code == 200:
                         pop_shows = pop_response.json().get('results', [])
                         existing_ids = {show['id'] for show in tv_shows}
-                        
                         for show in pop_shows:
                             if show['id'] not in existing_ids:
                                 tv_shows.append({
@@ -251,7 +203,7 @@ class TMDBService:
             except Exception as e:
                 print(f"Error fetching TV shows: {e}")
         
-        # Sort by popularity and return top results
+        # Sort by popularity
         tv_shows.sort(key=lambda x: x.get('popularity', 0), reverse=True)
         print(f"Returning {len(tv_shows[:API_CONFIG['MAX_RESULTS_PER_TYPE']])} TV shows")
         return tv_shows[:API_CONFIG['MAX_RESULTS_PER_TYPE']]

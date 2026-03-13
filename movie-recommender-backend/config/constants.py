@@ -59,16 +59,16 @@ MOVIE_GENRE_MAP = {
 
 TV_GENRE_MAP = {
     'action': 10759,  # Action & Adventure
-    'adventure': 10759,  # Action & Adventure (same as action for TV)
+    'adventure': 10759,
     'animation': 16,
     'comedy': 35,
     'crime': 80,
     'documentary': 99,
     'drama': 18,
     'family': 10751,
-    'fantasy': 10765,  # Sci-Fi & Fantasy
-    'sci-fi': 10765,  # Sci-Fi & Fantasy
-    'science fiction': 10765,  # Sci-Fi & Fantasy
+    'fantasy': 10765,
+    'sci-fi': 10765,
+    'science fiction': 10765,
     'mystery': 9648,
     'western': 37,
     'kids': 10762,
@@ -76,8 +76,9 @@ TV_GENRE_MAP = {
     'reality': 10764,
     'soap': 10766,
     'talk': 10767,
-    'war': 10768,  # War & Politics
-    'politics': 10768  # War & Politics
+    'war': 10768,
+    'politics': 10768,
+    'romance': 18, # Fallback to Drama for TV (TMDB doesn't have 10749 for TV)
 }
 
 # Combined mapping for easy lookup (defaults to movie genres)
@@ -91,7 +92,10 @@ def get_genre_id(genre: str, content_type: str) -> int:
         return None
         
     if content_type == 'tv':
-        return TV_GENRE_MAP.get(genre_lower, MOVIE_GENRE_MAP.get(genre_lower, 28))
+        # Special case: Romance doesn't exist for TV in TMDB, usually mapped to Soap or Drama
+        if genre_lower == 'romance':
+            return 18 # Drama
+        return TV_GENRE_MAP.get(genre_lower, MOVIE_GENRE_MAP.get(genre_lower, 18))
     else:  # movie or both
         return MOVIE_GENRE_MAP.get(genre_lower, 28)
 
@@ -102,7 +106,8 @@ LANGUAGE_MAP = {
     'tamil': 'ta', 'Tamil': 'ta',
     'telugu': 'te', 'Telugu': 'te',
     'malayalam': 'ml', 'kannada': 'kn', 'bengali': 'bn', 'marathi': 'mr',
-    'gujarati': 'gu', 'punjabi': 'pa', 'urdu': 'ur'
+    'gujarati': 'gu', 'punjabi': 'pa', 'urdu': 'ur',
+    'hi': 'hi', 'en': 'en', 'ta': 'ta', 'te': 'te', 'ml': 'ml', 'kn': 'kn', 'bn': 'bn', 'mr': 'mr', 'gu': 'gu', 'pa': 'pa', 'ur': 'ur'
 }
 
 # OTT Platform Configuration
