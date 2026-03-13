@@ -8,17 +8,30 @@ from config.constants import SUPABASE_URL, SUPABASE_KEY
 class UserPreferenceService:
     def __init__(self):
         """Initialize Supabase client. Local file storage has been removed for production-ready cloud deployment."""
-        self.supabase = None
+        self._supabase = None
+
+    @property
+    def supabase(self):
+        """Lazy property for Supabase client to ensure it's initialized with latest env vars."""
+        if not self._supabase:
+            self._init_supabase()
+        return self._supabase
+
+    def _init_supabase(self):
+        """Internal method to initialize the Supabase client."""
+        from config.constants import SUPABASE_URL, SUPABASE_KEY
+        
         if not SUPABASE_URL or not SUPABASE_KEY:
-            print("⚠️ WARNING: SUPABASE_URL and SUPABASE_KEY not configured. User services will fail.")
+            # We don't print the warning here to avoid terminal spam, 
+            # the methods will print it when they actually need it.
             return
         
         try:
             from supabase import create_client, Client
-            self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+            self._supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
             print("🚀 Connected to Supabase Successfully!")
         except Exception as e:
-            print(f"❌ Failed to connect to Supabase: {e}")
+            print(f"❌ Failed to connect to Supabase: {str(e)}")
 
     async def _get_user_record(self, user_id: str) -> Dict:
         """Fetch the full record for a user from Supabase."""
@@ -30,18 +43,27 @@ class UserPreferenceService:
                 return response.data[0]
             return {}
         except Exception as e:
-            print(f"❌ Supabase fetch error for user {user_id}: {e}")
+            print(f"❌ Supabase fetch error for user {user_id}: {str(e)}")
             return {}
 
     async def record_interaction(self, interaction: ContentInteraction) -> bool:
         """Record user interaction directly to Supabase."""
         if not self.supabase:
-            print("⚠️ Cannot record interaction: Supabase not configured.")
+            from config.constants import SUPABASE_URL, SUPABASE_KEY
+            reason = []
+            if not SUPABASE_URL: reason.append("URL missing")
+            if not SUPABASE_KEY: reason.append("Key missing")
+            if not reason: reason.append("Initialization failed")
+            print(f"⚠️ Cannot record interaction: Supabase not configured ({', '.join(reason)}).")
             return False
         try:
             user_id = interaction.user_id
             record = await self._get_user_record(user_id)
-            preferences = record.get('preferences', []) if record else []
+            
+            # Use safety check to ensure preferences is always a list
+            preferences = record.get('preferences')
+            if preferences is None:
+                preferences = []
             
             # Convert interaction to dict for storage
             interaction_dict = {
@@ -70,17 +92,20 @@ class UserPreferenceService:
                 if interaction.action in s:
                     actions_to_remove.update(s)
 
-            # Update preferences list safely
+            # Update preferences list safely (filter existing interactions)
             updated_preferences = [
                 item for item in preferences 
-                if not (item["content_id"] == interaction.content_id and 
-                       item["content_type"] == interaction.content_type and
-                       item["action"] in actions_to_remove)
+                if isinstance(item, dict) and not (
+                    item.get("content_id") == interaction.content_id and 
+                    item.get("content_type") == interaction.content_type and
+                    item.get("action") in actions_to_remove
+                )
             ]
             updated_preferences.append(interaction_dict)
             updated_preferences = updated_preferences[-200:] # Keep recent 200
             
             # Upsert into Supabase
+            print(f"📡 Upserting preferences for {user_id}...")
             self.supabase.table('user_data').upsert({
                 "user_id": user_id,
                 "preferences": updated_preferences
@@ -90,7 +115,7 @@ class UserPreferenceService:
             await self._update_user_profile(user_id, updated_preferences)
             return True
         except Exception as e:
-            print(f"❌ Error recording interaction in Supabase: {e}")
+            print(f"❌ Error recording interaction in Supabase: {str(e)}")
             return False
 
     async def _update_user_profile(self, user_id: str, interactions: List[Dict]):
@@ -102,9 +127,9 @@ class UserPreferenceService:
                 return
 
             # Analysis for preferences
-            liked = [i for i in interactions if i["action"] == "liked"]
-            watched = [i for i in interactions if i["action"] == "watched"]
-            watchlisted = [i for i in interactions if i["action"] == "watchlisted"]
+            liked = [i for i in interactions if isinstance(i, dict) and i.get("action") == "liked"]
+            watched = [i for i in interactions if isinstance(i, dict) and i.get("action") == "watched"]
+            watchlisted = [i for i in interactions if isinstance(i, dict) and i.get("action") == "watchlisted"]
             positive_content = liked + watchlisted
             
             # Language signaling (weighted)
@@ -117,18 +142,20 @@ class UserPreferenceService:
             director_counter = Counter()
 
             for item in positive_content:
-                for g in item.get("genres", []): genre_counter[g.lower().strip()] += 1
+                for g in item.get("genres", []): genre_counter[str(g).lower().strip()] += 1
                 content_type_counter[item.get("content_type", "movie")] += 1
-                for a in item.get("actors", []): actor_counter[a.strip()] += 1
-                for d in item.get("directors", []): director_counter[d.strip()] += 1
+                for a in item.get("actors", []): actor_counter[str(a).strip()] += 1
+                for d in item.get("directors", []): director_counter[str(d).strip()] += 1
 
             for item, weight in language_signals:
-                lang = item.get("language", "").lower().strip()
+                lang = str(item.get("language", "")).lower().strip()
                 if lang: language_counter[lang] += weight
 
             # Get existing record to preserve manual settings like OTT subscriptions
             record = await self._get_user_record(user_id)
-            existing_profile = record.get('profile', {}) if record else {}
+            existing_profile = record.get('profile')
+            if not isinstance(existing_profile, dict):
+                existing_profile = {}
 
             profile = {
                 "user_id": user_id,
@@ -143,13 +170,14 @@ class UserPreferenceService:
                 "updated_at": datetime.now().isoformat()
             }
             
+            print(f"📡 Upserting profile for {user_id}...")
             self.supabase.table('user_data').upsert({
                 "user_id": user_id,
                 "profile": profile
             }).execute()
             
         except Exception as e:
-            print(f"❌ Error updating profile in Supabase: {e}")
+            print(f"❌ Error updating profile in Supabase: {str(e)}")
 
     async def remove_interaction(self, user_id: str, content_id: int, content_type: str, action: Optional[str] = None) -> bool:
         """Remove a specific interaction from Supabase."""
@@ -160,15 +188,20 @@ class UserPreferenceService:
             if not record:
                 return False
                 
-            preferences = record.get('preferences', [])
+            preferences = record.get('preferences')
+            if not isinstance(preferences, list):
+                preferences = []
+                
             original_len = len(preferences)
             
             # Filter out the matching interaction
             updated_preferences = [
                 item for item in preferences
-                if not (item["content_id"] == content_id and 
-                       item["content_type"] == content_type and 
-                       (action is None or item["action"] == action))
+                if isinstance(item, dict) and not (
+                    item.get("content_id") == content_id and 
+                    item.get("content_type") == content_type and 
+                    (action is None or item.get("action") == action)
+                )
             ]
             
             if len(updated_preferences) < original_len:
@@ -183,7 +216,7 @@ class UserPreferenceService:
                 return True
             return False
         except Exception as e:
-            print(f"❌ Error removing interaction from Supabase: {e}")
+            print(f"❌ Error removing interaction from Supabase: {str(e)}")
             return False
 
     async def save_user_subscriptions(self, user_id: str, provider_ids: List[int]) -> bool:
@@ -192,7 +225,10 @@ class UserPreferenceService:
             return False
         try:
             record = await self._get_user_record(user_id)
-            profile = record.get('profile', {}) if record else {"user_id": user_id, "created_at": datetime.now().isoformat()}
+            profile = record.get('profile')
+            
+            if not isinstance(profile, dict):
+                profile = {"user_id": user_id, "created_at": datetime.now().isoformat()}
             
             profile["subscribed_providers"] = provider_ids
             profile["updated_at"] = datetime.now().isoformat()
@@ -203,7 +239,7 @@ class UserPreferenceService:
             }).execute()
             return True
         except Exception as e:
-            print(f"❌ Error saving subscriptions to Supabase: {e}")
+            print(f"❌ Error saving subscriptions to Supabase: {str(e)}")
             return False
 
     async def get_user_profile(self, user_id: str) -> Dict:
@@ -211,20 +247,23 @@ class UserPreferenceService:
         if not self.supabase:
             return {}
         record = await self._get_user_record(user_id)
-        return record.get('profile', {}) if record else {}
+        profile = record.get('profile')
+        return profile if isinstance(profile, dict) else {}
 
     async def get_user_interactions(self, user_id: str, action: str = None) -> List[Dict]:
         """Fetch and optionally filter user interactions from Supabase."""
         if not self.supabase:
             return []
         record = await self._get_user_record(user_id)
-        interactions = record.get('preferences', []) if record else []
+        interactions = record.get('preferences')
+        if not isinstance(interactions, list):
+            interactions = []
         
         if action:
-            interactions = [i for i in interactions if i["action"] == action]
+            interactions = [i for i in interactions if isinstance(i, dict) and i.get("action") == action]
         
         # Newest first
-        interactions.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        interactions.sort(key=lambda x: str(x.get("timestamp", "")), reverse=True)
         return interactions
 
     async def get_recommendation_context(self, user_id: str) -> Dict:
@@ -240,11 +279,14 @@ class UserPreferenceService:
                 "has_preferences": False,
             }
         record = await self._get_user_record(user_id)
-        profile = record.get('profile', {}) if record else {}
-        interactions = record.get('preferences', []) if record else []
+        profile = record.get('profile')
+        if not isinstance(profile, dict): profile = {}
+        
+        preferences = record.get('preferences')
+        if not isinstance(preferences, list): preferences = []
 
         def filter_by_action(act: str):
-            return [i for i in interactions if i["action"] == act]
+            return [i for i in preferences if isinstance(i, dict) and i.get("action") == act]
 
         return {
             "profile": profile,
@@ -252,6 +294,6 @@ class UserPreferenceService:
             "watched": filter_by_action("watched"),
             "disliked": filter_by_action("disliked"),
             "watchlisted": filter_by_action("watchlisted"),
-            "total_interactions": len(interactions),
+            "total_interactions": len(preferences),
             "has_preferences": bool(profile.get("preferred_genres", [])),
         }
