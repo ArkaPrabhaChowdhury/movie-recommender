@@ -5,6 +5,8 @@ Backend Configuration Constants
 from datetime import datetime, timedelta
 
 import os
+from dotenv import load_dotenv
+
 # Load environment variables explicitly from the backend directory
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 if os.path.exists(env_path):
