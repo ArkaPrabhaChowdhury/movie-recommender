@@ -8,20 +8,22 @@ from config.constants import SUPABASE_URL, SUPABASE_KEY
 class UserPreferenceService:
     def __init__(self):
         """Initialize Supabase client. Local file storage has been removed for production-ready cloud deployment."""
+        self.supabase = None
         if not SUPABASE_URL or not SUPABASE_KEY:
-            raise ValueError("❌ SUPABASE_URL and SUPABASE_KEY must be configured in environment variables.")
+            print("⚠️ WARNING: SUPABASE_URL and SUPABASE_KEY not configured. User services will fail.")
+            return
         
         try:
             from supabase import create_client, Client
             self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
             print("🚀 Connected to Supabase Successfully!")
-            # Note: We use a single table 'user_data' with columns: user_id (PK), profile (jsonb), preferences (jsonb)
         except Exception as e:
             print(f"❌ Failed to connect to Supabase: {e}")
-            raise ConnectionError(f"Could not connect to Supabase: {e}")
 
     async def _get_user_record(self, user_id: str) -> Dict:
         """Fetch the full record for a user from Supabase."""
+        if not self.supabase:
+            return {}
         try:
             response = self.supabase.table('user_data').select('*').eq('user_id', user_id).execute()
             if response.data:
@@ -33,6 +35,9 @@ class UserPreferenceService:
 
     async def record_interaction(self, interaction: ContentInteraction) -> bool:
         """Record user interaction directly to Supabase."""
+        if not self.supabase:
+            print("⚠️ Cannot record interaction: Supabase not configured.")
+            return False
         try:
             user_id = interaction.user_id
             record = await self._get_user_record(user_id)
@@ -90,6 +95,8 @@ class UserPreferenceService:
 
     async def _update_user_profile(self, user_id: str, interactions: List[Dict]):
         """Analyze interactions and update user profile in Supabase."""
+        if not self.supabase:
+            return
         try:
             if not interactions:
                 return
@@ -144,8 +151,45 @@ class UserPreferenceService:
         except Exception as e:
             print(f"❌ Error updating profile in Supabase: {e}")
 
+    async def remove_interaction(self, user_id: str, content_id: int, content_type: str, action: Optional[str] = None) -> bool:
+        """Remove a specific interaction from Supabase."""
+        if not self.supabase:
+            return False
+        try:
+            record = await self._get_user_record(user_id)
+            if not record:
+                return False
+                
+            preferences = record.get('preferences', [])
+            original_len = len(preferences)
+            
+            # Filter out the matching interaction
+            updated_preferences = [
+                item for item in preferences
+                if not (item["content_id"] == content_id and 
+                       item["content_type"] == content_type and 
+                       (action is None or item["action"] == action))
+            ]
+            
+            if len(updated_preferences) < original_len:
+                # Save back to Supabase
+                self.supabase.table('user_data').upsert({
+                    "user_id": user_id,
+                    "preferences": updated_preferences
+                }).execute()
+                
+                # Update profile to reflect removal
+                await self._update_user_profile(user_id, updated_preferences)
+                return True
+            return False
+        except Exception as e:
+            print(f"❌ Error removing interaction from Supabase: {e}")
+            return False
+
     async def save_user_subscriptions(self, user_id: str, provider_ids: List[int]) -> bool:
         """Update only the subscription providers in the user's Supabase profile."""
+        if not self.supabase:
+            return False
         try:
             record = await self._get_user_record(user_id)
             profile = record.get('profile', {}) if record else {"user_id": user_id, "created_at": datetime.now().isoformat()}
@@ -164,11 +208,15 @@ class UserPreferenceService:
 
     async def get_user_profile(self, user_id: str) -> Dict:
         """Fetch user profile from Supabase."""
+        if not self.supabase:
+            return {}
         record = await self._get_user_record(user_id)
         return record.get('profile', {}) if record else {}
 
     async def get_user_interactions(self, user_id: str, action: str = None) -> List[Dict]:
         """Fetch and optionally filter user interactions from Supabase."""
+        if not self.supabase:
+            return []
         record = await self._get_user_record(user_id)
         interactions = record.get('preferences', []) if record else []
         
@@ -181,6 +229,16 @@ class UserPreferenceService:
 
     async def get_recommendation_context(self, user_id: str) -> Dict:
         """Gather context for recommendation engine exclusively from Supabase."""
+        if not self.supabase:
+            return {
+                "profile": {},
+                "liked": [],
+                "watched": [],
+                "disliked": [],
+                "watchlisted": [],
+                "total_interactions": 0,
+                "has_preferences": False,
+            }
         record = await self._get_user_record(user_id)
         profile = record.get('profile', {}) if record else {}
         interactions = record.get('preferences', []) if record else []

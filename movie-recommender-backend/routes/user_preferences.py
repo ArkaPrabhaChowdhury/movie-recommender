@@ -166,43 +166,19 @@ async def get_user_history(user_id: str):
 
 @router.delete("/user/{user_id}/interaction/{content_id}")
 async def remove_user_interaction(user_id: str, content_id: int, content_type: str, action: str = None):
-    """Remove a specific user interaction"""
+    """Remove a specific user interaction from Supabase"""
     try:
-        preferences_data = preference_service._load_data(preference_service.preferences_file)
+        success = await preference_service.remove_interaction(user_id, content_id, content_type, action)
         
-        if user_id in preferences_data:
-            # Remove the interaction
-            original_count = len(preferences_data[user_id])
-            
-            # Use action filter if provided for precision
-            preferences_data[user_id] = [
-                item for item in preferences_data[user_id]
-                if not (
-                    item["content_id"] == content_id and 
-                    item["content_type"] == content_type and 
-                    (action is None or item["action"] == action)
-                )
-            ]
-            removed_count = original_count - len(preferences_data[user_id])
-            
-            if removed_count > 0:
-                preference_service._save_data(preference_service.preferences_file, preferences_data)
-                await preference_service._update_user_profile(user_id)
-                
-                return {
-                    "status": "success",
-                    "message": f"Removed interaction for content ID {content_id}",
-                    "removed_count": removed_count
-                }
-            else:
-                return {
-                    "status": "not_found",
-                    "message": "No interaction found to remove"
-                }
+        if success:
+            return {
+                "status": "success",
+                "message": f"Removed interaction for content ID {content_id}"
+            }
         else:
             return {
-                "status": "not_found", 
-                "message": "User not found"
+                "status": "not_found",
+                "message": "No interaction found to remove or user not found"
             }
             
     except Exception as e:
