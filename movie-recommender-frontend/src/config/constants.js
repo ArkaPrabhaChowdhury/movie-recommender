@@ -111,3 +111,20 @@ export const isRecentRelease = (year) => {
   const releaseYear = parseInt(year);
   return currentYear - releaseYear <= 1;
 };
+
+export const getLanguageName = (code) => {
+  if (!code) return 'Any';
+  const lang = LANGUAGES.find(l => l.id.toLowerCase() === code.toLowerCase() || (code.length === 2 && l.id === code));
+  if (lang) return lang.name;
+  
+  // Extra mapping for common ISO codes
+  const isoMap = {
+    'en': 'English',
+    'hi': 'Hindi',
+    'ta': 'Tamil',
+    'te': 'Telugu',
+    'ml': 'Malayalam',
+    'kn': 'Kannada'
+  };
+  return isoMap[code.toLowerCase()] || code.charAt(0).toUpperCase() + code.slice(1);
+};

@@ -32,6 +32,10 @@ class ContentInteraction(BaseModel):
     actors: List[str] = []
     directors: List[str] = []
     poster: Optional[str] = None
+    release_date: Optional[str] = None
+    tmdb_rating: Optional[float] = 0.0
+    overview: Optional[str] = ""
+    popularity: Optional[float] = 0.0
     timestamp: datetime = datetime.now()
 
 class RecommendationRequest(BaseModel):

@@ -243,7 +243,11 @@ class RecommendationEngine:
         Task: Select {limit} items from the candidates that match this profile.
         Rank them based on thematic similarity to liked items and genre fit.
         Respect the language preferences equally as listed in the profile.
-        Provide a VERY SHORT recommendation reason (exactly 2-3 words).
+        
+        Provide a CRISP recommendation reason for each (MAX 5-6 words).
+        If it's similar to a specific movie they liked, use: "Because you liked [Movie Title]".
+        Otherwise, use a 2-3 word genre reason (e.g., "Gritty crime thriller").
+        Keep it short so it fits in a single line on a small UI card.
 
         Candidates:
         {candidate_list}
@@ -251,11 +255,11 @@ class RecommendationEngine:
         Respond ONLY with a JSON object:
         {{
             "recommendations": [
-                {{"index": 0, "reason": "2-3 word reason"}},
+                {{"index": 0, "reason": "Reason here"}},
                 ...
             ]
         }}
-        Example reasons: "Action-packed thriller", "Intense mystery drama", "Hilarious romantic comedy".
+        Example reasons: "Because you liked Inception", "Dark psychological drama", "Because you liked Interstellar".
         """
 
         print(f"🤖 AI Reranking {len(candidates[:100])} candidates...")

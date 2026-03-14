@@ -124,7 +124,7 @@ const ProfilePage = ({
                         </div>
                         <div>
                             <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                                {userName ? `Welcome, ${userName}!` : (hasPreferences ? 'Welcome Back!' : 'New User')}
+                                {userName ? `Welcome, ${userName.split(' ')[0]}!` : (hasPreferences ? 'Welcome Back!' : 'New User')}
                             </h2>
                             <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
                                 {hasPreferences
@@ -168,7 +168,7 @@ const ProfilePage = ({
                                 {stats?.watched_items || 0}
                             </div>
                             <div className="text-sm flex items-center justify-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
-                                <Zap size={16} className="text-yellow-400" /> Watched Items
+                                <Check size={16} className="text-green-400" /> Watched Items
                             </div>
                         </div>
                     </div>
@@ -317,15 +317,26 @@ const ProfilePage = ({
                                     <Globe size={20} /> Preferred Languages
                                 </h3>
                                 <div className="flex flex-wrap gap-3">
-                                    {profile.preferred_languages.map(lang => (
-                                        <span
-                                            key={lang}
-                                            className="px-4 py-2 rounded-full text-sm font-medium transition-transform hover:scale-105"
-                                            style={{ background: 'var(--color-accent-blue)', color: 'white' }}
-                                        >
-                                            {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                                        </span>
-                                    ))}
+                                    {profile.preferred_languages.map(lang => {
+                                        const langNames = {
+                                            'en': 'English',
+                                            'hi': 'Hindi',
+                                            'ta': 'Tamil',
+                                            'te': 'Telugu',
+                                            'ml': 'Malayalam',
+                                            'kn': 'Kannada'
+                                        };
+                                        const displayName = langNames[lang.toLowerCase()] || (lang.charAt(0).toUpperCase() + lang.slice(1));
+                                        return (
+                                            <span
+                                                key={lang}
+                                                className="px-4 py-2 rounded-full text-sm font-medium transition-transform hover:scale-105"
+                                                style={{ background: 'var(--color-accent-blue)', color: 'white' }}
+                                            >
+                                                {displayName}
+                                            </span>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

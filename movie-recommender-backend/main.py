@@ -16,28 +16,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Import and include routers AFTER app creation
+# Helper to include routers safely
+def include_router_safely(router, name):
+    try:
+        app.include_router(router)
+        print(f"[ OK ] Router '{name}' loaded")
+    except Exception as e:
+        print(f"[ ERROR ] Failed to load router '{name}': {e}")
+
 try:
     from routes.discovery import router as discovery_router
-    from routes.search import router as search_router
-    from routes.ai_chat import router as ai_chat_router
-    from routes.user_preferences import router as user_preferences_router  # NEW
-    from routes.details import router as details_router
-    
     app.include_router(discovery_router)
+except Exception as e: print(f"[ ERROR ] Failed to import discovery: {e}")
+
+try:
+    from routes.search import router as search_router
     app.include_router(search_router)
+except Exception as e: print(f"[ ERROR ] Failed to import search: {e}")
+
+try:
+    from routes.ai_chat import router as ai_chat_router
     app.include_router(ai_chat_router)
-    app.include_router(user_preferences_router)  # NEW
+except Exception as e: print(f"[ ERROR ] Failed to import ai_chat: {e}")
+
+try:
+    from routes.user_preferences import router as user_preferences_router
+    app.include_router(user_preferences_router)
+except Exception as e: print(f"[ ERROR ] Failed to import user_preferences: {e}")
+
+try:
+    from routes.details import router as details_router
     app.include_router(details_router)
-    
-    print("[ OK ] All routes loaded successfully")
-    print("  - Discovery routes: /discover")
-    print("  - Search routes: /search")
-    print("  - AI Chat routes: /ai-chat")
-    print("  - User Preference routes: /user/*")  # NEW
-    print("  - Details routes: /details/*")
-except ImportError as e:
-    print(f"[ ERROR ] Error importing routes: {e}")
+except Exception as e: print(f"[ ERROR ] Failed to import details: {e}")
 
 # --- Health Endpoints ---
 @app.get("/")

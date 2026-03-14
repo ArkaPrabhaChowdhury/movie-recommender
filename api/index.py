@@ -5,8 +5,11 @@ import os
 backend_path = os.path.join(os.path.dirname(__file__), '../movie-recommender-backend')
 sys.path.append(backend_path)
 
-from main import app
+from main import app as _app
+
+# Export the app for Vercel
+app = _app
 
 # Fix for Vercel: FastAPI needs to know it's running behind the /api proxy
-# This strips the /api prefix from incoming requests so they match the defined routes
+# This is required if the frontend calls /api/endpoint
 app.root_path = "/api"

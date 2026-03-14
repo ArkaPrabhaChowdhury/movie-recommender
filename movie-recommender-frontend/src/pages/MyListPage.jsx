@@ -61,8 +61,9 @@ const MyListPage = ({
             const formattedContent = (content || []).map(item => ({
                 ...item,
                 id: item.content_id, // Map back for grid compatibility
-                // Fallback for poster if missing in interaction (we added it recently)
-                poster: item.poster || null
+                // Fallback for poster and rating if missing in interaction
+                poster: item.poster || null,
+                rating: item.tmdb_rating || item.rating || 0
             }));
 
             setListContent(formattedContent);
@@ -114,7 +115,7 @@ const MyListPage = ({
                         <div className="flex p-1 bg-gray-900/50 rounded-xl border border-gray-800">
                             {[
                                 { id: 'watchlist', label: 'Watchlist', icon: Bookmark },
-                                { id: 'history', label: 'Entire History', icon: CheckCircle }
+                                { id: 'history', label: 'History', icon: CheckCircle }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}

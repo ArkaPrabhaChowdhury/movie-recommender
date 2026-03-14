@@ -112,7 +112,7 @@ const HomePage = ({
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-white tracking-tight">
-                                        {userName ? `Welcome, ${userName}!` : 'Your Daily Discoveries'}
+                                        {userName ? `Welcome, ${userName.split(' ')[0]}!` : 'Your Daily Discoveries'}
                                     </h3>
                                     <p className="text-sm text-gray-400">
                                         {userName ? "Here are your top-picked discoveries for today." : "Fresh recommendations based on your unique interests"}
