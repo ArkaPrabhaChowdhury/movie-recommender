@@ -22,10 +22,14 @@ from services.tmdb_service import TMDBService
 from config.constants import (
     TMDB_API_KEY, TMDB_API_URL, API_CONFIG, IMAGE_CONFIG, LANGUAGE_MAP
 )
+from services.embedding_service import EmbeddingService
+from services.vector_service import VectorService
 
 class RecommendationEngine:
     def __init__(self):
         self.user_service = UserPreferenceService()
+        self.embedding_service = EmbeddingService()
+        self.vector_service = VectorService()
 
     async def get_personalized_recommendations(self, user_id: str, limit: int = 20) -> Dict:
         try:
@@ -126,11 +130,21 @@ class RecommendationEngine:
             "global_trending": [],
             "language_trending": [],
             "genre_discovery": [],
-            "similar": []
+            "similar": [],
+            "vector_discovery": []
         }
         
         tasks = []
-        # 1. Global Trending
+        
+        # 1. Vector Search (Semantic Discovery based on ALL positive interactions)
+        liked = context.get("liked", [])
+        watchlisted = context.get("watchlisted", [])
+        positive_interactions = liked + watchlisted
+        
+        if positive_interactions:
+            tasks.append(("vector_discovery", self._fetch_semantic_candidates(positive_interactions, profile)))
+        
+        # 2. Global Trending
         tasks.append(("global_trending", self._fetch_trending()))
         
         # 2. Per Language & Genre Discovery
@@ -171,23 +185,27 @@ class RecommendationEngine:
         lang_items = source_groups["language_trending"]
         genre_items = source_groups["genre_discovery"]
         similar_items = source_groups["similar"]
+        vector_items = source_groups["vector_discovery"]
         global_items = source_groups["global_trending"]
         
-        # 1. First, take some from language trending (most relevant)
+        # 1. First, take some from vector discovery (Highest semantic relevance)
+        for item in vector_items[:60]: add_item(item)
+
+        # 2. Then take from language trending (Local relevance)
         for item in lang_items[:40]: add_item(item)
         
-        # 2. Then take some from genre discovery
-        for item in genre_items[:60]: add_item(item)
+        # 3. Then take some from genre discovery
+        for item in genre_items[:40]: add_item(item)
         
-        # 3. Then take some from similar
+        # 4. Then take some from similar
         for item in similar_items[:40]: add_item(item)
         
-        # 4. Finally, fill with global trending if needed
+        # 5. Finally, fill with global trending if needed
         for item in global_items[:30]: add_item(item)
         
         # Print stats for debugging
         print(f"📦 Gathered {len(candidates)} candidates following profile: {languages} / {genres}")
-        print(f"   Sources: Lang({len(lang_items)}) Genre({len(genre_items)}) Similar({len(similar_items)}) Global({len(global_items)})")
+        print(f"   Sources: Vector({len(vector_items)}) Lang({len(lang_items)}) Genre({len(genre_items)}) Similar({len(similar_items)}) Global({len(global_items)})")
         
         return candidates
 
@@ -265,6 +283,71 @@ class RecommendationEngine:
             print(f"⚠️ AI Parsing Error: {e}")
         
         return candidates[:limit]
+
+    async def _fetch_semantic_candidates(self, interactions: List[Dict], profile: Dict) -> List[Dict]:
+        """Generate a taste vector from interactions and search the Vector DB."""
+        try:
+            import numpy as np
+            
+            # 1. Collect texts for all interactions to build the taste vector
+            texts = []
+            weights = []
+            
+            for item in interactions:
+                # Weight Liked items more than Watchlisted
+                weight = 1.0 if item.get("action") == "liked" else 0.6
+                
+                title = item.get("title", "")
+                overview = item.get("overview", "")
+                # Create a concise but descriptive string for the interaction
+                text = f"{title}. {overview[:150]}"
+                
+                texts.append(text)
+                weights.append(weight)
+            
+            if not texts:
+                return []
+                
+            # 2. Generate embeddings for history
+            print(f"🧠 Vectorizing {len(texts)} history items for taste profile...")
+            embeddings = self.embedding_service.generate_batch_embeddings(texts)
+            
+            # 3. Calculate Weighted Average (The "Taste Vector")
+            avg_vector = np.average(embeddings, axis=0, weights=weights)
+            taste_vector = avg_vector.tolist()
+            
+            # 4. Search Vector DB
+            # Get preferred languages for filtering
+            pref_langs = profile.get("preferred_languages", ["en", "hi"])
+            
+            print(f"🔍 Searching Vector DB for semantic matches...")
+            # We fetch 100 candidates to ensure variety
+            results = await self.vector_service.semantic_search(
+                query_embedding=taste_vector,
+                limit=100,
+                content_type="both",
+                language="any" # Let re-ranking handle language weighting
+            )
+            
+            mapped = []
+            for item in results:
+                mapped.append({
+                    "id": item['tmdb_id'],
+                    "title": item['title'],
+                    "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{item['poster_path']}" if item.get('poster_path') else None,
+                    "rating": item['rating'],
+                    "year": item.get('release_date', '')[:4] if item.get('release_date') else '',
+                    "overview": item.get('overview', ''),
+                    "content_type": item['content_type'],
+                    "original_language": item['language'],
+                    "source": "vector"
+                })
+            
+            return mapped
+
+        except Exception as e:
+            print(f"⚠️ Vector discovery error: {e}")
+            return []
 
     # --- Helper Fetchers ---
 

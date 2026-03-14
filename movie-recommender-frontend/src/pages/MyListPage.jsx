@@ -114,7 +114,7 @@ const MyListPage = ({
                         <div className="flex p-1 bg-gray-900/50 rounded-xl border border-gray-800">
                             {[
                                 { id: 'watchlist', label: 'Watchlist', icon: Bookmark },
-                                { id: 'history', label: 'History', icon: CheckCircle }
+                                { id: 'history', label: 'Entire History', icon: CheckCircle }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -216,12 +216,12 @@ const MyListPage = ({
                             )}
                         </div>
                         <h3 className="text-xl font-bold text-gray-300 mb-2">
-                            {searchQuery ? 'No matches found' : `Your ${activeTab} is empty`}
+                            {searchQuery ? 'No matches found' : `Your ${activeTab === 'history' ? 'History' : activeTab} is empty`}
                         </h3>
                         <p className="text-gray-500 text-sm mb-8 leading-relaxed">
                             {searchQuery
                                 ? "We couldn't find anything matching your search. Try different keywords!"
-                                : `Start building your ${activeTab} by browsing our collection and marking your favorite content.`}
+                                : `Start building your ${activeTab === 'history' ? 'History' : activeTab} by browsing our collection and marking your favorite content.`}
                         </p>
                         <button
                             onClick={() => navigate('/')}

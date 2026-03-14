@@ -7,8 +7,12 @@ from services.simple_recommender import SimpleRecommender
 from routes.discovery import get_content_with_date_filtering
 from routes.search import global_search_with_ott_filtering
 from config.constants import LANGUAGE_MAP
+from services.embedding_service import EmbeddingService
+from services.vector_service import VectorService
 
 router = APIRouter()
+embedding_service = EmbeddingService()
+vector_service = VectorService()
 
 @router.post("/ai-chat")
 async def ai_chat_recommendation(request: AIChatRequest):
@@ -108,9 +112,43 @@ Use appropriate genre, language, and content_type based on the request."""
                 generic_content = generic_results[:8]  # Normal case
                 print(f"📊 GENERIC content: {len(generic_content)} items")
         
-        # Combine with SPECIFIC content first
-        all_content = specific_content + generic_content
-        print(f"📊 Combined: {len(specific_content)} specific + {len(generic_content)} generic = {len(all_content)} total")
+        # 3. SEMANTIC SEARCH (RAG)
+        semantic_content = []
+        try:
+            print(f"🧠 Performing semantic search for: '{user_message}'")
+            query_embedding = embedding_service.generate_embedding(user_message)
+            
+            # Map language to code for filtering
+            lang_code = LANGUAGE_MAP.get(language, 'any')
+            
+            semantic_results = await vector_service.semantic_search(
+                query_embedding=query_embedding,
+                limit=15,
+                content_type=content_type if content_type != 'both' else 'both',
+                language=lang_code
+            )
+            
+            if semantic_results:
+                print(f"✅ Semantic search found {len(semantic_results)} results")
+                for item in semantic_results:
+                    # Map semantic search result to standard content format
+                    semantic_content.append({
+                        "id": item['tmdb_id'],
+                        "title": item['title'],
+                        "poster": f"https://image.tmdb.org/t/p/w500{item['poster_path']}" if item.get('poster_path') else None,
+                        "rating": item['rating'],
+                        "year": item.get('release_date', '')[:4] if item.get('release_date') else '',
+                        "overview": item.get('overview', ''),
+                        "content_type": item['content_type'],
+                        "original_language": item['language'],
+                        "source": "semantic"
+                    })
+        except Exception as e:
+            print(f"⚠️ Semantic search failed: {e}")
+
+        # Combine results: Specific Titles + Semantic + Generic
+        all_content = specific_content + semantic_content + generic_content
+        print(f"📊 Combined: {len(specific_content)} specific + {len(semantic_content)} semantic + {len(generic_content)} generic = {len(all_content)} total")
         
         # Deduplication
         unique_content = []

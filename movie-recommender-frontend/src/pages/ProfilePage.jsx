@@ -8,6 +8,7 @@ import ApiService from '../services/api';
 
 const ProfilePage = ({
     userProfile,
+    userName,
     onGetPersonalizedRecommendations,
     hasPreferences,
     loading,
@@ -123,7 +124,7 @@ const ProfilePage = ({
                         </div>
                         <div>
                             <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                                {hasPreferences ? 'Welcome Back!' : 'New User'}
+                                {userName ? `Welcome, ${userName}!` : (hasPreferences ? 'Welcome Back!' : 'New User')}
                             </h2>
                             <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
                                 {hasPreferences
@@ -350,47 +351,6 @@ const ProfilePage = ({
                     </div>
                 )}
 
-                {/* ── Recent Activity ────────────────────────────────────────────────── */}
-                {userProfile.recent_activity?.length > 0 && (
-                    <div className="rounded-2xl p-6 border border-gray-800" style={{ background: 'var(--color-bg-elevated)' }}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                                <Smartphone size={20} /> Recent Activity
-                            </h3>
-                            <button
-                                onClick={() => navigate('/my-list?tab=history')}
-                                className="text-sm font-medium text-teal-500 hover:text-teal-400 transition-colors"
-                            >
-                                See All
-                            </button>
-                        </div>
-                        <div className="space-y-3">
-                            {userProfile.recent_activity.map((activity, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.01]"
-                                    style={{ background: 'var(--color-bg-secondary)' }}
-                                >
-                                    <span>
-                                        {activity.action === 'liked' && <Heart size={22} className="text-red-400" />}
-                                        {activity.action === 'disliked' && <ThumbsDown size={22} className="text-gray-400" />}
-                                        {activity.action === 'watchlisted' && <Bookmark size={22} className="text-blue-400" />}
-                                        {activity.action === 'watched' && <CheckCircle size={22} className="text-green-400" />}
-                                    </span>
-                                    <div className="flex-1">
-                                        <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                                            {activity.action.charAt(0).toUpperCase() + activity.action.slice(1)}
-                                        </span>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}> "{activity.title}"</span>
-                                    </div>
-                                    <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                                        {new Date(activity.timestamp).toLocaleDateString()}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </main>
         </div>
     );

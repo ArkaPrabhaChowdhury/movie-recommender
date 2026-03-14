@@ -14,6 +14,7 @@ const HomePage = ({
     globalSearchResults,
     searchLoading,
     userId,
+    userName,
     userProfile,
     personalizedRecommendations,
     preferencesLoading,
@@ -110,8 +111,12 @@ const HomePage = ({
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-white tracking-tight">Your Daily Discoveries</h3>
-                                    <p className="text-sm text-gray-400">Fresh recommendations based on your unique interests</p>
+                                    <h3 className="text-lg font-bold text-white tracking-tight">
+                                        {userName ? `Welcome, ${userName}!` : 'Your Daily Discoveries'}
+                                    </h3>
+                                    <p className="text-sm text-gray-400">
+                                        {userName ? "Here are your top-picked discoveries for today." : "Fresh recommendations based on your unique interests"}
+                                    </p>
                                 </div>
                             </div>
                             <button

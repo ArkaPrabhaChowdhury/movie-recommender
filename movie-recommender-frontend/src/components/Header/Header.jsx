@@ -10,7 +10,8 @@ const Header = ({
   onClearSearch,
   isGlobalSearch,
   globalSearchResults,
-  userId
+  userId,
+  userName
 }) => {
   const navigate = useNavigate();
   const [isSearchMobileOpen, setIsSearchMobileOpen] = useState(false);
@@ -129,6 +130,11 @@ const Header = ({
               <div className="flex items-center gap-2 sm:gap-3">
                 {userId && (
                   <>
+                    {userName && (
+                      <span className="hidden md:block mr-2 text-sm font-medium text-gray-400">
+                        Welcome, <span className="text-teal-500 font-bold">{userName}</span>
+                      </span>
+                    )}
                     <button
                       onClick={() => navigate('/my-list')}
                       className="group flex items-center justify-center p-2 sm:px-4 sm:py-2 rounded-xl transition-all border border-gray-800 bg-gray-900/50 hover:bg-teal-500 hover:border-teal-500 text-gray-300 hover:text-black"

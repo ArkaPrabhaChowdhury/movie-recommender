@@ -30,6 +30,7 @@ function App() {
   // User preferences hook
   const {
     userId,
+    userName,
     userProfile,
     personalizedRecommendations,
     loading: preferencesLoading,
@@ -89,6 +90,7 @@ function App() {
           isGlobalSearch={isGlobalSearch}
           globalSearchResults={globalSearchResults}
           userId={userId}
+          userName={userName}
         />
 
         <Routes>
@@ -102,6 +104,7 @@ function App() {
                 globalSearchResults={globalSearchResults}
                 searchLoading={searchLoading}
                 userId={userId}
+                userName={userName}
                 userProfile={userProfile}
                 personalizedRecommendations={personalizedRecommendations}
                 preferencesLoading={preferencesLoading}
@@ -127,6 +130,7 @@ function App() {
             element={
               <ProfilePage
                 userProfile={userProfile}
+                userName={userName}
                 onGetPersonalizedRecommendations={handlePersonalizedRecommendations}
                 hasPreferences={hasPreferences}
                 loading={preferencesLoading}

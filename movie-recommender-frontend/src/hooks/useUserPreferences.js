@@ -6,6 +6,7 @@ import { supabase } from '../services/supabaseClient';
 
 export const useUserPreferences = () => {
   const [userId, setUserId] = useState(null);
+  const [userName, setUserName] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,6 +20,7 @@ export const useUserPreferences = () => {
         localStorage.setItem('movie_app_user_id', storedUserId);
       }
       setUserId(storedUserId);
+      setUserName(null);
     };
 
     const initializeAuth = async () => {
@@ -30,6 +32,8 @@ export const useUserPreferences = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUserId(session.user.id);
+        const fullName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0];
+        setUserName(fullName);
       } else {
         setAnonymousId();
       }
@@ -37,6 +41,8 @@ export const useUserPreferences = () => {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
           setUserId(session.user.id);
+          const fullName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0];
+          setUserName(fullName);
         } else {
           setAnonymousId();
           setUserProfile(null); // Clear profile on logout
@@ -178,6 +184,7 @@ export const useUserPreferences = () => {
 
   return {
     userId,
+    userName,
     userProfile,
     personalizedRecommendations,
     loading,

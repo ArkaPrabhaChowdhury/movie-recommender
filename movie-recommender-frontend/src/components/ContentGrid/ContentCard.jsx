@@ -89,11 +89,20 @@ const ContentCard = ({
           )}
         </div>
 
-        <div className={`absolute ${showInteractionButtons ? 'top-10.5' : 'top-2'} right-2 flex flex-col gap-1`}>
+        <div className={`absolute ${showInteractionButtons ? 'top-10.5' : 'top-2'} right-2 flex flex-col gap-1 items-end`}>
           <span className="flex items-center gap-1.5 px-2.5 py-1 text-white text-[10px] rounded-full font-bold shadow-lg border border-black/20 tracking-wider" style={{ background: 'var(--color-primary-600)' }}>
             {item.content_type === 'movie' ? <Film size={10} /> : <Tv size={10} />}
             {item.content_type.toUpperCase()}
           </span>
+          {item.action && (
+            <span className={`px-2 py-0.5 text-[9px] rounded-full font-black uppercase tracking-widest border border-white/20 shadow-xl ${item.action === 'liked' ? 'bg-red-500 text-white' :
+                item.action === 'watchlisted' ? 'bg-blue-600 text-white' :
+                  item.action === 'watched' ? 'bg-green-600 text-white' :
+                    'bg-gray-700 text-gray-200'
+              }`}>
+              {item.action}
+            </span>
+          )}
         </div>
       </div>
 

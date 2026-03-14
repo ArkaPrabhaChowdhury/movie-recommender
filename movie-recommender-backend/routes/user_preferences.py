@@ -153,7 +153,7 @@ async def get_user_watchlist(user_id: str):
 async def get_user_history(user_id: str):
     """Get user's watch history"""
     try:
-        interactions = await preference_service.get_user_interactions(user_id, action="watched")
+        interactions = await preference_service.get_user_interactions(user_id)
         
         return {
             "history": interactions,
