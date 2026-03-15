@@ -96,7 +96,7 @@ class ApiService {
     });
   }
 
-  static async recordInteraction(userId, contentData, action, rating = null) {
+  static async recordInteraction(userId, contentData, action, rating = null, userEmail = null, userFullName = null) {
     console.log('📤 Recording interaction with data:', contentData);
 
     // Genres can come in two formats:
@@ -118,6 +118,8 @@ class ApiService {
 
     const enhancedContentData = {
       user_id: userId,
+      email: userEmail,
+      full_name: userFullName,
       content_id: contentData.id,
       content_type: contentData.content_type,
       title: contentData.title || contentData.name,
@@ -146,7 +148,9 @@ class ApiService {
       title: enhancedContentData.title,
       language: enhancedContentData.language,
       genres: enhancedContentData.genres,
-      hasOverview: !!enhancedContentData.overview
+      hasOverview: !!enhancedContentData.overview,
+      email: enhancedContentData.email,
+      name: enhancedContentData.full_name
     });
 
     return this.request('/user/interaction', {

@@ -151,6 +151,37 @@ function App() {
               />
             }
           />
+          <Route
+            path="/details/:contentType/:contentId"
+            element={
+              <HomePage
+                searchQuery={searchQuery}
+                onClearSearch={handleClearSearch}
+                isGlobalSearch={isGlobalSearch}
+                globalSearchResults={globalSearchResults}
+                searchLoading={searchLoading}
+                userId={userId}
+                userName={userName}
+                userProfile={userProfile}
+                personalizedRecommendations={personalizedRecommendations}
+                preferencesLoading={preferencesLoading}
+                likeContent={likeContent}
+                dislikeContent={dislikeContent}
+                addToWatchlist={addToWatchlist}
+                markAsWatched={markAsWatched}
+                isPersonalizedMode={isPersonalizedMode}
+                setIsPersonalizedMode={setIsPersonalizedMode}
+                isAIRecommendationMode={isAIRecommendationMode}
+                setIsAIRecommendationMode={setIsAIRecommendationMode}
+                aiRecommendations={aiRecommendations}
+                setAiRecommendations={setAiRecommendations}
+                aiResponse={aiResponse}
+                setAiResponse={setAiResponse}
+                onGetPersonalizedRecommendations={handlePersonalizedRecommendations}
+                hasPreferences={hasPreferences}
+              />
+            }
+          />
         </Routes>
       </div>
     </Router>

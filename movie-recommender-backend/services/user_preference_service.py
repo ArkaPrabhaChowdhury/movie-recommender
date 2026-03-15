@@ -106,10 +106,19 @@ class UserPreferenceService:
             
             # Upsert into Supabase
             print(f"📡 Upserting preferences for {user_id}...")
-            self.supabase.table('user_data').upsert({
+            upsert_data = {
                 "user_id": user_id,
                 "preferences": updated_preferences
-            }).execute()
+            }
+            
+            # Save email/name if present
+            if getattr(interaction, 'email', None):
+                upsert_data["email"] = interaction.email
+            
+            if getattr(interaction, 'full_name', None):
+                upsert_data["full_name"] = interaction.full_name
+
+            self.supabase.table('user_data').upsert(upsert_data).execute()
             
             # Trigger profile update asynchronously
             await self._update_user_profile(user_id, updated_preferences)
@@ -265,6 +274,21 @@ class UserPreferenceService:
         # Newest first
         interactions.sort(key=lambda x: str(x.get("timestamp", "")), reverse=True)
         return interactions
+
+    async def get_all_users_for_email(self) -> List[Dict]:
+        """Fetch all users who have an email address stored."""
+        if not self.supabase:
+            return []
+        try:
+            # We select user_id, email, and full_name
+            response = self.supabase.table('user_data').select('user_id, email, full_name').execute()
+            if response.data:
+                # Filter out those without email
+                return [u for u in response.data if u.get('email')]
+            return []
+        except Exception as e:
+            print(f"❌ Error fetching users for email: {e}")
+            return []
 
     async def get_recommendation_context(self, user_id: str) -> Dict:
         """Gather context for recommendation engine exclusively from Supabase."""

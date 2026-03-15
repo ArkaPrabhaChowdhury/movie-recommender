@@ -8,5 +8,11 @@
             "source": "/(.*)",
             "destination": "/movie-recommender-frontend/dist/index.html"
         }
+    ],
+    "crons": [
+        {
+            "path": "/api/cron/weekly-recommendations",
+            "schedule": "0 9 * * 1"
+        }
     ]
 }

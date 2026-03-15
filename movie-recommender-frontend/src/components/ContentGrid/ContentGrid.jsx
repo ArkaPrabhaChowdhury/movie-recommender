@@ -25,9 +25,19 @@ const ContentGrid = ({
   onWatched,
   userInteractions,
   interactionMap = {},
-  subscribedProviders = []
+  subscribedProviders = [],
+  initialContentType,
+  initialContentId,
+  onCloseModal
 }) => {
   const [selectedContent, setSelectedContent] = useState(null);
+
+  // Set up initial content from deep link if present
+  useEffect(() => {
+    if (initialContentType && initialContentId) {
+      setSelectedContent({ id: initialContentId, content_type: initialContentType });
+    }
+  }, [initialContentType, initialContentId]);
   const observerRef = useRef(null);
 
   // Set up intersection observer for infinite scroll
@@ -54,54 +64,43 @@ const ContentGrid = ({
     };
   }, [loading, loadingMore, hasMore, onLoadMore]);
 
-  // Show skeleton grid on every loading (initial load AND filter change)
-  if (loading) {
-    return (
-      <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6`}>
-        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-          <SkeletonCard key={i} />
-        ))}
-      </div>
-    );
-  }
-
-  if (content.length === 0 && !loading) {
-    let emptyMessage;
-    if (isGlobalSearch) {
-      emptyMessage = `No OTT content found for "${searchQuery}". Try a different search term.`;
-    } else if (isAIRecommendationMode) {
-      emptyMessage = "No AI recommendations found. Try asking the AI assistant something else.";
-    } else if (isPersonalizedMode) {
-      emptyMessage = "No personalized recommendations available. Like more content to improve recommendations.";
-    } else {
-      emptyMessage = "No content found. Try different filters.";
-    }
-
-    return <EmptyState message={emptyMessage} />;
-  }
-
   return (
     <>
-      <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6`}>
-        {content.map((item, index) => (
-          <div key={`${item.content_type}-${item.id}-${index}`} onClick={() => setSelectedContent(item)}>
-            <ContentCard
-              item={item}
-              showInteractionButtons={showInteractionButtons}
-              onLike={onLike}
-              onDislike={onDislike}
-              onWatchlist={onWatchlist}
-              onWatched={onWatched}
-              userInteractions={userInteractions}
-              interactionMap={interactionMap}
-              subscribedProviders={subscribedProviders}
-            />
-          </div>
-        ))}
-      </div>
+      {loading && !selectedContent ? (
+        <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6`}>
+          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : content.length === 0 ? (
+        <EmptyState message={
+          isGlobalSearch ? `No OTT content found for "${searchQuery}". Try a different search term.` :
+          isAIRecommendationMode ? "No AI recommendations found. Try asking the AI assistant something else." :
+          isPersonalizedMode ? "No personalized recommendations available. Like more content to improve recommendations." :
+          "No content found. Try different filters."
+        } />
+      ) : (
+        <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6`}>
+          {content.map((item, index) => (
+            <div key={`${item.content_type}-${item.id}-${index}`} onClick={() => setSelectedContent(item)}>
+              <ContentCard
+                item={item}
+                showInteractionButtons={showInteractionButtons}
+                onLike={onLike}
+                onDislike={onDislike}
+                onWatchlist={onWatchlist}
+                onWatched={onWatched}
+                userInteractions={userInteractions}
+                interactionMap={interactionMap}
+                subscribedProviders={subscribedProviders}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Sentinel for infinite scroll */}
-      {hasMore && (
+      {hasMore && !loading && (
         <div ref={observerRef} className="py-12 flex justify-center">
           {loadingMore && (
             <div className={`grid grid-cols-2 ${UI_CONFIG.GRID_BREAKPOINTS.SM} ${UI_CONFIG.GRID_BREAKPOINTS.MD} ${UI_CONFIG.GRID_BREAKPOINTS.LG} ${UI_CONFIG.GRID_BREAKPOINTS.XL} gap-6 w-full`}>
@@ -116,7 +115,10 @@ const ContentGrid = ({
       {selectedContent && (
         <ContentDetailsModal
           isOpen={!!selectedContent}
-          onClose={() => setSelectedContent(null)}
+          onClose={() => {
+            setSelectedContent(null);
+            if (onCloseModal) onCloseModal();
+          }}
           contentId={selectedContent.id}
           contentType={selectedContent.content_type}
           onLike={onLike}

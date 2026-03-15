@@ -22,6 +22,8 @@ class UserProfile(BaseModel):
 
 class ContentInteraction(BaseModel):
     user_id: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
     content_id: int
     content_type: str
     title: str

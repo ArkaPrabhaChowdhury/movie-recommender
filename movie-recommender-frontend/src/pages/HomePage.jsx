@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Sparkles, Bot, ArrowLeft } from 'lucide-react';
 import FilterSection from '../components/Filters/FilterSection';
 import ContentGrid from '../components/ContentGrid/ContentGrid';
@@ -39,6 +40,9 @@ const HomePage = ({
     const [selectedContentType, setSelectedContentType] = useState(DEFAULTS.CONTENT_TYPE);
     const [selectedReleasePeriod, setSelectedReleasePeriod] = useState(DEFAULTS.RELEASE_PERIOD);
     const [selectedSortBy, setSelectedSortBy] = useState(DEFAULTS.SORT_BY);
+    
+    const { contentType, contentId } = useParams();
+    const navigate = useNavigate();
 
     const resetFilters = () => {
         setSelectedLanguage(DEFAULTS.LANGUAGE);
@@ -213,6 +217,9 @@ const HomePage = ({
                 userInteractions={userProfile?.recent_activity || []}
                 interactionMap={userProfile?.interaction_map || {}}
                 subscribedProviders={userProfile?.profile?.subscribed_providers || []}
+                initialContentType={contentType}
+                initialContentId={contentId}
+                onCloseModal={() => navigate('/')}
             />
 
             {/* AI Chat Bot */}
