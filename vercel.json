@@ -1,4 +1,5 @@
 {
+    "trailingSlash": false,
     "rewrites": [
         {
             "source": "/api/(.*)",
@@ -13,7 +14,11 @@
             "destination": "/movie-recommender-frontend/dist/vite.svg"
         },
         {
-            "source": "/((?!api|assets|vite.svg).*)",
+            "source": "/icon.svg",
+            "destination": "/movie-recommender-frontend/dist/icon.svg"
+        },
+        {
+            "source": "/(.*)",
             "destination": "/movie-recommender-frontend/dist/index.html"
         }
     ],

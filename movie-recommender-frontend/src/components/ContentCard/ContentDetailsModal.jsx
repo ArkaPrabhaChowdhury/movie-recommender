@@ -62,7 +62,7 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
 
         if (name.includes('netflix')) return `https://www.netflix.com/search?q=${encodedTitle}`;
         if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_40?phrase=${encodedTitle}`;
-        if (name.includes('hotstar')) return `https://www.hotstar.com/in/explore?searchQuery=${encodedTitle}`;
+        if (name.includes('disney') || name.includes('hotstar')) return `https://www.hotstar.com/in/explore?searchQuery=${encodedTitle}`;
         if (name.includes('jio')) return `https://www.jiocinema.com/search?q=${encodedTitle}`;
         if (name.includes('sony')) return `https://www.sonyliv.com/search?query=${encodedTitle}`;
         if (name.includes('zee5')) return `https://www.zee5.com/search?q=${encodedTitle}`;
@@ -75,6 +75,8 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
         if (name.includes('eros')) return `https://erosnow.com/search?q=${encodedTitle}`;
         if (name.includes('alt')) return `https://www.altt.co.in/search?searchKeyword=${encodedTitle}`;
         if (name.includes('lionsgate')) return `https://lionsgateplay.com/in/search?q=${encodedTitle}`;
+        if (name.includes('discovery')) return `https://www.discoveryplus.in/search?q=${encodedTitle}`;
+        if (name.includes('mubi')) return `https://mubi.com/en/in/search?q=${encodedTitle}`;
         return null;
     };
 
