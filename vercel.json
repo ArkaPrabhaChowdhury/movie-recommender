@@ -1,12 +1,14 @@
 {
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
         {
             "source": "/api/(.*)",
             "destination": "/api/index.py"
         },
         {
-            "source": "/(.*)",
-            "destination": "/movie-recommender-frontend/dist/index.html"
+            "source": "/((?!api/|.*\\..*).*)",
+            "destination": "/index.html"
         }
     ],
     "crons": [
