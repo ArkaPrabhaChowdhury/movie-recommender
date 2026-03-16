@@ -48,6 +48,7 @@ export const useContent = (filters, userId = null) => {
     } catch (err) {
       console.error('Error fetching content:', err);
       setError('Failed to fetch content');
+      setHasMore(false); // Stop infinite retries on connection error
       if (!isLoadMore) setContent([]);
     } finally {
       setLoading(false);

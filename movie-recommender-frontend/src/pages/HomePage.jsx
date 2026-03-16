@@ -65,6 +65,7 @@ const HomePage = ({
         content,
         loading,
         loadingMore,
+        error,
         hasMore,
         loadMore
     } = useContent(filters, userId);
@@ -203,6 +204,7 @@ const HomePage = ({
                 content={displayContent}
                 loading={isDisplayLoading}
                 loadingMore={displayMode === 'normal' ? loadingMore : false}
+                error={displayMode === 'normal' ? error : null}
                 hasMore={displayMode === 'normal' ? hasMore : false}
                 onLoadMore={displayMode === 'normal' ? loadMore : null}
                 isGlobalSearch={displayMode === 'search'}

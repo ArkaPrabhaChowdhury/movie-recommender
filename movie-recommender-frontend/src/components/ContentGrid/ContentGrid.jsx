@@ -28,7 +28,8 @@ const ContentGrid = ({
   subscribedProviders = [],
   initialContentType,
   initialContentId,
-  onCloseModal
+  onCloseModal,
+  error
 }) => {
   const [selectedContent, setSelectedContent] = useState(null);
 
@@ -42,7 +43,7 @@ const ContentGrid = ({
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
-    if (loading || !onLoadMore || !hasMore) return;
+    if (loading || !onLoadMore || !hasMore || error) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -71,6 +72,16 @@ const ContentGrid = ({
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
+        </div>
+      ) : error && content.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="p-4 rounded-full bg-red-500/10 text-red-500 mb-4">
+            <Bot size={40} />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Connection Issues</h3>
+          <p className="text-gray-400 max-w-md">
+            We're having trouble reaching the scouting server. It might be starting up or under heavy load. Please wait a few seconds.
+          </p>
         </div>
       ) : content.length === 0 ? (
         <EmptyState message={

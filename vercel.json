@@ -1,14 +1,32 @@
 {
-    "cleanUrls": true,
-    "trailingSlash": false,
     "rewrites": [
         {
             "source": "/api/(.*)",
             "destination": "/api/index.py"
         },
         {
-            "source": "/((?!api/|.*\\..*).*)",
-            "destination": "/index.html"
+            "source": "/assets/(.*)",
+            "destination": "/movie-recommender-frontend/dist/assets/$1"
+        },
+        {
+            "source": "/details/(.*)",
+            "destination": "/movie-recommender-frontend/dist/index.html"
+        },
+        {
+            "source": "/profile",
+            "destination": "/movie-recommender-frontend/dist/index.html"
+        },
+        {
+            "source": "/my-list",
+            "destination": "/movie-recommender-frontend/dist/index.html"
+        },
+        {
+            "source": "/vite.svg",
+            "destination": "/movie-recommender-frontend/dist/vite.svg"
+        },
+        {
+            "source": "/",
+            "destination": "/movie-recommender-frontend/dist/index.html"
         }
     ],
     "crons": [
