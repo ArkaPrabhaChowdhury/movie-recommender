@@ -9,23 +9,11 @@
             "destination": "/movie-recommender-frontend/dist/assets/$1"
         },
         {
-            "source": "/details/(.*)",
-            "destination": "/movie-recommender-frontend/dist/index.html"
-        },
-        {
-            "source": "/profile",
-            "destination": "/movie-recommender-frontend/dist/index.html"
-        },
-        {
-            "source": "/my-list",
-            "destination": "/movie-recommender-frontend/dist/index.html"
-        },
-        {
             "source": "/vite.svg",
             "destination": "/movie-recommender-frontend/dist/vite.svg"
         },
         {
-            "source": "/",
+            "source": "/((?!api|assets|vite.svg).*)",
             "destination": "/movie-recommender-frontend/dist/index.html"
         }
     ],
