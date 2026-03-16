@@ -10,15 +10,7 @@
             "destination": "/movie-recommender-frontend/dist/assets/$1"
         },
         {
-            "source": "/vite.svg",
-            "destination": "/movie-recommender-frontend/dist/vite.svg"
-        },
-        {
-            "source": "/icon.svg",
-            "destination": "/movie-recommender-frontend/dist/icon.svg"
-        },
-        {
-            "source": "/(.*)",
+            "source": "/((?!api|assets|vite.svg|icon.svg).*)",
             "destination": "/movie-recommender-frontend/dist/index.html"
         }
     ],
