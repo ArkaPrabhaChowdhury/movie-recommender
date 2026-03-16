@@ -1,23 +1,23 @@
 {
-    "trailingSlash": false,
-    "rewrites": [
-        {
-            "source": "/api/(.*)",
-            "destination": "/api/index.py"
-        },
-        {
-            "source": "/assets/(.*)",
-            "destination": "/movie-recommender-frontend/dist/assets/$1"
-        },
-        {
-            "source": "/((?!api|assets|vite.svg|icon.svg).*)",
-            "destination": "/movie-recommender-frontend/dist/index.html"
-        }
-    ],
-    "crons": [
-        {
-            "path": "/api/cron/weekly-recommendations",
-            "schedule": "0 9 * * 1"
-        }
-    ]
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/((?!api|assets|vite.svg|icon.svg).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/weekly-recommendations",
+      "schedule": "0 9 * * 1"
+    }
+  ]
 }
