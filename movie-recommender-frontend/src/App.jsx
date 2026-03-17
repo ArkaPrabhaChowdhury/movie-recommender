@@ -84,8 +84,10 @@ function App() {
   };
 
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+  console.log('Admin email', adminEmails)
   const isAdmin = userEmail && adminEmails.includes(userEmail.toLowerCase());
-
+  console.log("User", userEmail)
+  console.log("isAdmin",isAdmin)
   return (
     <Router>
       <div className="min-h-screen text-white">
