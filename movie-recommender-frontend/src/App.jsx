@@ -4,6 +4,7 @@ import Header from './components/Header/Header';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import MyListPage from './pages/MyListPage';
+import SystemHealthPage from './pages/SystemHealthPage';
 import { useGlobalSearch } from './hooks/useGlobalSearch';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { API_CONFIG } from './config/constants';
@@ -31,6 +32,7 @@ function App() {
   const {
     userId,
     userName,
+    userEmail,
     userProfile,
     personalizedRecommendations,
     loading: preferencesLoading,
@@ -40,7 +42,8 @@ function App() {
     markAsWatched,
     getPersonalizedRecommendations,
     updateSubscriptions,
-    hasPreferences
+    hasPreferences,
+    thinkingProcess
   } = useUserPreferences();
 
   const handleSearchChange = (e) => {
@@ -80,6 +83,9 @@ function App() {
     }
   };
 
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+  const isAdmin = userEmail && adminEmails.includes(userEmail.toLowerCase());
+
   return (
     <Router>
       <div className="min-h-screen text-white">
@@ -91,6 +97,7 @@ function App() {
           globalSearchResults={globalSearchResults}
           userId={userId}
           userName={userName}
+          isAdmin={isAdmin}
         />
 
         <Routes>
@@ -107,6 +114,7 @@ function App() {
                 userName={userName}
                 userProfile={userProfile}
                 personalizedRecommendations={personalizedRecommendations}
+                thinkingProcess={thinkingProcess}
                 preferencesLoading={preferencesLoading}
                 likeContent={likeContent}
                 dislikeContent={dislikeContent}
@@ -181,6 +189,10 @@ function App() {
                 hasPreferences={hasPreferences}
               />
             }
+          />
+          <Route 
+            path="/system-health" 
+            element={isAdmin ? <SystemHealthPage /> : <div className="p-32 text-center text-red-500 font-bold text-2xl">403 - Forbidden: Admins Only (Set VITE_ADMIN_EMAILS)</div>} 
           />
         </Routes>
       </div>

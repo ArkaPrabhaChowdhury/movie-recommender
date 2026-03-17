@@ -2,12 +2,29 @@ import httpx
 import json
 import re
 import os
+import time
+from utils.observability import observe, langfuse_context
 from config.constants import OLLAMA_API_URL
 
+# lazy import to avoid circular imports at module load time
+def _get_tracker():
+    from utils.analytics_tracker import tracker
+    return tracker
+
+
 class OllamaService:
+    @observe()
     @staticmethod
     async def get_ai_response(prompt: str, temperature: float = 0.7) -> str:
         """Get response from Groq API (replacing Ollama LLM) with optimized settings"""
+        # Set span information for Langfuse
+        langfuse_context.update_current_observation(
+            name="Groq-Completion",
+            metadata={"temperature": temperature, "model": "llama-3.3-70b-versatile"}
+        )
+        langfuse_context.update_current_trace(
+            tags=["llm-call", "groq"]
+        )
         try:
             groq_api_key = os.getenv("GROQ_API_KEY")
             if not groq_api_key:
@@ -40,7 +57,24 @@ class OllamaService:
                 if response.status_code == 200:
                     result = response.json()
                     ai_text = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-                    print(f"✅ Groq response received: {len(ai_text)} characters")
+                    usage = result.get("usage", {})
+                    tokens_in  = usage.get("prompt_tokens", 0)
+                    tokens_out = usage.get("completion_tokens", 0)
+
+                    # Log usage metrics to Langfuse
+                    langfuse_context.update_current_observation(
+                        usage={"input": tokens_in, "output": tokens_out, "total": tokens_in + tokens_out},
+                        input=prompt,
+                        output=ai_text
+                    )
+
+                    # Emit to local analytics tracker
+                    try:
+                        _get_tracker()._last_tokens = (tokens_in, tokens_out)
+                    except Exception:
+                        pass
+
+                    print(f"✅ Groq response received: {len(ai_text)} characters ({tokens_in}+{tokens_out} tokens)")
                     return ai_text
                 else:
                     print(f"❌ Groq error status: {response.status_code}")

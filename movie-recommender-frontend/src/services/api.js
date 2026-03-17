@@ -86,10 +86,11 @@ class ApiService {
     return data;
   }
 
-  static async aiChat(message, conversationHistory = []) {
+  static async aiChat(message, conversationHistory = [], userId = null) {
     return this.request('/ai-chat', {
       method: 'POST',
       body: JSON.stringify({
+        user_id: userId,
         message,
         conversation_history: conversationHistory
       }),
@@ -237,6 +238,10 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(providerIds),
     });
+  }
+
+  static async getAnalyticsSummary() {
+    return this.request('/analytics/summary');
   }
 
   static getContentDescription(contentType) {

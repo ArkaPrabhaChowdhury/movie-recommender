@@ -7,7 +7,7 @@ export const useAIChat = () => {
   const [chatLoading, setChatLoading] = useState(false);
   const [conversationHistory, setConversationHistory] = useState([]);
 
-  const sendMessage = async (message) => {
+  const sendMessage = async (message, userId = null) => {
     if (!message.trim()) return null;
 
     const userMessage = { 
@@ -20,7 +20,7 @@ export const useAIChat = () => {
     setChatLoading(true);
 
     try {
-      const response = await ApiService.aiChat(message, conversationHistory);
+      const response = await ApiService.aiChat(message, conversationHistory, userId);
       
       // Log what we received from backend
       console.log('🎯 Frontend received from backend:');

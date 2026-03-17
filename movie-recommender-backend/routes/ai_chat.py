@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException
 import asyncio
 from datetime import datetime
+import time
+from utils.observability import observe, langfuse_context
+from utils.analytics_tracker import tracker
 from models.request_models import AIChatRequest
 from services.ollama_service import OllamaService
 from services.simple_recommender import SimpleRecommender
@@ -9,12 +12,19 @@ from routes.search import global_search_with_ott_filtering
 from config.constants import LANGUAGE_MAP
 from services.embedding_service import EmbeddingService
 from services.vector_service import VectorService
+from services.semantic_cache_service import SemanticCacheService
+from services.user_preference_service import UserPreferenceService
+from services.streaming_service import StreamingService
+from services.evaluation_service import EvaluationService
 
 router = APIRouter()
 embedding_service = EmbeddingService()
 vector_service = VectorService()
+cache_service = SemanticCacheService()
+pref_service = UserPreferenceService()
 
 @router.post("/ai-chat")
+@observe()
 async def ai_chat_recommendation(request: AIChatRequest):
     """AI recommendations with proper content prioritization"""
     try:
@@ -22,7 +32,20 @@ async def ai_chat_recommendation(request: AIChatRequest):
         conversation_history = request.conversation_history or []
         
         print(f"🤖 AI Chat request: '{user_message}'")
+        _t0 = time.time()
         
+        # 0. Check Semantic Cache
+        cached_response = await cache_service.get_cached_response(user_message)
+        if cached_response:
+            latency_ms = (time.time() - _t0) * 1000
+            tracker.record_trace(
+                trace_type="ai_chat",
+                query=user_message,
+                latency_ms=latency_ms,
+                cache_hit=True
+            )
+            return cached_response
+
         # Try AI first
         ai_data = None
         try:
@@ -72,7 +95,7 @@ Use appropriate genre, language, and content_type based on the request."""
             print(f"🔎 Searching SPECIFIC titles first: {suggested_titles}")
             for title in suggested_titles:
                 try:
-                    title_results = await global_search_with_ott_filtering(title)
+                    title_results = await global_search_with_ott_filtering(title, request.user_id)
                     specific_content.extend(title_results)
                     print(f"  - '{title}': found {len(title_results)} results")
                     
@@ -91,7 +114,9 @@ Use appropriate genre, language, and content_type based on the request."""
         if len(specific_content) < 10:  # Only if we need more
             print(f"🔍 Need more content, searching generic {genre} {content_type}...")
             language_code = LANGUAGE_MAP.get(language, 'en')
-            generic_results = await get_content_with_date_filtering(language_code, content_type, genre, '2years')
+            generic_results = await get_content_with_date_filtering(
+                language_code, content_type, genre, '2years', user_id=request.user_id
+            )
             
             # Filter out generic results that aren't related to the search
             if 'marvel' in user_message.lower() or 'superhero' in user_message.lower():
@@ -143,6 +168,30 @@ Use appropriate genre, language, and content_type based on the request."""
                         "original_language": item['language'],
                         "source": "semantic"
                     })
+                
+                # Apply OTT availability and Subscription filtering to Semantic results
+                print(f"🎬 Checking OTT availability for {len(semantic_content)} semantic items")
+                semantic_content = await StreamingService.get_streaming_providers_batch(semantic_content, 'both')
+                
+                # Filter for at least one platform found in India
+                semantic_content = [item for item in semantic_content if item.get("streaming", {}).get("platform_found")]
+                
+                if request.user_id:
+                    try:
+                        profile = await pref_service.get_user_profile(request.user_id)
+                        sub_ids = set(profile.get("subscribed_providers", []))
+                        if sub_ids:
+                            filtered_semantic = []
+                            for item in semantic_content:
+                                all_platforms = item.get("streaming", {}).get("available_on", [])
+                                user_platforms = [p for p in all_platforms if p.get("id") in sub_ids and not p.get("is_rent")]
+                                if user_platforms:
+                                    item["streaming"]["available_on"] = user_platforms
+                                    filtered_semantic.append(item)
+                            print(f"🎯 Semantic sub filter: {len(semantic_content)} -> {len(filtered_semantic)}")
+                            semantic_content = filtered_semantic
+                    except Exception as e:
+                        print(f"⚠️ Semantic sub filter error: {e}")
         except Exception as e:
             print(f"⚠️ Semantic search failed: {e}")
 
@@ -194,7 +243,7 @@ Use appropriate genre, language, and content_type based on the request."""
             final_titles = [f"{item.get('title', 'Unknown')} ({item.get('content_type', 'unknown')})" for item in final_recommendations]
             print(f"📤 FINAL TITLES: {final_titles}")
         
-        return {
+        final_res = {
             "ai_response": ai_data.get('response', ''),
             "recommendations": final_recommendations,
             "query_analysis": {
@@ -206,11 +255,52 @@ Use appropriate genre, language, and content_type based on the request."""
             },
             "total_found": len(final_recommendations),
             "conversation_context": conversation_history + [{
-                "user": user_message,
                 "ai": ai_data.get('response', ''),
                 "timestamp": datetime.now().isoformat()
             }]
         }
+        
+        # Save to Cache for future
+        await cache_service.set_cached_response(user_message, final_res)
+        
+        latency_ms = (time.time() - _t0) * 1000
+        tokens_in, tokens_out = 0, 0
+        try:
+            tok = getattr(tracker, '_last_tokens', (0, 0))
+            tokens_in, tokens_out = tok
+        except Exception:
+            pass
+
+        tracker.record_trace(
+            trace_type="ai_chat",
+            query=user_message,
+            latency_ms=latency_ms,
+            tokens_input=tokens_in,
+            tokens_output=tokens_out,
+            cache_hit=False
+        )
+
+        # 4. Fire and forget Quality Evaluation
+        if request.user_id:
+            try:
+                # Mock a small profile context for evaluation
+                eval_context = {"profile": {"subscribed_providers": []}}
+                profile = await pref_service.get_user_profile(request.user_id)
+                if profile:
+                    eval_context["profile"]["subscribed_providers"] = profile.get("subscribed_providers", [])
+                
+                asyncio.create_task(
+                    EvaluationService.evaluate_recommendations(
+                        request.user_id, 
+                        final_recommendations, 
+                        eval_context,
+                        query=user_message
+                    )
+                )
+            except Exception as e:
+                print(f"⚠️ Failed to start evaluation: {e}")
+
+        return final_res
         
     except Exception as e:
         print(f"❌ Complete error: {e}")

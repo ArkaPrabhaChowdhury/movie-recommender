@@ -11,9 +11,12 @@ A fast, AI-first recommendation system that focuses on:
 import asyncio
 import random
 import httpx
+import time
 from typing import List, Dict, Set, Optional
 from collections import defaultdict
 from datetime import datetime
+from utils.observability import observe, langfuse_context
+from utils.analytics_tracker import tracker
 
 from services.user_preference_service import UserPreferenceService
 from services.ollama_service import OllamaService
@@ -24,6 +27,7 @@ from config.constants import (
 )
 from services.embedding_service import EmbeddingService
 from services.vector_service import VectorService
+from services.evaluation_service import EvaluationService
 
 class RecommendationEngine:
     def __init__(self):
@@ -31,7 +35,9 @@ class RecommendationEngine:
         self.embedding_service = EmbeddingService()
         self.vector_service = VectorService()
 
+    @observe()
     async def get_personalized_recommendations(self, user_id: str, limit: int = 20) -> Dict:
+        _t0 = time.time()
         try:
             # 1. Gather Context
             context = await self.user_service.get_recommendation_context(user_id)
@@ -39,7 +45,8 @@ class RecommendationEngine:
                 return await self._get_trending_fallback(limit)
 
             profile = context["profile"]
-            
+            languages = profile.get("preferred_languages", ["en"])
+
             # 2. Extract Disliked and Watched IDs to exclude/deprioritize
             disliked_ids = {str(item["content_id"]) for item in context["disliked"]}
             watched_ids = {str(item["content_id"]) for item in context["watched"]}
@@ -51,31 +58,25 @@ class RecommendationEngine:
             # 3. Gather Candidates (Fast & Broad)
             candidates = await self._gather_candidates(context)
             
-            # Filter out disliked and already liked/watchlisted (to show fresh things)
-            # We keep watched to potentially suggest them if they are very highly rated or for re-watching logic,
-            # but usually we want fresh content. Let's filter all known for now for a "discovery" feel.
             fresh_candidates = [
                 c for c in candidates 
                 if str(c.get("id")) not in all_known_ids
             ]
 
             if not fresh_candidates:
-                # If we filtered everything, keep some watchlisted/watched but not liked/disliked
                 fresh_candidates = [
                     c for c in candidates 
                     if str(c.get("id")) not in (disliked_ids | liked_ids)
                 ]
 
             # 4. AI Reranking with Groq
-            # We fetch a larger pool (limit * 3) because many might be filtered out by OTT subscription check
-            # We take more candidates to ensure diversity in the AI selection
-            recommended = await self._ai_rerank(context, fresh_candidates[:100], limit * 3)
+            # Reduced pool size for better latency (60 instead of 100)
+            recommended = await self._ai_rerank(context, fresh_candidates[:60], limit * 3)
 
-            # 5. Check OTT Availability for the selection (Optimization!)
+            # 5. Check OTT Availability
             with_ott = await StreamingService.get_streaming_providers_batch(recommended, 'both')
 
             # 6. Strict Subscription Filter
-            # Ensure we only return content that is actually on one of the user's platforms
             subscribed_ids = set(profile.get("subscribed_providers", []))
             
             if subscribed_ids:
@@ -86,24 +87,32 @@ class RecommendationEngine:
                         p for p in all_platforms 
                         if p.get("id") in subscribed_ids and not p.get("is_rent")
                     ]
-                    
                     if user_platforms:
                         new_item = item.copy()
                         new_item["streaming"] = item["streaming"].copy()
                         new_item["streaming"]["available_on"] = user_platforms
                         final_recommendations.append(new_item)
-                
                 print(f"🎯 Subscription Filter: {len(with_ott)} -> {len(final_recommendations)}")
             else:
-                # If user has no subscriptions selected, ONLY show OTT available content
                 final_recommendations = [
                     item for item in with_ott 
                     if item.get("streaming", {}).get("platform_found")
                 ]
                 print(f"⚠️ No subscriptions, returning all {len(final_recommendations)} OTT items")
 
-            return {
-                "recommendations": final_recommendations[:limit], # Respect the original limit
+            latency_ms = (time.time() - _t0) * 1000
+
+            # Collect token data from OllamaService if recorded
+            tokens_in, tokens_out = 0, 0
+            try:
+                tok = getattr(tracker, '_last_tokens', (0, 0))
+                tokens_in, tokens_out = tok
+            except Exception:
+                pass
+
+            # 7. Quality Assurance (Background Task)
+            res = {
+                "recommendations": final_recommendations[:limit],
                 "algorithm": "ai_personalized_v4",
                 "personalization_level": self._get_personalization_level(context),
                 "user_stats": {
@@ -111,14 +120,50 @@ class RecommendationEngine:
                     "watches": len(context["watched"]),
                     "watchlist": len(context["watchlisted"]),
                     "top_genres": profile.get("preferred_genres", [])[:3]
+                },
+                "thinking_process": {
+                    "steps": [
+                        {"step": "Context Analysis", "status": "completed",
+                         "details": f"Analyzed {len(context['liked'])} likes and {len(profile.get('preferred_genres', []))} preferred genres."},
+                        {"step": "Candidate Retrieval", "status": "completed",
+                         "details": f"Gathered {len(fresh_candidates)} fresh candidates from {len(languages)} languages."},
+                        {"step": "Groq AI Reranking", "status": "completed",
+                         "details": f"Reranked top 100 candidates. Tokens used: {tokens_in}+{tokens_out}."},
+                        {"step": "OTT Filtering", "status": "completed",
+                         "details": f"Filtered for {len(subscribed_ids)} subscribed platforms. {len(final_recommendations)} passed."}
+                    ],
+                    "latency_ms": round(latency_ms),
+                    "tokens_used": tokens_in + tokens_out,
                 }
             }
 
+            # Record to analytics tracker
+            trace_id = tracker.record_trace(
+                trace_type="recommendation",
+                query=f"personalized:{user_id[:8]}",
+                latency_ms=latency_ms,
+                tokens_input=tokens_in,
+                tokens_output=tokens_out,
+                cache_hit=False,
+            )
+            print(f"📊 Analytics trace recorded: {trace_id} ({latency_ms:.0f}ms)")
+
+            # Fire and forget evaluation
+            # Use query analysis results for the judge context if available
+            eval_query = f"Personalized recommendations based on {len(context['liked'])} likes and genres: {profile.get('preferred_genres', [])[:5]}"
+            asyncio.create_task(EvaluationService.evaluate_recommendations(user_id, res["recommendations"], context, query=eval_query))
+            
+            return res
+
         except Exception as e:
+            latency_ms = (time.time() - _t0) * 1000
+            tracker.record_trace(trace_type="recommendation", query="error",
+                                 latency_ms=latency_ms, status="error")
             print(f"❌ AI Recommendation Error: {e}")
             import traceback; traceback.print_exc()
             return await self._get_trending_fallback(limit)
 
+    @observe()
     async def _gather_candidates(self, context: Dict) -> List[Dict]:
         """Fetch candidates according to user profile languages and genres, balancing sources."""
         profile = context["profile"]
@@ -209,6 +254,7 @@ class RecommendationEngine:
         
         return candidates
 
+    @observe()
     async def _ai_rerank(self, context: Dict, candidates: List[Dict], limit: int) -> List[Dict]:
         """Use AI to rank candidates according to profile without artificial bias."""
         if not candidates:
@@ -221,14 +267,14 @@ class RecommendationEngine:
         disliked_titles = [item["title"] for item in context.get("disliked", [])[:10]]
         
         candidate_list = ""
-        # Increase the window we show to the AI
-        for i, c in enumerate(candidates[:100]):
+        # Reduce rerank pool to 60 for better latency (was 100)
+        for i, c in enumerate(candidates[:60]):
             genre_str = ", ".join(c.get("genres", []))
             lang = c.get("original_language", "en")
             title = c.get("title", "Unknown")
             year = c.get("year", "N/A")
-            overview = c.get("overview", "")[:120]
-            candidate_list += f"[{i}] {title} ({year}) [Lang: {lang}] - {genre_str}. Overview: {overview}...\n"
+            overview = c.get("overview", "")[:80] # Shorter overview for faster processing
+            candidate_list += f"[{i}] {title} ({year}) [{lang}] - {genre_str}. {overview}\n"
 
         prompt = f"""
         You are a premium movie recommendation AI.
@@ -288,6 +334,7 @@ class RecommendationEngine:
         
         return candidates[:limit]
 
+    @observe()
     async def _fetch_semantic_candidates(self, interactions: List[Dict], profile: Dict) -> List[Dict]:
         """Generate a taste vector from interactions and search the Vector DB."""
         try:

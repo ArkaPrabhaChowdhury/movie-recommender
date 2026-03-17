@@ -10,6 +10,7 @@ export const useUserPreferences = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState([]);
+  const [thinkingProcess, setThinkingProcess] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Initialize user ID from Supabase Auth, fallback to anonymous local storage
@@ -148,6 +149,7 @@ export const useUserPreferences = () => {
 
       const recommendations = response.recommendations || [];
       setPersonalizedRecommendations(recommendations);
+      setThinkingProcess(response.thinking_process || null);
 
       console.log(`✨ Got ${recommendations.length} personalized recommendations`);
       console.log('Personalization level:', response.personalization_level);
@@ -189,8 +191,10 @@ export const useUserPreferences = () => {
   return {
     userId,
     userName,
+    userEmail,
     userProfile,
     personalizedRecommendations,
+    thinkingProcess,
     loading,
     recordInteraction,
     likeContent,

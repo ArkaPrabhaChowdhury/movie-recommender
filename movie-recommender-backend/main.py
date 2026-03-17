@@ -45,6 +45,11 @@ try:
 except Exception as e: print(f"[ ERROR ] Failed to import user_preferences: {e}")
 
 try:
+    from routes.analytics import router as analytics_router
+    app.include_router(analytics_router)
+except Exception as e: print(f"[ ERROR ] Failed to import analytics: {e}")
+
+try:
     from routes.cron import router as cron_router
     app.include_router(cron_router)
 except Exception as e: print(f"[ ERROR ] Failed to import cron: {e}")

@@ -3,11 +3,13 @@ import asyncio
 from models.request_models import SearchRequest
 from services.tmdb_service import TMDBService
 from services.streaming_service import StreamingService
+from services.user_preference_service import UserPreferenceService
 from config.constants import MESSAGES
 
 router = APIRouter()
+_pref_service = UserPreferenceService()
 
-async def global_search_with_ott_filtering(query: str):
+async def global_search_with_ott_filtering(query: str, user_id: str = None):
     """Perform global search and filter for OTT availability"""
     print(f"Starting global search for: {query}")
     
@@ -41,6 +43,35 @@ async def global_search_with_ott_filtering(query: str):
         ott_content.extend(tv_ott)
         print(f"Found {len(tv_ott)} TV shows with OTT availability")
     
+    # Mandatory filter: Only show content available on OTT in India
+    before_filter = len(ott_content)
+    ott_content = [item for item in ott_content if item.get("streaming", {}).get("platform_found")]
+    print(f"🛡️ OTT Filter: {before_filter} -> {len(ott_content)} items available on streaming")
+
+    # --- Subscription filter (Sub-filter of OTT) -----------------------
+    if user_id:
+        try:
+            profile_data = await _pref_service.get_user_profile(user_id)
+            sub_ids = set(profile_data.get("subscribed_providers", []))
+            if sub_ids:
+                filtered_content = []
+                for item in ott_content:
+                    all_platforms = item.get("streaming", {}).get("available_on", [])
+                    user_platforms = [
+                        p for p in all_platforms 
+                        if p.get("id") in sub_ids and not p.get("is_rent")
+                    ]
+                    if user_platforms:
+                        new_item = item.copy()
+                        new_item["streaming"] = item["streaming"].copy()
+                        new_item["streaming"]["available_on"] = user_platforms
+                        filtered_content.append(new_item)
+                
+                print(f"🎯 Subscription filter: {len(ott_content)} → {len(filtered_content)} items")
+                ott_content = filtered_content
+        except Exception as sub_err:
+            print(f"⚠️ Subscription filter error in search: {sub_err}")
+
     # Sort by rating and popularity
     ott_content.sort(key=lambda x: (x.get('rating', 0), x.get('release_date', '')), reverse=True)
     
@@ -63,7 +94,7 @@ async def global_search(request: SearchRequest):
         print(f"Global search request: '{query}'")
         
         # Perform global search with OTT filtering
-        content = await global_search_with_ott_filtering(query)
+        content = await global_search_with_ott_filtering(query, request.user_id)
         
         print(f"Global search returning {len(content)} results")
         

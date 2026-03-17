@@ -224,8 +224,8 @@ const HomePage = ({
                 onCloseModal={() => navigate('/')}
             />
 
-            {/* AI Chat Bot */}
-            <ChatBot onRecommendationsReceived={handleAIRecommendations} />
+            {/* AI Chatbot Overlay */}
+            <ChatBot onRecommendationsReceived={handleAIRecommendations} userId={userId} />
         </main>
     );
 };

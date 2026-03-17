@@ -4,7 +4,7 @@ import ChatInput from './ChatInput';
 import { useAIChat } from '../../hooks/useAIChat';
 import { Bot, X, MessageSquare } from 'lucide-react';
 
-const ChatBot = ({ onRecommendationsReceived }) => {
+const ChatBot = ({ onRecommendationsReceived, userId }) => {
   const {
     isChatOpen,
     chatMessages,
@@ -15,7 +15,7 @@ const ChatBot = ({ onRecommendationsReceived }) => {
   } = useAIChat();
 
   const handleSendMessage = async (message) => {
-    const response = await sendMessage(message);
+    const response = await sendMessage(message, userId);
 
     // If we get recommendations, pass them up to parent
     if (response && response.recommendations && response.recommendations.length > 0) {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, X, Bookmark, Search, ArrowLeft, LogIn, LogOut } from 'lucide-react';
+import { User, X, Bookmark, Search, ArrowLeft, LogIn, LogOut, Activity, Zap } from 'lucide-react';
 import { UI_CONFIG, API_CONFIG } from '../../config/constants';
 import { supabase } from '../../services/supabaseClient';
 
@@ -11,7 +11,8 @@ const Header = ({
   isGlobalSearch,
   globalSearchResults,
   userId,
-  userName
+  userName,
+  isAdmin
 }) => {
   const navigate = useNavigate();
   const [isSearchMobileOpen, setIsSearchMobileOpen] = useState(false);
@@ -147,6 +148,17 @@ const Header = ({
                       <User size={20} className="group-hover:scale-110 transition-transform" />
                       <span className="hidden lg:inline ml-2 font-bold text-sm">Profile</span>
                     </button>
+
+                    {isAdmin && (
+                      <button
+                        onClick={() => navigate('/system-health')}
+                        className="group flex items-center justify-center p-2 sm:px-4 sm:py-2 rounded-xl transition-all border border-gray-800 bg-gray-900/50 hover:bg-teal-500 hover:border-teal-500 text-gray-300 hover:text-black"
+                        title="System Health"
+                      >
+                        <Activity size={20} className="group-hover:scale-110 transition-transform text-teal-500" />
+                        <span className="hidden lg:inline ml-2 font-bold text-sm">Health</span>
+                      </button>
+                    )}
                     {!isAnonymous ? (
                       <button
                         onClick={handleLogout}

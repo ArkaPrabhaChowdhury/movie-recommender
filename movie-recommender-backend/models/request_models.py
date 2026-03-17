@@ -16,5 +16,6 @@ class SearchRequest(BaseModel):
     query: str
 
 class AIChatRequest(BaseModel):
+    user_id: Optional[str] = None
     message: str
     conversation_history: Optional[List[Dict[str, str]]] = []
