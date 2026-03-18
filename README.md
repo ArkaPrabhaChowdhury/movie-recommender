@@ -34,9 +34,9 @@
 
 ### 🕵️ AI Observability & Monitoring
 *   **Real-time Tracing**: Integrated with **Langfuse** to track every step of the recommendation pipeline. View live traces at the [Project Dashboard](https://cloud.langfuse.com/project/cmmu985wg044zad08l2v1s4f7).
-*   **LLM-as-a-Judge**: Automated quality gates that evaluate recommendations for *Faithfulness* (hallucination checks) and *Constraint Compliance* (OTT availability).
-*   **System Health Dashboard (Admin Only)**: A dedicated view restricted via `VITE_ADMIN_EMAILS`, showing real P90 latency, token efficiency, cost per user session, and semantic cache hit rates.
-*   **Live Analytics Tracker**: Real-time in-memory tracking of every request's latency, token usage, and evaluation scores.
+*   **LLM-as-a-Judge**: Automated quality gates that evaluate recommendations for *Faithfulness* (hallucinations), *Constraint Compliance* (OTT), and *Thematic Relevancy* (with detailed **Mistake Reasoning**).
+*   **Persistent Health Dashboard**: A dedicated view restricted via `VITE_ADMIN_EMAILS`, showing real P90 latency, token efficiency, cost per session, and semantic cache hit rates—backed by **Persistent Supabase Analytics**.
+*   **Trace-Level Precision**: Every AI request is assigned a unique `trace_id`, ensuring that background quality audits are accurately mapped even under heavy concurrent load. 
 *   **Semantic Caching**: Reduces API costs and latency by caching semantically similar queries using vector search in Supabase.
 
 ---
@@ -49,7 +49,8 @@ OTT Scout uses a multi-stage **Hybrid Intelligence** pipeline to ensure your fee
 2.  **Intelligent Balancing**: To prevent "Popularity Bias" (where English blockbusters drown out regional gems), we use a weighted round-robin balancer that guarantees variety in language and genre.
 3.  **Vector Discovery**: We generate a **"Taste Vector"** (weighted average embedding) using the **Hugging Face Inference API**. This allows the system to find movies that feel similar thematically, even if they share no common actors or genres.
 4.  **AI Reranking**: The top candidates are analyzed by **Advanced LLMs**. The AI examines your complex profile—including dislikes—to pick the final selections and provides a human-readable reason for each.
-5.  **Availability Enforcement**: Finally, the system checks real-time OTT availability in your region, filtering for your specific subscriptions before you even see the results.
+5.  **Availability Enforcement**: Checks real-time OTT availability in your region, filtering for your specific subscriptions before you even see the results.
+6.  **Serverless Execution**: The entire backend runs on **Vercel Serverless Functions**, providing zero-overhead hosting that scales to zero when not in use and handles massive bursts automatically.
 
 ---
 

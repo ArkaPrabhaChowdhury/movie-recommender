@@ -10,7 +10,7 @@ from services.ollama_service import OllamaService
 from services.simple_recommender import SimpleRecommender
 from routes.discovery import get_content_with_date_filtering
 from routes.search import global_search_with_ott_filtering
-from config.constants import LANGUAGE_MAP
+from config.constants import LANGUAGE_MAP, DEFAULTS
 from services.embedding_service import EmbeddingService
 from services.vector_service import VectorService
 from services.semantic_cache_service import SemanticCacheService
@@ -136,6 +136,44 @@ async def ai_chat_recommendation(request: AIChatRequest):
                             seen_ids.add(c['id'])
             except Exception as e:
                 print(f"⚠️ Semantic search failure: {e}")
+
+        # 2.5 Fallback: Rule-based recommendations when semantic/direct yield nothing
+        if not final_recommendations:
+            try:
+                rule_based = SimpleRecommender.analyze_request(user_message)
+                print(f"âš ï¸ Fallback triggered. Using rule-based criteria: {rule_based.get('search_criteria', {})}")
+
+                # 1) Try exact title searches for suggested titles
+                suggested_titles = rule_based.get("suggested_titles", []) or []
+                for title in suggested_titles:
+                    results = await global_search_with_ott_filtering(title, request.user_id)
+                    if results:
+                        existing_ids = {x['id'] for x in final_recommendations}
+                        for r in results:
+                            if r['id'] not in existing_ids:
+                                final_recommendations.append(r)
+                                existing_ids.add(r['id'])
+
+                # 2) If still empty, fall back to genre-based discovery
+                if not final_recommendations:
+                    criteria = rule_based.get("search_criteria", {})
+                    genre = criteria.get("genre", DEFAULTS['GENRE'])
+                    language = criteria.get("language", DEFAULTS['LANGUAGE'])
+                    content_type = criteria.get("content_type", DEFAULTS['CONTENT_TYPE'])
+                    language_code = LANGUAGE_MAP.get(language, None)
+
+                    discovery_results = await get_content_with_date_filtering(
+                        language_code=language_code,
+                        content_type=content_type,
+                        genre=genre,
+                        release_period=DEFAULTS['RELEASE_PERIOD'],
+                        sort_by='rating',
+                        page=1,
+                        user_id=request.user_id
+                    )
+                    final_recommendations.extend(discovery_results or [])
+            except Exception as e:
+                print(f"âš ï¸ Fallback recommendation failure: {e}")
 
         # 3. AI RESPONDER (STRICT MODE)
         final_recommendations = final_recommendations[:15]
