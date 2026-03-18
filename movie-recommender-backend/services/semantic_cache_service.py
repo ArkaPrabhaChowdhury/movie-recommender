@@ -19,8 +19,10 @@ class SemanticCacheService:
             print(f"🧠 Checking semantic cache for: '{query}'")
             query_embedding = self.embedding_service.generate_embedding(query)
             
-            # Use Supabase RPC to find similar queries
-            # Table: query_cache, Function: match_queries
+            if not query_embedding or sum(map(abs, query_embedding)) < 1e-9:
+                print("⚠️ Skipping semantic cache (invalid query embedding)")
+                return None
+            
             params = {
                 "query_embedding": query_embedding,
                 "match_threshold": 0.95,
@@ -32,7 +34,15 @@ class SemanticCacheService:
             
             if response.data:
                 cached = response.data[0]
-                print(f"✨ Semantic Cache Hit! (Similarity: {cached.get('similarity', 0):.4f})")
+                import math
+                similarity = float(cached.get('similarity', 0))
+                
+                # Check for NaN or non-finite similarity which indicates a vector match error
+                if not math.isfinite(similarity) or similarity < 0.95:
+                    print(f"⚠️ Invalid cache similarity ({similarity}), ignoring.")
+                    return None
+
+                print(f"✨ Semantic Cache Hit! (Similarity: {similarity:.4f})")
                 
                 # Log hit to Langfuse
                 langfuse_context.update_current_trace(
@@ -56,6 +66,10 @@ class SemanticCacheService:
         try:
             query_embedding = self.embedding_service.generate_embedding(query)
             
+            if not query_embedding or sum(map(abs, query_embedding)) < 1e-9:
+                print("⚠️ Cannot save to cache: invalid embedding")
+                return
+                
             data = {
                 "query_text": query,
                 "embedding": query_embedding,

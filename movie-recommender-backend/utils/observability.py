@@ -26,12 +26,33 @@ except ImportError:
 
 # ── Public symbols ──────────────────────────────────────────────────────────
 
+# ── Token & Analytics System Explanation ───────────────────────────────────
+# The app tracks actual token usage to calculate costs in real-time.
+# 1. INPUT TOKENS: The length of the prompt + metadata sent to Groq. 
+#    ($0.59 per 1M tokens for Llama-3.3-70b)
+# 2. OUTPUT TOKENS: The length of the AI response generated.
+#    ($0.79 per 1M tokens for Llama-3.3-70b)
+# 3. ANALYTICS TRACKER: Captures these metrics in-memory and provides a 
+#    summary via the /analytics/summary endpoint for the Health Dashboard.
+# ────────────────────────────────────────────────────────────────────────────
+
 if _langfuse_enabled:
     observe = _lf_observe
-    langfuse_context = _lf_ctx
+    
+    # Wrap context in a safe proxy to ensure .score exists even on older SDKs
+    class _LangfuseProxy:
+        def __getattr__(self, name):
+            # Try to get it from the real langfuse_context
+            val = getattr(_lf_ctx, name, None)
+            if val: return val
+            
+            # If missing (like .score), return a no-op to prevent app crashes
+            def noop(*args, **kwargs): pass
+            return noop
+
+    langfuse_context = _LangfuseProxy()
 else:
     def observe(func=None, *, name=None, **kwargs):  # type: ignore
-        """No-op decorator when Langfuse is not active."""
         if func is not None:
             return func
         def decorator(fn):

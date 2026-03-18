@@ -59,10 +59,10 @@ class EmbeddingService:
                     return response.json()
                 else:
                     print(f"⚠️ HF API Error {response.status_code}: {response.text}")
-                    return [0.0] * 384
+                    return None
         except Exception as e:
             print(f"❌ Embedding API Error: {e}")
-            return [0.0] * 384
+            return None
 
     def generate_batch_embeddings(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of strings."""
@@ -83,11 +83,10 @@ class EmbeddingService:
                     return response.json()
                 else:
                     print(f"⚠️ HF Batch API Error {response.status_code}: {response.text}")
-                    # Fallback to zeros to avoid crashing
-                    return [[0.0] * 384 for _ in texts]
+                    return [None for _ in texts]
         except Exception as e:
             print(f"❌ Batch Embedding API Error: {e}")
-            return [[0.0] * 384 for _ in texts]
+            return [None for _ in texts]
 
     def prepare_metadata_text(self, item: Dict) -> str:
         """Create a rich text representation of a movie/show for embedding."""

@@ -19,7 +19,7 @@ const SystemHealthPage = () => {
         };
 
         fetchMetrics();
-        const interval = setInterval(fetchMetrics, 5000); // 5s refresh
+        const interval = setInterval(fetchMetrics, 15000); // 15s refresh
         return () => clearInterval(interval);
     }, []);
 

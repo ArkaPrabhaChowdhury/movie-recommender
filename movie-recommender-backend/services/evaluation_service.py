@@ -7,67 +7,103 @@ from utils.analytics_tracker import tracker
 class EvaluationService:
     @observe()
     @staticmethod
-    async def evaluate_recommendations(user_id: str, recommendations: List[Dict], context: Dict, query: str = None):
+    async def evaluate_recommendations(user_id: str, recommendations: List[Dict], context: Dict, query: str = None, trace_id: str = None):
         """
-        LLM-as-a-Judge: evaluates 10% of requests for faithfulness, relevance, and OTT compliance.
-        Scores are written back to the analytics tracker so the health dashboard is real.
+        LLM-as-a-Judge: evaluates 30% of requests for exhaustive quality audit.
+        Now includes a 'Mistake Reason' to see exactly why it failed.
         """
-        if random.random() > 0.1:
+        if random.random() > 0.3:
             return
             
         print(f"🧐 Quality Gate: evaluating recommendations for user {user_id[:8]}...")
         
+        # Parallel Audit
         tasks = [
             EvaluationService.check_hallucinations(recommendations),
             EvaluationService.check_ott_constraints(recommendations, context),
             EvaluationService.check_relevance(recommendations, query)
         ]
         
-        faithfulness_score, ott_score, rel_score = await asyncio.gather(*tasks)
+        faithfulness_score, ott_score, rel_data = await asyncio.gather(*tasks)
+        rel_score, rel_reason = rel_data # Decompose tuple
         
-        # Write scores to langfuse
+        # 1. Log to Langfuse (with Reasoning)
         langfuse_context.score(name="faithfulness", value=faithfulness_score)
         langfuse_context.score(name="ott_compliance", value=ott_score)
-        langfuse_context.score(name="relevance", value=rel_score)
-
-        # Patch the LAST recorded trace with real scores
-        try:
-            with tracker._lock:
-                if tracker._traces:
-                    last = tracker._traces[-1]
-                    last.faithfulness_score  = faithfulness_score
-                    last.ott_compliance_score = ott_score
-                    last.relevance_score = rel_score
-        except Exception:
-            pass
-
-        print(f"✅ QA result: faith={faithfulness_score:.2f}, ott={ott_score:.2f}, rel={rel_score:.2f}")
+        langfuse_context.score(
+            name="relevance", 
+            value=rel_score,
+            comment=f"Audit Mistakes: {rel_reason}" # Capture the 'WHY'
+        )
+        
+        # 2. Patch the trace for the Dashboard
+        if trace_id:
+            tracker.update_trace_scores(
+                trace_id=trace_id, 
+                faithfulness=faithfulness_score, 
+                ott_compliance=ott_score, 
+                relevance=rel_score
+            )
+            print(f"✅ QA result recorded for trace {trace_id}: rel={rel_score:.2f}")
+        else:
+            # Fallback to last trace if no trace_id provided (deprecated)
+            try:
+                with tracker._lock:
+                    if tracker._traces:
+                        last = tracker._traces[-1]
+                        last.faithfulness_score  = faithfulness_score
+                        last.ott_compliance_score = ott_score
+                        last.relevance_score = rel_score
+            except Exception: pass
 
     @observe()
     @staticmethod
-    async def check_relevance(recommendations: List[Dict], query: str) -> float:
-        """Use AI to judge if recommendations match the user's intent/query."""
+    async def check_relevance(recommendations: List[Dict], query: str) -> tuple:
+        """Use AI to judge if ALL matches are strict. Returns (core, mistakes_json)."""
         if not query or not recommendations:
-            return 1.0
+            return (1.0, "[]")
             
         from services.ollama_service import OllamaService
         
-        titles = [r.get("title") for r in recommendations[:5]]
+        # FORMAT ITEMS FOR JUDGE
+        items_list = []
+        for i, r in enumerate(recommendations):
+            items_list.append({
+                "index": i+1,
+                "title": r.get('title'),
+                "overview": r.get('overview', '')[:80]
+            })
+        
         prompt = f"""
-        User Query: "{query}"
-        AI Recommendations: {", ".join(titles)}
+        USER INTENT: "{query}"
+        PROPOSED LIST: {json.dumps(items_list)}
         
-        Do these recommendations actually match what the user is looking for?
-        (e.g., If they asked for Marvel and got crime dramas, that's a 0).
+        CRITICAL TASK:
+        Find every item that DOES NOT strictly match the intent.
         
-        Respond ONLY with a decimal between 0.0 and 1.0 (e.g. 0.85).
-        No text, just the number.
+        SCORING RULES:
+        1. If user asks for a 'DIRECT' person (Nolan) or franchise (DC), ANY non-member is a 0.5 penalty.
+        2. More than 2 unrelated items = 0.0 total score.
+        
+        RESPONSE FORMAT (JSON ONLY):
+        {{
+            "score": 0.0-1.0,
+            "mistakes": ["Item X is not related because..."],
+            "reasoning": "Overall audit summary"
+        }}
         """
         try:
-            res = await OllamaService.get_ai_response(prompt, temperature=0)
-            return float(res.strip())
-        except Exception:
-            return 1.0 # Fallback to perfect score if judge fails
+            res_text = await OllamaService.get_ai_response(prompt, temperature=0)
+            # Try to parse JSON from AI
+            import re
+            match = re.search(r'\{.*\}', res_text, re.DOTALL)
+            if match:
+                data = json.loads(match.group())
+                return (float(data.get('score', 1.0)), json.dumps(data.get('mistakes', [])))
+            return (1.0, "[]")
+        except Exception as e:
+            print(f"⚠️ Judge failed: {e}")
+            return (1.0, "[]")
 
     @observe()
     @staticmethod

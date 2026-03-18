@@ -13,17 +13,21 @@ async def global_search_with_ott_filtering(query: str, user_id: str = None):
     """Perform global search and filter for OTT availability"""
     print(f"Starting global search for: {query}")
     
-    # Search both movies and TV shows in parallel
-    movies_task = TMDBService.search_movies_globally(query)
-    tv_shows_task = TMDBService.search_tv_shows_globally(query)
+    # Search titles AND persons in parallel
+    titles_task = TMDBService.search_movies_globally(query)
+    tv_task = TMDBService.search_tv_shows_globally(query)
+    persons_task = TMDBService.search_person_globally(query)
     
-    movies, tv_shows = await asyncio.gather(movies_task, tv_shows_task)
+    titles, tv_shows, person_credits = await asyncio.gather(titles_task, tv_task, persons_task)
     
     all_content = []
-    all_content.extend(movies)
-    all_content.extend(tv_shows)
+    seen = set()
+    for item in titles + tv_shows + person_credits:
+        if item['id'] not in seen:
+            all_content.append(item)
+            seen.add(item['id'])
     
-    print(f"Global search found {len(all_content)} total items before OTT filtering")
+    print(f"Global search found {len(all_content)} unique items before OTT filtering")
     
     # Check OTT availability for search results
     movies_to_check = [item for item in all_content if item['content_type'] == 'movie']

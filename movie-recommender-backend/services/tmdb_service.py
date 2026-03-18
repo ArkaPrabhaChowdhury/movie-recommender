@@ -249,43 +249,84 @@ class TMDBService:
         return movies
 
     @staticmethod
+    async def search_person_globally(query: str):
+        """Search for a person and return their movie/TV credits"""
+        credits = []
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            try:
+                # 1. Find the person
+                person_resp = await client.get(f"{TMDB_API_URL}/search/person", params={
+                    "api_key": TMDB_API_KEY,
+                    "query": query,
+                    "include_adult": False
+                })
+                
+                if person_resp.status_code == 200:
+                    results = person_resp.json().get('results', [])
+                    if not results: return []
+                    
+                    person = results[0] # Take the most popular match
+                    person_id = person['id']
+                    
+                    # 2. Get their combined credits (movies + tv)
+                    credits_resp = await client.get(f"{TMDB_API_URL}/person/{person_id}/combined_credits", params={
+                        "api_key": TMDB_API_KEY
+                    })
+                    
+                    if credits_resp.status_code == 200:
+                        all_credits = credits_resp.json().get('cast', []) + credits_resp.json().get('crew', [])
+                        # Deduplicate by ID
+                        seen = set()
+                        for c in all_credits:
+                            if c['id'] in seen: continue
+                            if IMAGE_CONFIG['REQUIRE_POSTER'] and not c.get('poster_path'): continue
+                            
+                            seen.add(c['id'])
+                            credits.append({
+                                "id": c['id'],
+                                "title": c.get('title', c.get('name', 'Unknown')),
+                                "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{c['poster_path']}" if c.get('poster_path') else None,
+                                "rating": c.get('vote_average', 0),
+                                "year": (c.get('release_date') or c.get('first_air_date') or '')[:4],
+                                "overview": c.get('overview', ''),
+                                "content_type": c['media_type'],
+                                "popularity": c.get('popularity', 0)
+                            })
+                        
+                        # Sort by popularity or release date
+                        credits.sort(key=lambda x: x.get('popularity', 0), reverse=True)
+            except Exception as e:
+                print(f"Error in person search: {e}")
+        
+        return credits[:20]
+
+    @staticmethod
     async def search_tv_shows_globally(query: str):
         """Search TV shows globally using TMDB search API"""
         tv_shows = []
-        
         async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
             try:
-                print(f"Global search for TV shows: {query}")
-                
                 search_response = await client.get(f"{TMDB_API_URL}/search/tv", params={
                     "api_key": TMDB_API_KEY,
                     "query": query,
                     "page": 1,
                     "include_adult": False
                 })
-                
                 if search_response.status_code == 200:
-                    search_results = search_response.json().get('results', [])
-                    print(f"Found {len(search_results)} TV shows in global search")
-                    
-                    for show in search_results[:API_CONFIG['MAX_SEARCH_RESULTS']]:
-                        if IMAGE_CONFIG['REQUIRE_POSTER'] and not show.get('poster_path'):
-                            continue
-                            
+                    results = search_response.json().get('results', [])
+                    for show in results[:API_CONFIG['MAX_SEARCH_RESULTS']]:
+                        if IMAGE_CONFIG['REQUIRE_POSTER'] and not show.get('poster_path'): continue
                         tv_shows.append({
                             "id": show['id'],
-                            "title": show.get('name', show.get('title', 'Unknown')),
+                            "title": show.get('name', 'Unknown'),
                             "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{show['poster_path']}" if show.get('poster_path') else None,
                             "rating": show.get('vote_average', 0),
-                            "year": show.get('first_air_date', '')[:4] if show.get('first_air_date') else '',
+                            "year": show.get('first_air_date', '')[:4],
                             "overview": show.get('overview', ''),
                             "content_type": "tv",
                             "release_date": show.get('first_air_date', '')
                         })
-            
-            except Exception as e:
-                print(f"Error in global TV search: {e}")
-        
+            except Exception as e: print(f"Error: {e}")
         return tv_shows
 
     @staticmethod

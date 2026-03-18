@@ -11,6 +11,9 @@ import threading
 from typing import List, Dict, Optional
 from collections import deque
 from dataclasses import dataclass, field
+import os
+from supabase import create_client, Client
+from config.constants import SUPABASE_URL, SUPABASE_KEY
 
 # ── Data Structures ────────────────────────────────────────────────────────────
 
@@ -53,7 +56,80 @@ class AnalyticsTracker:
                 cls._instance._cache_hits   = 0
                 cls._instance._cache_misses = 0
                 cls._instance._trace_counter = 0
+                cls._instance._supabase: Optional[Client] = None
+                cls._instance._initialized = False
         return cls._instance
+
+    def _init_db(self):
+        """Initialize Supabase and load historical data if not already done."""
+        if self._initialized:
+            return
+        
+        with self._lock:
+            if self._initialized:
+                return
+            
+            try:
+                if SUPABASE_URL and SUPABASE_KEY:
+                    self._supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+                    print("🚀 Analytics Tracker: Connected to Supabase Successfully!")
+                    self._load_historical_data()
+                else:
+                    print("⚠️ Analytics Tracker: Supabase keys missing, running in memory-only mode.")
+            except Exception as e:
+                print(f"❌ Analytics Tracker: Failed to initialize database: {e}")
+            
+            self._initialized = True
+
+    def _load_historical_data(self):
+        """Fetch last 500 traces from Supabase to restore state."""
+        if not self._supabase:
+            return
+        
+        try:
+            # Table name 'system_analytics' is expected to exist
+            print("📊 Analytics Tracker: Restoring historical metrics...")
+            response = self._supabase.table('system_analytics').select('*').order('timestamp', desc=True).limit(500).execute()
+            
+            if response.data:
+                # Traces are returned newest first, so we reverse them for the deque
+                loaded_traces = []
+                max_id_num = 0
+                
+                for item in reversed(response.data):
+                    event = TraceEvent(
+                        trace_id=item.get('trace_id', 'tr_unknown'),
+                        trace_type=item.get('trace_type', 'recommendation'),
+                        query=item.get('query', ''),
+                        latency_ms=item.get('latency_ms', 0.0),
+                        tokens_input=item.get('tokens_input', 0),
+                        tokens_output=item.get('tokens_output', 0),
+                        cache_hit=item.get('cache_hit', False),
+                        faithfulness_score=item.get('faithfulness_score'),
+                        ott_compliance_score=item.get('ott_compliance_score'),
+                        relevance_score=item.get('relevance_score'),
+                        status=item.get('status', 'ok'),
+                        timestamp=item.get('timestamp', time.time())
+                    )
+                    self._traces.append(event)
+                    
+                    if event.cache_hit:
+                        self._cache_hits += 1
+                    else:
+                        self._cache_misses += 1
+                    
+                    # Try to extract number from tr_XXXXX to preserve sequence
+                    try:
+                        if event.trace_id.startswith('tr_'):
+                            num = int(event.trace_id.split('_')[1])
+                            max_id_num = max(max_id_num, num)
+                    except:
+                        pass
+                
+                self._trace_counter = max_id_num
+                print(f"✅ Analytics Tracker: Restored {len(response.data)} traces. Last ID: tr_{max_id_num:05d}")
+        except Exception as e:
+            print(f"ℹ️ Analytics Tracker: Could not load historical data (table 'system_analytics' may not exist): {e}")
 
     def record_trace(
         self,
@@ -68,6 +144,7 @@ class AnalyticsTracker:
         relevance_score: Optional[float] = None,
         status: str = "ok"
     ) -> str:
+        self._init_db()  # Ensure DB is connected
         with self._lock:
             self._trace_counter += 1
             trace_id = f"tr_{self._trace_counter:05d}"
@@ -91,10 +168,75 @@ class AnalyticsTracker:
             else:
                 self._cache_misses += 1
 
+            # Background save to Supabase
+            if self._supabase:
+                threading.Thread(target=self._save_to_db, args=(event,), daemon=True).start()
+
         return trace_id
+
+    def _save_to_db(self, event: TraceEvent):
+        """Save a single trace event to Supabase."""
+        if not self._supabase:
+            return
+        
+        try:
+            data = {
+                "trace_id": event.trace_id,
+                "trace_type": event.trace_type,
+                "query": event.query,
+                "latency_ms": event.latency_ms,
+                "tokens_input": event.tokens_input,
+                "tokens_output": event.tokens_output,
+                "cache_hit": event.cache_hit,
+                "faithfulness_score": event.faithfulness_score,
+                "ott_compliance_score": event.ott_compliance_score,
+                "relevance_score": event.relevance_score,
+                "status": event.status,
+                "timestamp": event.timestamp
+            }
+            self._supabase.table('system_analytics').insert(data).execute()
+        except Exception:
+            pass
+
+    def update_trace_scores(self, trace_id: str, faithfulness: Optional[float] = None, ott_compliance: Optional[float] = None, relevance: Optional[float] = None):
+        """Update scores for a specific trace in memory and DB."""
+        with self._lock:
+            # Update in-memory
+            # We search from the end for efficiency as it's usually a recent trace
+            for t in reversed(self._traces):
+                if t.trace_id == trace_id:
+                    if faithfulness is not None: t.faithfulness_score = faithfulness
+                    if ott_compliance is not None: t.ott_compliance_score = ott_compliance
+                    if relevance is not None: t.relevance_score = relevance
+                    break
+        
+        # Update in DB in background
+        if self._supabase:
+            threading.Thread(
+                target=self._update_db_scores, 
+                args=(trace_id, faithfulness, ott_compliance, relevance), 
+                daemon=True
+            ).start()
+
+    def _update_db_scores(self, trace_id: str, faithfulness: Optional[float] = None, ott_compliance: Optional[float] = None, relevance: Optional[float] = None):
+        """Internal worker to update DB scores."""
+        if not self._supabase:
+            return
+            
+        try:
+            updates = {}
+            if faithfulness is not None: updates["faithfulness_score"] = faithfulness
+            if ott_compliance is not None: updates["ott_compliance_score"] = ott_compliance
+            if relevance is not None: updates["relevance_score"] = relevance
+            
+            if updates:
+                self._supabase.table('system_analytics').update(updates).eq('trace_id', trace_id).execute()
+        except Exception:
+            pass
 
     def get_summary(self) -> Dict:
         """Return aggregated metrics for the /analytics/summary endpoint."""
+        self._init_db()  # Ensure DB is connected
         with self._lock:
             traces = list(self._traces)
 

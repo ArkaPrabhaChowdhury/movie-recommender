@@ -151,7 +151,7 @@ class RecommendationEngine:
             # Fire and forget evaluation
             # Use query analysis results for the judge context if available
             eval_query = f"Personalized recommendations based on {len(context['liked'])} likes and genres: {profile.get('preferred_genres', [])[:5]}"
-            asyncio.create_task(EvaluationService.evaluate_recommendations(user_id, res["recommendations"], context, query=eval_query))
+            asyncio.create_task(EvaluationService.evaluate_recommendations(user_id, res["recommendations"], context, query=eval_query, trace_id=trace_id))
             
             return res
 
