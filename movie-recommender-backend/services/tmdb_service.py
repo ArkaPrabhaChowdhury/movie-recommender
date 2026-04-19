@@ -1,5 +1,6 @@
 import httpx
 import asyncio
+from typing import Dict, List
 from config.constants import (
     TMDB_API_KEY, TMDB_API_URL, API_CONFIG, 
     IMAGE_CONFIG, get_genre_id, get_date_range

@@ -11,10 +11,10 @@ from dotenv import load_dotenv
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 if os.path.exists(env_path):
     load_dotenv(env_path)
-    print(f"✅ Loaded .env from {env_path}")
+    print(f"[ OK ] Loaded .env from {env_path}")
 else:
-    load_dotenv() # Fallback to default behavior
-    print(f"ℹ️  No .env found at {env_path}, using system environment variables")
+    load_dotenv()  # Fallback to default behavior
+    print(f"[INFO] No .env found at {env_path}, using system environment variables")
 
 # API Configuration
 TMDB_API_KEY = os.getenv('TMDB_API_KEY', '120b28e3a6abbe3a6837a90885401cb8')
@@ -24,8 +24,8 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
 # Debug prints (sanitized)
-if not SUPABASE_URL: print("⚠️ SUPABASE_URL is missing in environment.")
-if not SUPABASE_KEY: print("⚠️ SUPABASE_KEY is missing in environment.")
+if not SUPABASE_URL: print("[WARN] SUPABASE_URL is missing in environment.")
+if not SUPABASE_KEY: print("[WARN] SUPABASE_KEY is missing in environment.")
 
 # Server Configuration
 SERVER_CONFIG = {
