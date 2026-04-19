@@ -17,6 +17,7 @@ from services.semantic_cache_service import SemanticCacheService
 from services.user_preference_service import UserPreferenceService
 from services.streaming_service import StreamingService
 from services.evaluation_service import EvaluationService
+from services.tmdb_service import TMDBService
 
 router = APIRouter()
 embedding_service = EmbeddingService()
@@ -34,18 +35,6 @@ async def ai_chat_recommendation(request: AIChatRequest):
         
         print(f"🤖 AI Chat request: '{user_message}'")
         _t0 = time.time()
-        
-        # 0. Check Semantic Cache
-        cached_response = await cache_service.get_cached_response(user_message)
-        if cached_response:
-            latency_ms = (time.time() - _t0) * 1000
-            tracker.record_trace(
-                trace_type="ai_chat",
-                query=user_message,
-                latency_ms=latency_ms,
-                cache_hit=True
-            )
-            return cached_response
 
         # 1. SMART DISPATCHER
         # AI decides if we need a direct search (Director/Actor/Franchise) or semantic search (Vibe/Mood)
@@ -86,6 +75,13 @@ async def ai_chat_recommendation(request: AIChatRequest):
         
         # 2. EXECUTION PHASE
         if strategy == "direct":
+            # Check cache for direct queries too (keyed on dispatcher's extracted query)
+            cached_response = await cache_service.get_cached_response(search_query)
+            if cached_response:
+                latency_ms = (time.time() - _t0) * 1000
+                tracker.record_trace(trace_type="ai_chat", query=user_message, latency_ms=latency_ms, cache_hit=True)
+                return cached_response
+
             print(f"🎯 Performing DIRECT search for: '{search_query}'")
             final_recommendations = await global_search_with_ott_filtering(search_query, request.user_id)
             
@@ -98,14 +94,21 @@ async def ai_chat_recommendation(request: AIChatRequest):
 
         if strategy == "semantic":
             # Expand intent ONLY if it doesn't look like a direct title/person request
-            # (Double check to prevent "Director movies" from becoming a "Vibe")
             is_generic = len(user_message.split()) > 2 or any(word in user_message.lower() for word in ['movie', 'show', 'vibe', 'like'])
-            
+
             if is_generic:
                 expansion_prompt = f'Translate vibe into a descriptive search: "{user_message}". NO conversational filler.'
                 expanded_query = await OllamaService.get_ai_response(expansion_prompt, temperature=0.1)
                 search_query = expanded_query or user_message
-            
+
+            # Check semantic cache on the EXPANDED query so structurally similar phrases
+            # with different titles (e.g. "like Vadh" vs "like Daredevil") don't collide
+            cached_response = await cache_service.get_cached_response(search_query)
+            if cached_response:
+                latency_ms = (time.time() - _t0) * 1000
+                tracker.record_trace(trace_type="ai_chat", query=user_message, latency_ms=latency_ms, cache_hit=True)
+                return cached_response
+
             print(f"🧠 Performing SEMANTIC search for: '{search_query}'")
             try:
                 query_embedding = embedding_service.generate_embedding(search_query)
@@ -128,7 +131,7 @@ async def ai_chat_recommendation(request: AIChatRequest):
                     
                     candidates = await StreamingService.get_streaming_providers_batch(candidates, 'both')
                     candidates = [c for c in candidates if c.get("streaming", {}).get("platform_found")]
-                    
+
                     seen_ids = {r['id'] for r in final_recommendations}
                     for c in candidates:
                         if c['id'] not in seen_ids:
@@ -136,6 +139,26 @@ async def ai_chat_recommendation(request: AIChatRequest):
                             seen_ids.add(c['id'])
             except Exception as e:
                 print(f"⚠️ Semantic search failure: {e}")
+
+            # TMDB Similar: when user says "like [title]", fetch TMDB /similar for that title
+            # This gives diverse, precise results independent of vector DB coverage
+            import re as _re
+            like_match = _re.search(r'like\s+(.+?)(?:\s+but|\s+in\s|\s*$)', user_message, _re.IGNORECASE)
+            if like_match:
+                ref_title = like_match.group(1).strip()
+                print(f"🎯 Fetching TMDB similar for reference title: '{ref_title}'")
+                try:
+                    tmdb_similar = await TMDBService.get_similar_by_title(ref_title)
+                    if tmdb_similar:
+                        tmdb_similar = await StreamingService.get_streaming_providers_batch(tmdb_similar, 'both')
+                        tmdb_similar = [c for c in tmdb_similar if c.get("streaming", {}).get("platform_found")]
+                        seen_ids = {r['id'] for r in final_recommendations}
+                        for c in tmdb_similar:
+                            if c['id'] not in seen_ids:
+                                final_recommendations.append(c)
+                                seen_ids.add(c['id'])
+                except Exception as e:
+                    print(f"⚠️ TMDB similar lookup failed: {e}")
 
         # 2.5 Fallback: Rule-based recommendations when semantic/direct yield nothing
         if not final_recommendations:
@@ -209,8 +232,9 @@ async def ai_chat_recommendation(request: AIChatRequest):
             }]
         }
         
-        # Save to Cache
-        await cache_service.set_cached_response(user_message, final_res)
+        # Save to Cache using the expanded query so future semantically-similar
+        # but entity-distinct queries (e.g. "like Vadh" vs "like Daredevil") don't collide
+        await cache_service.set_cached_response(search_query, final_res)
         
         # Analytics Tracking
         latency_ms = (time.time() - _t0) * 1000

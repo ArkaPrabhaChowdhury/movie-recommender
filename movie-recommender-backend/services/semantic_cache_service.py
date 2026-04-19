@@ -25,7 +25,7 @@ class SemanticCacheService:
             
             params = {
                 "query_embedding": query_embedding,
-                "match_threshold": 0.95,
+                "match_threshold": 0.97,
                 "match_count": 1
             }
             
@@ -38,7 +38,7 @@ class SemanticCacheService:
                 similarity = float(cached.get('similarity', 0))
                 
                 # Check for NaN or non-finite similarity which indicates a vector match error
-                if not math.isfinite(similarity) or similarity < 0.95:
+                if not math.isfinite(similarity) or similarity < 0.97:
                     print(f"⚠️ Invalid cache similarity ({similarity}), ignoring.")
                     return None
 

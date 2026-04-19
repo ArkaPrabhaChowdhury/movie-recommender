@@ -455,3 +455,56 @@ class TMDBService:
                 print(f"❌ Error fetching watch providers: {e}")
                 return []
 
+    @staticmethod
+    async def get_similar_by_title(title: str, content_type: str = 'both') -> List[Dict]:
+        """Search for a title, then fetch TMDB similar recommendations for it."""
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            try:
+                types_to_try = ['movie', 'tv'] if content_type == 'both' else [content_type]
+                found_id, found_type = None, None
+
+                for ct in types_to_try:
+                    endpoint = 'movie' if ct == 'movie' else 'tv'
+                    resp = await client.get(f"{TMDB_API_URL}/search/{endpoint}", params={
+                        "api_key": TMDB_API_KEY,
+                        "query": title,
+                        "page": 1,
+                        "include_adult": False
+                    })
+                    if resp.status_code == 200:
+                        results = resp.json().get('results', [])
+                        if results:
+                            found_id = results[0]['id']
+                            found_type = ct
+                            break
+
+                if not found_id:
+                    return []
+
+                sim_resp = await client.get(
+                    f"{TMDB_API_URL}/{'movie' if found_type == 'movie' else 'tv'}/{found_id}/similar",
+                    params={"api_key": TMDB_API_KEY, "page": 1}
+                )
+                if sim_resp.status_code != 200:
+                    return []
+
+                items = []
+                for item in sim_resp.json().get('results', [])[:20]:
+                    if IMAGE_CONFIG['REQUIRE_POSTER'] and not item.get('poster_path'):
+                        continue
+                    items.append({
+                        "id": item['id'],
+                        "title": item.get('title') or item.get('name', ''),
+                        "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{item['poster_path']}" if item.get('poster_path') else None,
+                        "rating": item.get('vote_average', 0),
+                        "year": (item.get('release_date') or item.get('first_air_date') or '')[:4],
+                        "overview": item.get('overview', ''),
+                        "content_type": found_type,
+                        "original_language": item.get('original_language', ''),
+                        "source": "tmdb_similar"
+                    })
+                print(f"✅ TMDB similar for '{title}': {len(items)} results")
+                return items
+            except Exception as e:
+                print(f"❌ Error in get_similar_by_title: {e}")
+                return []
