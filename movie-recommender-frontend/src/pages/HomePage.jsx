@@ -23,6 +23,7 @@ const HomePage = ({
     dislikeContent,
     addToWatchlist,
     markAsWatched,
+    watchSeries,
     isPersonalizedMode,
     setIsPersonalizedMode,
     isAIRecommendationMode,
@@ -216,6 +217,7 @@ const HomePage = ({
                 onDislike={dislikeContent}
                 onWatchlist={addToWatchlist}
                 onWatched={markAsWatched}
+                onWatching={watchSeries}
                 userInteractions={userProfile?.recent_activity || []}
                 interactionMap={userProfile?.interaction_map || {}}
                 subscribedProviders={userProfile?.profile?.subscribed_providers || []}

@@ -4,6 +4,7 @@ from datetime import datetime
 from collections import Counter
 from models.user_models import UserProfile, ContentInteraction
 from config.constants import SUPABASE_URL, SUPABASE_KEY
+from services.tmdb_service import TMDBService
 
 class UserPreferenceService:
     def __init__(self):
@@ -65,6 +66,11 @@ class UserPreferenceService:
             if preferences is None:
                 preferences = []
             
+            watching_episode_id = None
+            if interaction.action == "watching" and interaction.content_type == "tv":
+                episode_status = await TMDBService.get_tv_episode_status(interaction.content_id)
+                watching_episode_id = (episode_status.get("last_episode") or {}).get("id")
+
             # Convert interaction to dict for storage
             interaction_dict = {
                 "user_id": interaction.user_id,
@@ -84,6 +90,8 @@ class UserPreferenceService:
                 "popularity": getattr(interaction, 'popularity', 0),
                 "poster": getattr(interaction, 'poster', None)
             }
+            if interaction.action == "watching":
+                interaction_dict["last_notified_episode_id"] = watching_episode_id
             
             # Logic for mutually exclusive actions
             exclusive_sets = [{"liked", "disliked"}, {"watchlisted", "watched"}]
@@ -279,6 +287,64 @@ class UserPreferenceService:
         """Fetch all users who have an email address stored."""
         if not self.supabase:
             return []
+        try:
+            response = self.supabase.table('user_data').select('user_id, email, full_name').execute()
+            if response.data:
+                return [u for u in response.data if u.get('email')]
+            return []
+        except Exception as e:
+            print(f"Error fetching users for email: {e}")
+            return []
+
+    async def get_all_watching_users(self) -> List[Dict]:
+        """Return email-enabled users and their TV watching subscriptions."""
+        if not self.supabase:
+            return []
+        try:
+            response = self.supabase.table('user_data').select(
+                'user_id, email, full_name, preferences'
+            ).execute()
+            users = []
+            for user in response.data or []:
+                watching = [
+                    item for item in (user.get('preferences') or [])
+                    if isinstance(item, dict)
+                    and item.get('action') == 'watching'
+                    and item.get('content_type') == 'tv'
+                ]
+                if user.get('email') and watching:
+                    users.append({**user, 'watching': watching})
+            return users
+        except Exception as e:
+            print(f"Error fetching watching users: {e}")
+            return []
+
+    async def update_watching_episode(self, user_id: str, content_id: int, episode_id: int) -> bool:
+        """Persist the last episode sent for a user's watching subscription."""
+        if not self.supabase:
+            return False
+        try:
+            record = await self._get_user_record(user_id)
+            preferences = record.get('preferences') if isinstance(record.get('preferences'), list) else []
+            updated = []
+            changed = False
+            for item in preferences:
+                if (isinstance(item, dict) and item.get('action') == 'watching'
+                        and item.get('content_type') == 'tv'
+                        and item.get('content_id') == content_id):
+                    item = {**item, 'last_notified_episode_id': episode_id}
+                    changed = True
+                updated.append(item)
+            if not changed:
+                return False
+            self.supabase.table('user_data').upsert({
+                'user_id': user_id,
+                'preferences': updated
+            }).execute()
+            return True
+        except Exception as e:
+            print(f"Error updating watching episode for {user_id}: {e}")
+            return False
         try:
             # We select user_id, email, and full_name
             response = self.supabase.table('user_data').select('user_id, email, full_name').execute()

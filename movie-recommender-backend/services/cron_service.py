@@ -3,6 +3,8 @@ from typing import List, Dict
 from services.user_preference_service import UserPreferenceService
 from services.recommendation_engine import RecommendationEngine
 from services.email_service import EmailService
+from services.tmdb_service import TMDBService
+from datetime import datetime, timezone
 
 class CronService:
     def __init__(self):
@@ -67,4 +69,39 @@ class CronService:
                 results["failed"] += 1
 
         print(f"🏁 Weekly task completed: {results}")
+        return results
+
+    async def run_watching_notifications(self):
+        """Check TMDB for newly aired episodes and email watching subscribers."""
+        users = await self.user_service.get_all_watching_users()
+        results = {"total_users": len(users), "episodes_checked": 0, "emails_sent": 0, "failed": 0}
+        now = datetime.now(timezone.utc).date()
+
+        for user in users:
+            user_name = (user.get('full_name') or 'User').split(' ')[0]
+            for subscription in user.get('watching', []):
+                try:
+                    status = await TMDBService.get_tv_episode_status(subscription['content_id'])
+                    episode = status.get('last_episode') or {}
+                    air_date = episode.get('air_date')
+                    results['episodes_checked'] += 1
+                    if not episode.get('id') or not air_date or datetime.fromisoformat(air_date).date() > now:
+                        continue
+                    if episode.get('id') == subscription.get('last_notified_episode_id'):
+                        continue
+
+                    show = {**subscription, 'id': subscription['content_id']}
+                    sent = await self.email_service.send_episode_notification_email(
+                        user.get('email'), user_name, show, episode
+                    )
+                    if sent:
+                        await self.user_service.update_watching_episode(
+                            user['user_id'], subscription['content_id'], episode['id']
+                        )
+                        results['emails_sent'] += 1
+                    else:
+                        results['failed'] += 1
+                except Exception as e:
+                    print(f"Error processing watching subscription: {e}")
+                    results['failed'] += 1
         return results

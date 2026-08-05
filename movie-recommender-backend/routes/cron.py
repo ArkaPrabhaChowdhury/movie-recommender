@@ -32,3 +32,12 @@ async def trigger_weekly_recommendations(authorized: bool = Depends(verify_cron_
     except Exception as e:
         print(f"❌ Cron execution failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/watching-notifications")
+async def trigger_watching_notifications(authorized: bool = Depends(verify_cron_secret)):
+    """Check TMDB daily and notify users when a watched show's episode airs."""
+    try:
+        return {"status": "completed", "results": await cron_service.run_watching_notifications()}
+    except Exception as e:
+        print(f"Watching notification cron failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

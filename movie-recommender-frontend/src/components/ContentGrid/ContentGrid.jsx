@@ -23,6 +23,7 @@ const ContentGrid = ({
   onDislike,
   onWatchlist,
   onWatched,
+  onWatching,
   userInteractions,
   interactionMap = {},
   subscribedProviders = [],
@@ -101,6 +102,7 @@ const ContentGrid = ({
                 onDislike={onDislike}
                 onWatchlist={onWatchlist}
                 onWatched={onWatched}
+                onWatching={onWatching}
                 userInteractions={userInteractions}
                 interactionMap={interactionMap}
                 subscribedProviders={subscribedProviders}
@@ -136,6 +138,7 @@ const ContentGrid = ({
           onDislike={onDislike}
           onWatchlist={onWatchlist}
           onWatched={onWatched}
+          onWatching={onWatching}
           userInteractions={userInteractions}
           interactionMap={interactionMap}
           subscribedProviders={subscribedProviders}

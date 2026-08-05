@@ -9,6 +9,7 @@ const ContentCard = ({
   onDislike,
   onWatchlist,
   onWatched,
+  onWatching,
   userInteractions = [],
   interactionMap = {},
   showInteractionButtons = false,
@@ -43,6 +44,7 @@ const ContentCard = ({
             onDislike={onDislike}
             onWatchlist={onWatchlist}
             onWatched={onWatched}
+            onWatching={onWatching}
             userInteractions={userInteractions}
             interactionMap={interactionMap}
           />

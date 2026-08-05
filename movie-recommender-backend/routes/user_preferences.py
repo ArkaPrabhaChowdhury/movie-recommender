@@ -15,6 +15,8 @@ recommendation_engine = RecommendationEngine()
 async def record_user_interaction(interaction: ContentInteraction):
     """Record user interaction (like, dislike, watchlist, watched)"""
     try:
+        if interaction.action == "watching" and interaction.content_type != "tv":
+            raise HTTPException(status_code=400, detail="Watching notifications are available for TV shows only")
         print(f"📝 Recording interaction: {interaction.action} for '{interaction.title}' by {interaction.user_id}")
         
         success = await preference_service.record_interaction(interaction)
@@ -49,6 +51,7 @@ async def get_user_profile(user_id: str):
         liked_interactions = [item for item in interactions if item["action"] == "liked"]
         watchlist_interactions = [item for item in interactions if item["action"] == "watchlisted"]
         watched_interactions = [item for item in interactions if item["action"] == "watched"]
+        watching_interactions = [item for item in interactions if item["action"] == "watching"]
         
         # Calculate genre distribution
         genre_distribution = {}
@@ -72,6 +75,7 @@ async def get_user_profile(user_id: str):
                 "liked_content": len(liked_interactions),
                 "watchlist_items": len(watchlist_interactions),
                 "watched_items": len(watched_interactions),
+                "watching_items": len(watching_interactions),
                 "genre_distribution": genre_distribution
             },
             "recent_activity": interactions[:10],  # Newest 10 interactions
