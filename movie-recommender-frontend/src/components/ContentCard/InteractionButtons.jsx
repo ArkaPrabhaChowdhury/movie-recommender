@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, ThumbsDown, Bookmark, CheckCircle, Plus, X } from 'lucide-react';
+import { Heart, ThumbsDown, Bookmark, CheckCircle, BellRing, Plus, X } from 'lucide-react';
 
 const InteractionButtons = ({
   item,
@@ -7,6 +7,7 @@ const InteractionButtons = ({
   onDislike,
   onWatchlist,
   onWatched,
+  onWatching,
   userInteractions = [],
   interactionMap = {}
 }) => {
@@ -57,6 +58,9 @@ const InteractionButtons = ({
           console.log('Calling onWatched...');
           result = await onWatched(item, rating);
           break;
+        case 'watching':
+          result = await onWatching(item);
+          break;
       }
 
       console.log('✅ Interaction result:', result);
@@ -97,7 +101,8 @@ const InteractionButtons = ({
           <div className="flex items-center justify-center transition-transform group-hover:scale-110">
             {hasAction('liked') ? <Heart size={18} fill="currentColor" className="text-red-500" /> :
               hasAction('watchlisted') ? <Bookmark size={18} fill="currentColor" className="text-blue-500" /> :
-                hasAction('watched') ? <CheckCircle size={18} className="text-green-500" /> :
+              hasAction('watched') ? <CheckCircle size={18} className="text-green-500" /> :
+              hasAction('watching') ? <BellRing size={18} className="text-amber-400" /> :
                   hasAction('disliked') ? <ThumbsDown size={18} className="text-gray-400" /> :
                     <Plus size={20} />}
           </div>
@@ -144,6 +149,17 @@ const InteractionButtons = ({
             <CheckCircle size={16} fill={hasAction('watched') ? "currentColor" : "none"} />
             <span>Watched</span>
           </button>
+
+          {item.content_type === 'tv' && (
+            <button
+              onClick={(e) => handleInteraction(e, 'watching')}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${hasAction('watching') ? 'bg-amber-500/10 text-amber-400 font-medium' : 'text-gray-300 hover:bg-white/5'}`}
+              title="Email me when a new episode airs"
+            >
+              <BellRing size={16} />
+              <span>Watching</span>
+            </button>
+          )}
 
           <button
             onClick={(e) => {

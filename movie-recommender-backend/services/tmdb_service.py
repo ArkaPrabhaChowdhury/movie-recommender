@@ -8,6 +8,29 @@ from config.constants import (
 
 class TMDBService:
     @staticmethod
+    async def get_tv_episode_status(content_id: int) -> Dict:
+        """Return TMDB's latest and upcoming episode records for a TV show."""
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            try:
+                response = await client.get(
+                    f"{TMDB_API_URL}/tv/{content_id}",
+                    params={"api_key": TMDB_API_KEY}
+                )
+                if response.status_code != 200:
+                    return {}
+
+                data = response.json()
+                return {
+                    "show_title": data.get("name", "Unknown show"),
+                    "status": data.get("status", ""),
+                    "last_episode": data.get("last_episode_to_air"),
+                    "next_episode": data.get("next_episode_to_air")
+                }
+            except Exception as e:
+                print(f"Error fetching episode status for TV {content_id}: {e}")
+                return {}
+
+    @staticmethod
     async def fetch_movies(language_code: str, genre: str, date_from: str, date_to: str, page: int = 1):
         """Fetch movies with date filtering and correct genre ID"""
         movies = []

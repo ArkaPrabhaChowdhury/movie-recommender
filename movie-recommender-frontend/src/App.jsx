@@ -40,6 +40,7 @@ function App() {
     dislikeContent,
     addToWatchlist,
     markAsWatched,
+    watchSeries,
     getPersonalizedRecommendations,
     updateSubscriptions,
     hasPreferences,
@@ -122,6 +123,7 @@ function App() {
                 dislikeContent={dislikeContent}
                 addToWatchlist={addToWatchlist}
                 markAsWatched={markAsWatched}
+                watchSeries={watchSeries}
                 isPersonalizedMode={isPersonalizedMode}
                 setIsPersonalizedMode={setIsPersonalizedMode}
                 isAIRecommendationMode={isAIRecommendationMode}
@@ -158,6 +160,7 @@ function App() {
                 dislikeContent={dislikeContent}
                 addToWatchlist={addToWatchlist}
                 markAsWatched={markAsWatched}
+                watchSeries={watchSeries}
               />
             }
           />
@@ -179,6 +182,7 @@ function App() {
                 dislikeContent={dislikeContent}
                 addToWatchlist={addToWatchlist}
                 markAsWatched={markAsWatched}
+                watchSeries={watchSeries}
                 isPersonalizedMode={isPersonalizedMode}
                 setIsPersonalizedMode={setIsPersonalizedMode}
                 isAIRecommendationMode={isAIRecommendationMode}

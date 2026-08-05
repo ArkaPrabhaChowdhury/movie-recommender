@@ -22,7 +22,8 @@ const MyListPage = ({
     likeContent,
     dislikeContent,
     addToWatchlist,
-    markAsWatched
+    markAsWatched,
+    watchSeries
 }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -202,6 +203,7 @@ const MyListPage = ({
                         onDislike={dislikeContent}
                         onWatchlist={addToWatchlist}
                         onWatched={markAsWatched}
+                        onWatching={watchSeries}
                         userInteractions={userProfile?.recent_activity || []}
                         interactionMap={userProfile?.interaction_map || {}}
                         subscribedProviders={userProfile?.profile?.subscribed_providers || []}

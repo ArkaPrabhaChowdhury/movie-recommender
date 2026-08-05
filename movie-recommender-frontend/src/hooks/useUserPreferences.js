@@ -168,6 +168,7 @@ export const useUserPreferences = () => {
   const dislikeContent = (contentData) => recordInteraction(contentData, 'disliked');
   const addToWatchlist = (contentData) => recordInteraction(contentData, 'watchlisted');
   const markAsWatched = (contentData, rating = null) => recordInteraction(contentData, 'watched', rating);
+  const watchSeries = (contentData) => recordInteraction(contentData, 'watching');
 
   const updateSubscriptions = async (providerIds) => {
     if (!userId) return false;
@@ -201,6 +202,7 @@ export const useUserPreferences = () => {
     dislikeContent,
     addToWatchlist,
     markAsWatched,
+    watchSeries,
     getPersonalizedRecommendations,
     loadUserProfile,
     updateSubscriptions,

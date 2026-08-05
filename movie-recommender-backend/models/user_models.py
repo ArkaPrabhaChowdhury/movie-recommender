@@ -27,7 +27,7 @@ class ContentInteraction(BaseModel):
     content_id: int
     content_type: str
     title: str
-    action: str  # like, dislike, watchlist, watched
+    action: str  # liked, disliked, watchlisted, watched, watching
     rating: Optional[float] = None
     genres: List[str] = []
     language: str

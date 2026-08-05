@@ -4,7 +4,7 @@ import ApiService from '../../services/api';
 import { UI_CONFIG } from '../../config/constants';
 import InteractionButtons from './InteractionButtons';
 
-const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, onDislike, onWatchlist, onWatched, userInteractions, interactionMap = {}, subscribedProviders = [] }) => {
+const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, onDislike, onWatchlist, onWatched, onWatching, userInteractions, interactionMap = {}, subscribedProviders = [] }) => {
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -195,6 +195,7 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
                                             onDislike={onDislike}
                                             onWatchlist={onWatchlist}
                                             onWatched={onWatched}
+                                            onWatching={onWatching}
                                             userInteractions={userInteractions}
                                             interactionMap={interactionMap}
                                         />
