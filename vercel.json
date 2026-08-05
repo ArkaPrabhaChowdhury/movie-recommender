@@ -21,7 +21,7 @@
     },
     {
       "path": "/api/cron/watching-notifications",
-      "schedule": "0 * * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }
