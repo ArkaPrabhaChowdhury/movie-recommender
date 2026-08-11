@@ -55,16 +55,17 @@ const ContentGrid = ({
       { threshold: 1.0 }
     );
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+    const sentinel = observerRef.current;
+    if (sentinel) {
+      observer.observe(sentinel);
     }
 
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
+      if (sentinel) {
+        observer.unobserve(sentinel);
       }
     };
-  }, [loading, loadingMore, hasMore, onLoadMore]);
+  }, [loading, loadingMore, hasMore, onLoadMore, error]);
 
   return (
     <>

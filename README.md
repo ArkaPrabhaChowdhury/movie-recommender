@@ -26,7 +26,7 @@ Run the reproducible benchmark:
 python evaluation/run_evaluation.py
 ```
 
-The frozen dataset contains three preference scenarios and measures Precision@3, Recall@3, NDCG@3, diversity, catalog coverage, regional-language representation, subscription compliance, metadata-error rate, token usage, and estimated LLM cost. The generated report is [evaluation/REPORT.md](evaluation/REPORT.md).
+The frozen dataset expands three preference templates into 36 deterministic cases covering regional languages, subscription constraints, disliked genres/actors, “like X but not Y” queries, missing metadata, provider failures, duplicate titles, hallucinated availability, and cold/warm cache labels. It measures Precision@3, Recall@3, NDCG@3, diversity, catalog coverage, regional-language representation, subscription compliance, metadata-error rate, token usage, and estimated LLM cost. The generated report is [evaluation/REPORT.md](evaluation/REPORT.md).
 
 | Strategy | P@3 | R@3 | NDCG@3 | Diversity | Subscription compliance | Tokens | Cost / recommendation |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -37,6 +37,18 @@ The frozen dataset contains three preference scenarios and measures Precision@3,
 | Hybrid + semantic cache | 0.778 | 0.889 | 0.901 | 1.000 | 1.000 | 0 | $0.000000 |
 
 These are offline ranking results, not proof of live TMDB, Supabase, provider, email, or LLM performance. The `rerank` and `cache` rows use deterministic stand-ins for those stages.
+
+## Continuous verification and load probe
+
+GitHub Actions runs Python compilation, the 36-case benchmark, smoke tests, frontend lint, frontend production build, npm audit, and pip-audit on pushes and pull requests. Dependency audits are non-blocking while existing dependency debt is triaged, but their findings remain visible in the workflow.
+
+Run the reproducible HTTP probe against a local or deployed endpoint:
+
+```powershell
+python evaluation/load_test.py --url https://ottscout.arkocodes.dev/api/health --requests 100 --concurrency 10
+```
+
+Pass `--warm-url` to compare alternating cold/warm targets. The probe reports P50/P95 latency, requests per second, concurrent request count, failure rate, and estimated cost. It does not infer server cache state; recommendation cost and cache telemetry must come from `/api/analytics/summary`.
 
 ## Reliability and observability
 
@@ -93,7 +105,7 @@ Required secrets are environment variables. Never commit `.env` files or service
 
 ## Known limitations
 
-- The offline benchmark is small and synthetic; it needs a larger anonymized relevance set and a live replay harness.
+- The offline benchmark has 36 synthetic cases; it still needs a larger anonymized relevance set and a live replay harness.
 - No measured burst/concurrency or availability study is included, so this README does not claim automatic burst handling or real-time behavior.
 - Historical verification confirmed the notification UI/API and deployment, but actual Resend delivery was not fully exercised.
 - Frontend lint has no errors but still reports four pre-existing React hook warnings; a production-readiness claim should wait for that cleanup.
