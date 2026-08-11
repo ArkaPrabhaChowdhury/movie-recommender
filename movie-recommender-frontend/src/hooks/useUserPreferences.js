@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ApiService from '../services/api';
 import ApiCache from '../services/apiCache';
 import { supabase } from '../services/supabaseClient';
@@ -61,13 +61,7 @@ export const useUserPreferences = () => {
   }, []);
 
   // Load user profile when userId is available
-  useEffect(() => {
-    if (userId) {
-      loadUserProfile();
-    }
-  }, [userId]);
-
-  const loadUserProfile = async () => {
+  const loadUserProfile = useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -81,7 +75,13 @@ export const useUserPreferences = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadUserProfile();
+    }
+  }, [userId, loadUserProfile]);
 
   const recordInteraction = async (contentData, action, rating = null) => {
     if (!userId || !contentData) return false;

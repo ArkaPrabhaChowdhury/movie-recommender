@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Bookmark,
@@ -39,16 +39,7 @@ const MyListPage = ({
     const [sortBy, setSortBy] = useState('newest'); // 'newest', 'rating', 'title'
     const [filterType, setFilterType] = useState('all'); // 'all', 'movie', 'tv'
 
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const urlTab = params.get('tab');
-        if (urlTab && (urlTab === 'watchlist' || urlTab === 'history') && urlTab !== activeTab) {
-            setActiveTab(urlTab);
-        }
-        fetchListData();
-    }, [activeTab, userId, userProfile?.updated_at, location.search]);
-
-    const fetchListData = async () => {
+    const fetchListData = useCallback(async () => {
         if (!userId) return;
         setIsLoading(true);
         try {
@@ -73,7 +64,16 @@ const MyListPage = ({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [activeTab, userId]);
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const urlTab = params.get('tab');
+        if (urlTab && (urlTab === 'watchlist' || urlTab === 'history') && urlTab !== activeTab) {
+            setActiveTab(urlTab);
+        }
+        fetchListData();
+    }, [activeTab, userId, userProfile?.updated_at, location.search, fetchListData]);
 
     // Filter and Sort Logic
     const filteredContent = listContent
