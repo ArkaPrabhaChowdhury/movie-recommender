@@ -9,9 +9,7 @@ import ApiService from '../services/api';
 const ProfilePage = ({
     userProfile,
     userName,
-    onGetPersonalizedRecommendations,
     hasPreferences,
-    loading,
     updateSubscriptions
 }) => {
     const navigate = useNavigate();

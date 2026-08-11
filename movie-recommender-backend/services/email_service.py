@@ -2,6 +2,7 @@ import os
 from typing import Dict, List
 
 import httpx
+from utils.analytics_tracker import tracker
 
 
 class EmailService:
@@ -12,6 +13,7 @@ class EmailService:
 
     async def _send(self, to_email: str, subject: str, html: str) -> bool:
         if not self.api_key:
+            tracker.record_event("email_failures")
             print("RESEND_API_KEY not set. Skipping email.")
             return False
         try:
@@ -22,10 +24,13 @@ class EmailService:
                     json={"from": self.from_email, "to": to_email, "subject": subject, "html": html}
                 )
                 if response.status_code not in [200, 201]:
+                    tracker.record_event("email_failures")
                     print(f"Resend API Error {response.status_code}: {response.text}")
                     return False
+                tracker.record_event("email_successes")
                 return True
         except Exception as e:
+            tracker.record_event("email_failures")
             print(f"Failed to send email: {e}")
             return False
 

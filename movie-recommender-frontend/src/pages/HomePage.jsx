@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Sparkles, Bot, ArrowLeft } from 'lucide-react';
 import FilterSection from '../components/Filters/FilterSection';

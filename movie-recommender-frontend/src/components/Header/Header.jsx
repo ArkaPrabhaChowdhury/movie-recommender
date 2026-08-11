@@ -8,10 +8,7 @@ const Header = ({
   searchQuery,
   onSearchChange,
   onClearSearch,
-  isGlobalSearch,
-  globalSearchResults,
   userId,
-  userName,
   isAdmin
 }) => {
   const navigate = useNavigate();

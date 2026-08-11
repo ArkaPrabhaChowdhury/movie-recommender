@@ -1,5 +1,6 @@
 import { API_CONFIG } from '../config/constants';
 import ApiCache from './apiCache';
+import { supabase } from './supabaseClient';
 
 // Prune any expired entries once when the module loads
 ApiCache.pruneExpired();
@@ -11,8 +12,12 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 class ApiService {
   static async request(endpoint, options = {}) {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+    const { data: { session } = {} } = supabase ? await supabase.auth.getSession() : { data: {} };
     const defaultOptions = {
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      },
       ...options,
     };
 

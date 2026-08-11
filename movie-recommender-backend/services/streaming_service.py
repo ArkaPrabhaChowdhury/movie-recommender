@@ -1,6 +1,7 @@
 import httpx
 import asyncio
 from config.constants import TMDB_API_KEY, TMDB_API_URL, INDIAN_OTT_PLATFORMS, API_CONFIG
+from utils.analytics_tracker import tracker
 
 class StreamingService:
     @staticmethod
@@ -37,6 +38,7 @@ class StreamingService:
             
             for i, response in enumerate(responses):
                 if isinstance(response, Exception):
+                    tracker.record_event("provider_failures")
                     print(f"Error for item {valid_items[i]['id']}: {response}")
                     continue
                     
@@ -97,6 +99,7 @@ class StreamingService:
                         ott_content.append(content_item)
                             
                 except Exception as e:
+                    tracker.record_event("provider_failures")
                     print(f"Error processing streaming data for item {valid_items[i]['id']}: {e}")
                     # Still add the item even on error
                     content_item = valid_items[i].copy()

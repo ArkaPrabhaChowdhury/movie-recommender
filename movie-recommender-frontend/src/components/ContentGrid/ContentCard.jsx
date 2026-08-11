@@ -1,5 +1,4 @@
 import { UI_CONFIG } from '../../config/constants';
-import { isRecentRelease } from '../../config/constants';
 import InteractionButtons from '../ContentCard/InteractionButtons';
 import { Star, Film, Tv } from 'lucide-react';
 

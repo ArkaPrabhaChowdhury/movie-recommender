@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import { useAIChat } from '../../hooks/useAIChat';
