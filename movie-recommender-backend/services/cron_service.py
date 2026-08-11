@@ -5,6 +5,7 @@ from services.recommendation_engine import RecommendationEngine
 from services.email_service import EmailService
 from services.tmdb_service import TMDBService
 from datetime import datetime, timezone
+from utils.analytics_tracker import tracker
 
 class CronService:
     def __init__(self):
@@ -88,6 +89,7 @@ class CronService:
                     if not episode.get('id') or not air_date or datetime.fromisoformat(air_date).date() > now:
                         continue
                     if episode.get('id') == subscription.get('last_notified_episode_id'):
+                        tracker.record_event("duplicate_notifications_prevented")
                         continue
 
                     show = {**subscription, 'id': subscription['content_id']}
@@ -95,11 +97,13 @@ class CronService:
                         user.get('email'), user_name, show, episode
                     )
                     if sent:
+                        tracker.record_event("notification_successes")
                         await self.user_service.update_watching_episode(
                             user['user_id'], subscription['content_id'], episode['id']
                         )
                         results['emails_sent'] += 1
                     else:
+                        tracker.record_event("notification_failures")
                         results['failed'] += 1
                 except Exception as e:
                     print(f"Error processing watching subscription: {e}")

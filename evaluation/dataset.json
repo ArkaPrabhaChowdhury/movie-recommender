@@ -1,0 +1,47 @@
+[
+  {
+    "id": "regional_crime",
+    "preferences": ["crime", "drama"],
+    "languages": ["hi", "ta"],
+    "subscriptions": [8, 119],
+    "relevant_ids": [101, 102, 103],
+    "relevant_languages": ["hi", "ta"],
+    "candidates": [
+      {"id": 101, "title": "Delhi Crime", "genres": ["crime", "drama"], "language": "hi", "providers": [8]},
+      {"id": 102, "title": "Suzhal", "genres": ["crime", "drama"], "language": "ta", "providers": [119]},
+      {"id": 104, "title": "The Night Agent", "genres": ["action", "thriller"], "language": "en", "providers": [8]},
+      {"id": 103, "title": "Kohrra", "genres": ["crime", "drama"], "language": "hi", "providers": [119]},
+      {"id": 105, "title": "Friends", "genres": ["comedy"], "language": "en", "providers": [8]}
+    ]
+  },
+  {
+    "id": "sci_fi",
+    "preferences": ["science fiction", "thriller"],
+    "languages": ["en"],
+    "subscriptions": [8],
+    "relevant_ids": [201, 202, 203],
+    "relevant_languages": ["en"],
+    "candidates": [
+      {"id": 204, "title": "Tenet", "genres": ["action", "thriller"], "language": "en", "providers": [8]},
+      {"id": 201, "title": "Dark", "genres": ["science fiction", "thriller"], "language": "de", "providers": [8]},
+      {"id": 202, "title": "The Expanse", "genres": ["science fiction", "drama"], "language": "en", "providers": [8]},
+      {"id": 205, "title": "The Office", "genres": ["comedy"], "language": "en", "providers": [8]},
+      {"id": 203, "title": "Arrival", "genres": ["science fiction", "drama"], "language": "en", "providers": [8]}
+    ]
+  },
+  {
+    "id": "subscription_constraint",
+    "preferences": ["romance", "drama"],
+    "languages": ["en"],
+    "subscriptions": [232],
+    "relevant_ids": [301, 302],
+    "relevant_languages": ["en"],
+    "candidates": [
+      {"id": 301, "title": "Normal People", "genres": ["romance", "drama"], "language": "en", "providers": [232]},
+      {"id": 303, "title": "Bridgerton", "genres": ["romance", "drama"], "language": "en", "providers": [8]},
+      {"id": 302, "title": "One Day", "genres": ["romance", "drama"], "language": "en", "providers": [232]},
+      {"id": 304, "title": "The Bear", "genres": ["drama"], "language": "en", "providers": [8]},
+      {"id": 305, "title": "Masaba Masaba", "genres": ["comedy"], "language": "hi", "providers": [232]}
+    ]
+  }
+]

@@ -1,116 +1,104 @@
-# 🎬 OTT Scout: AI-Powered Personalized Streaming 🍿
+# OTT Scout
 
-![Hero Image](./assets/hero.png)
+OTT Scout is a full-stack recommendation product for finding movies and TV shows across Indian streaming services. It combines FastAPI, React, Supabase/PostgreSQL with pgvector, TMDB metadata, hybrid retrieval, optional LLM reranking, semantic caching, Langfuse tracing, and Resend notifications.
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![AI Powered](https://img.shields.io/badge/AI-Powered-blueviolet?style=for-the-badge)](https://ottscout.vercel.app)
+The project is evaluated as an engineering system. Claims below distinguish deterministic offline results from live production observations.
 
-**OTT Scout** is the ultimate entertainment companion that solves the "what to watch" dilemma. By combining the vast **TMDB** database with **Advanced AI** and **Supabase** synchronization, it provides a deeply personalized discovery experience tailored to *your* subscriptions and *your* taste.
+## Architecture
 
----
+```mermaid
+flowchart LR
+  Browser[React / Supabase Auth] --> Edge[Vercel rewrites]
+  Edge --> API[FastAPI]
+  API --> TMDB[TMDB metadata and providers]
+  API --> DB[(Supabase Postgres + pgvector)]
+  API --> LLM[LLM reranker / embeddings]
+  API --> Trace[Langfuse + system_analytics]
+  Cron[Vercel Cron + CRON_SECRET] --> API
+  API --> Email[Resend]
+```
 
-## 🔥 Key Features
+## Offline evaluation
 
-### 🧠 Deep-Taste AI Engine
-*   **Conversational Discovery**: Chat with the built-in AI scout using natural language ("Gritty crime thrillers like Mirzapur but in English"). High-performance inference ensures near-instant responses.
-*   **Taste Synthesis**: Every interaction (Like, Dislike, Watch) builds a complex multidimensional profile of your preferences using state-of-the-art vector embeddings.
-*   **Bias-Free Diversity**: Specifically optimized to balance genres and languages, ensuring high-quality Hindi and regional content gets equal spotlight alongside global blockbusters.
+Run the reproducible benchmark:
 
-### 📺 Subscription-First "Watch Now"
-*   **Zero-Noise Filtering**: Connect your OTT platforms (Netflix, Prime, Hotstar, JioCinema, etc.). The app hides anything you can't stream, ensuring every recommendation is actionable.
-*   **Direct-to-Platform Routing**: Skip the manual search. Our **"Watch Now"** system generates deep-search links that drop you directly into the search bar of your favorite streaming service.
+```powershell
+python evaluation/run_evaluation.py
+```
 
-### 📧 Weekly Scout Automations
-*   **Personalized Newsletters**: Receive a weekly digest of top 5 hand-picked recommendations delivered straight to your inbox via **Resend**.
-*   **Actionable Links**: Every email includes one-click "Watch Now" buttons that sync with your session for a seamless cross-device experience.
+The frozen dataset contains three preference scenarios and measures Precision@3, Recall@3, NDCG@3, diversity, catalog coverage, regional-language representation, subscription compliance, metadata-error rate, token usage, and estimated LLM cost. The generated report is [evaluation/REPORT.md](evaluation/REPORT.md).
 
-### ⚡ Premium UI/UX
-*   **Sleek Dark Mode**: A gorgeous, glassmorphic interface designed for cinematic immersion using **Tailwind CSS v4**.
-*   **Skeleton Loaders**: Fast, glitch-free loading states for a smooth browsing experience.
-*   **Responsive Details**: Deep meta-data, high-fidelity backdrops, and integrated YouTube trailers in a fluid modal interface.
+| Strategy | P@3 | R@3 | NDCG@3 | Diversity | Subscription compliance | Tokens | Cost / recommendation |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Keyword | 0.778 | 0.889 | 0.875 | 0.889 | 0.889 | 0 | $0.000000 |
+| Dense | 0.778 | 0.889 | 0.875 | 0.889 | 0.889 | 0 | $0.000000 |
+| Hybrid | 0.778 | 0.889 | 0.901 | 0.889 | 0.889 | 0 | $0.000000 |
+| Hybrid + reranking | 0.778 | 0.889 | 0.901 | 1.000 | 1.000 | 780 | $0.000460 |
+| Hybrid + semantic cache | 0.778 | 0.889 | 0.901 | 1.000 | 1.000 | 0 | $0.000000 |
 
-### 🕵️ AI Observability & Monitoring
-*   **Real-time Tracing**: Integrated with **Langfuse** to track every step of the recommendation pipeline. View live traces at the [Project Dashboard](https://cloud.langfuse.com/project/cmmu985wg044zad08l2v1s4f7).
-*   **LLM-as-a-Judge**: Automated quality gates that evaluate recommendations for *Faithfulness* (hallucinations), *Constraint Compliance* (OTT), and *Thematic Relevancy* (with detailed **Mistake Reasoning**).
-*   **Persistent Health Dashboard**: A dedicated view restricted via `VITE_ADMIN_EMAILS`, showing real P90 latency, token efficiency, cost per session, and semantic cache hit rates—backed by **Persistent Supabase Analytics**.
-*   **Trace-Level Precision**: Every AI request is assigned a unique `trace_id`, ensuring that background quality audits are accurately mapped even under heavy concurrent load. 
-*   **Semantic Caching**: Reduces API costs and latency by caching semantically similar queries using vector search in Supabase.
+These are offline ranking results, not proof of live TMDB, Supabase, provider, email, or LLM performance. The `rerank` and `cache` rows use deterministic stand-ins for those stages.
 
----
+## Reliability and observability
 
-## 🛠️ Technical Spotlight: The Recommendation Pipeline
+Recommendation traces are stored in `system_analytics` when Supabase is configured and exposed through `/analytics/summary`. The response includes observed P50/P90/P95 latency, cache hit rate, token totals, estimated cost, quality scores, recent traces, and operational counters.
 
-OTT Scout uses a multi-stage **Hybrid Intelligence** pipeline to ensure your feed is never stale:
+Tracked operational counters include provider failures, email/notification success and failure, and duplicate notifications prevented. Supabase query latency and delivery-provider message IDs should be added to the same event model before making an SLA claim.
 
-1.  **Candidate Gathering**: The engine pulls candidates from 5 distinct sources: Global Trending, Language-Specific Popularity, Genre Discovery, Collaborative Filtering (Similar Items), and **Semantic Vector Search**.
-2.  **Intelligent Balancing**: To prevent "Popularity Bias" (where English blockbusters drown out regional gems), we use a weighted round-robin balancer that guarantees variety in language and genre.
-3.  **Vector Discovery**: We generate a **"Taste Vector"** (weighted average embedding) using the **Hugging Face Inference API**. This allows the system to find movies that feel similar thematically, even if they share no common actors or genres.
-4.  **AI Reranking**: The top candidates are analyzed by **Advanced LLMs**. The AI examines your complex profile—including dislikes—to pick the final selections and provides a human-readable reason for each.
-5.  **Availability Enforcement**: Checks real-time OTT availability in your region, filtering for your specific subscriptions before you even see the results.
-6.  **Serverless Execution**: The entire backend runs on **Vercel Serverless Functions**, providing zero-overhead hosting that scales to zero when not in use and handles massive bursts automatically.
+Example trace shape:
 
----
+```json
+{
+  "id": "tr_00042",
+  "type": "recommendation",
+  "latency_ms": 1840,
+  "tokens": 780,
+  "cache_hit": false,
+  "status": "ok"
+}
+```
 
-## 🛠️ Technology Stack
+Failure behavior is intentionally conservative: TMDB/provider failures remove unavailable items from the result; missing Resend credentials report a failed delivery; recommendation exceptions record an error trace; the semantic cache fails open.
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 19, Vite, Tailwind CSS v4, Lucide Icons, Framer Motion |
-| **Backend** | Python 3.9+, FastAPI, AsyncIO, HTTPX |
-| **Database/Auth** | Supabase (PostgreSQL + pgvector), Google OAuth |
-| **AI/ML** | Cloud-based LLM Inference, Hugging Face (Embeddings) |
-| **Integrations** | TMDB API (Content), Resend (Email Services) |
+## Security model
 
----
+- Set `REQUIRE_AUTH=true` in production. The backend validates the Supabase bearer token and checks that the authenticated subject owns the requested user resource.
+- Keep Supabase service credentials, TMDB, LLM, Resend, and cron secrets server-side. The frontend sends only the Supabase access token.
+- Apply [supabase/migrations/001_security_and_history.sql](supabase/migrations/001_security_and_history.sql) to enable RLS for user data, recommendation history, and notification deliveries.
+- Admin analytics should be protected by an authenticated admin allowlist or gateway policy before exposing it publicly; the current endpoint is not a production admin boundary.
+- Cron endpoints require `CRON_SECRET` unless `ALLOW_UNAUTHENTICATED_CRON=true` is explicitly used for local development. `X-Cron-Run-Id` prevents replay within the process window.
+- The current rate limiter is process-local. Use a shared edge/Redis limiter for multi-instance enforcement.
+- `/user/{user_id}/data-export` and `/user/{user_id}/data` provide portability and deletion flows; deletion does not delete the Supabase Auth account.
 
-## 🚀 Speed-Start Guide
+## Deployment
 
-### 1. Prerequisites
-- **Node.js** (v18+) & **Python** (3.10+)
-- **TMDB API Key** (Free)
-- **AI Backend API Keys** (configured in .env)
-- **Hugging Face Token**
+Vercel serves the React app and rewrites `/api/*` to the FastAPI function. Vercel Cron invokes the weekly recommendation and daily watching routes. The known live deployment was verified at `https://www.ottscout.arkocodes.dev`; the domain/DNS state is time-sensitive and should be rechecked before a release.
 
-### 2. Backend Setup
-```bash
-# Navigate to backend
+## Local development
+
+```powershell
 cd movie-recommender-backend
-
-# Setup environment
 python -m venv venv
-./venv/Scripts/activate  # Windows
-source venv/bin/activate # Mac/Linux
-
-# Install & Run
+venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-# Create .env with TMDB_API_KEY, SUPABASE_URL, SUPABASE_KEY, AI_API_KEY, HF_TOKEN, RESEND_API_KEY
 python run.py
 ```
 
-### 3. Frontend Setup
-```bash
-# Navigate to frontend
+```powershell
 cd movie-recommender-frontend
-
-# Install & Launch
 npm install
-# Create .env with VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
-# Add VITE_ADMIN_EMAILS="your.email@gmail.com" for dashboard access
 npm run dev
 ```
 
----
+Required secrets are environment variables. Never commit `.env` files or service-role keys.
 
-## 📱 Screenshots
+## Known limitations
 
-<div align="center">
-  <img src="./assets/hero.png" width="800" alt="App Preview" />
-</div>
+- The offline benchmark is small and synthetic; it needs a larger anonymized relevance set and a live replay harness.
+- No measured burst/concurrency or availability study is included, so this README does not claim automatic burst handling or real-time behavior.
+- Historical verification confirmed the notification UI/API and deployment, but actual Resend delivery was not fully exercised.
+- Frontend lint has no errors but still reports four pre-existing React hook warnings; a production-readiness claim should wait for that cleanup.
+- Analytics currently retains an in-memory sliding window plus optional Supabase history; percentile samples are observed request traces, not a formal SLO system.
 
----
+## Why this is a strong portfolio project
 
-## 📄 License & Contribution
-This project is open-source. Feel free to fork, submit PRs, and build the future of streaming discovery!
+OTT Scout demonstrates AI application design, Python backend work, React integration, retrieval evaluation, PostgreSQL/pgvector data flows, external-provider failure handling, tenant isolation, background jobs, and cost-aware observability.

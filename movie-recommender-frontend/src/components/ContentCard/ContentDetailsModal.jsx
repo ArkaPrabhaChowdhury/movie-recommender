@@ -80,10 +80,6 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
         return null;
     };
 
-    const watchNowLink = displayedPlatforms.length > 0
-        ? (getPlatformWatchLink(displayedPlatforms[0].name, details?.title) || details?.streaming?.tmdb_link)
-        : details?.streaming?.tmdb_link;
-
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10 bg-black/80 backdrop-blur-sm">
             {/* Click outside to close */}

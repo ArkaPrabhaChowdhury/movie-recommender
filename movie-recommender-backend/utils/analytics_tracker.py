@@ -58,6 +58,7 @@ class AnalyticsTracker:
                 cls._instance._trace_counter = 0
                 cls._instance._supabase: Optional[Client] = None
                 cls._instance._initialized = False
+                cls._instance._events = {}
         return cls._instance
 
     def _init_db(self):
@@ -174,6 +175,11 @@ class AnalyticsTracker:
 
         return trace_id
 
+    def record_event(self, name: str, value: int = 1):
+        """Record operational counters that are not recommendation traces."""
+        with self._lock:
+            self._events[name] = self._events.get(name, 0) + value
+
     def _save_to_db(self, event: TraceEvent):
         """Save a single trace event to Supabase."""
         if not self._supabase:
@@ -248,13 +254,17 @@ class AnalyticsTracker:
         all_tokens_out = sum(t.tokens_output for t in traces)
         total_requests = len(traces)
 
-        # P90 latency
+        # Percentiles are calculated from observed request traces, not estimates.
         if latencies:
             sorted_lat  = sorted(latencies)
+            p50_idx     = int(len(sorted_lat) * 0.50)
+            p95_idx     = int(len(sorted_lat) * 0.95)
+            p50_latency = round(sorted_lat[min(p50_idx, len(sorted_lat) - 1)] / 1000, 2)
             p90_idx     = int(len(sorted_lat) * 0.90)
             p90_latency = round(sorted_lat[min(p90_idx, len(sorted_lat) - 1)] / 1000, 2)
+            p95_latency = round(sorted_lat[min(p95_idx, len(sorted_lat) - 1)] / 1000, 2)
         else:
-            p90_latency = 0.0
+            p50_latency = p90_latency = p95_latency = 0.0
 
         # Faithfulness score (avg of evaluated traces)
         faith_scores = [t.faithfulness_score for t in traces if t.faithfulness_score is not None]
@@ -301,6 +311,8 @@ class AnalyticsTracker:
         return {
             "total_requests":   total_requests,
             "p90_latency_s":    p90_latency,
+            "p50_latency_s":    p50_latency,
+            "p95_latency_s":    p95_latency,
             "faithfulness_pct": faithfulness,
             "ott_compliance_pct": ott_compliance,
             "relevance_pct":    relevancy,
@@ -314,6 +326,7 @@ class AnalyticsTracker:
             "cache_misses":     self._cache_misses,
             "pipeline_steps":   step_latencies,
             "recent_traces":    recent,
+            "operational_events": dict(self._events),
         }
 
     def _compute_step_breakdown(self, traces: List[TraceEvent]) -> List[Dict]:
@@ -352,6 +365,8 @@ class AnalyticsTracker:
         return {
             "total_requests": 0,
             "p90_latency_s": 0.0,
+            "p50_latency_s": 0.0,
+            "p95_latency_s": 0.0,
             "faithfulness_pct": None,
             "ott_compliance_pct": None,
             "relevance_pct": None,
@@ -365,6 +380,7 @@ class AnalyticsTracker:
             "cache_misses": 0,
             "pipeline_steps": [],
             "recent_traces": [],
+            "operational_events": {},
         }
 
 

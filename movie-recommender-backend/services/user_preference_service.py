@@ -387,3 +387,24 @@ class UserPreferenceService:
             "total_interactions": len(preferences),
             "has_preferences": bool(profile.get("preferred_genres", [])),
         }
+
+    async def export_user_data(self, user_id: str) -> Dict:
+        """Return the user-owned profile and history for a portability request."""
+        if not self.supabase:
+            return {"user_id": user_id, "profile": {}, "interactions": []}
+        profile = await self.get_user_profile(user_id)
+        interactions = await self.get_user_interactions(user_id)
+        return {"user_id": user_id, "profile": profile, "interactions": interactions}
+
+    async def delete_user_data(self, user_id: str) -> bool:
+        """Delete user-owned records; auth account deletion remains an Auth operation."""
+        if not self.supabase:
+            return False
+        try:
+            self.supabase.table('user_data').delete().eq('user_id', user_id).execute()
+            self.supabase.table('recommendation_history').delete().eq('user_id', user_id).execute()
+            self.supabase.table('notification_deliveries').delete().eq('user_id', user_id).execute()
+            return True
+        except Exception as e:
+            print(f"Error deleting user data: {e}")
+            return False

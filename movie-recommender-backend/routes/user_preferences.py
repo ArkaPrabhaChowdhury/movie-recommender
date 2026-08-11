@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header, Request
 from typing import List
 from models.user_models import ContentInteraction, RecommendationRequest
 from services.user_preference_service import UserPreferenceService
@@ -6,15 +6,22 @@ from services.recommendation_engine import RecommendationEngine
 from services.tmdb_service import TMDBService
 from datetime import datetime
 import asyncio
+from typing import Optional
+from utils.auth import authenticated_user, assert_owner
+from utils.rate_limit import enforce_rate_limit
 
 router = APIRouter()
 preference_service = UserPreferenceService()
 recommendation_engine = RecommendationEngine()
 
 @router.post("/user/interaction")
-async def record_user_interaction(interaction: ContentInteraction):
+async def record_user_interaction(interaction: ContentInteraction, authorization: Optional[str] = Header(None), request: Request = None):
     """Record user interaction (like, dislike, watchlist, watched)"""
     try:
+        authenticated_id = authenticated_user(authorization)
+        assert_owner(interaction.user_id, authenticated_id)
+        if request:
+            enforce_rate_limit(request)
         if interaction.action == "watching" and interaction.content_type != "tv":
             raise HTTPException(status_code=400, detail="Watching notifications are available for TV shows only")
         print(f"📝 Recording interaction: {interaction.action} for '{interaction.title}' by {interaction.user_id}")
@@ -41,9 +48,10 @@ async def record_user_interaction(interaction: ContentInteraction):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/user/{user_id}/profile")
-async def get_user_profile(user_id: str):
+async def get_user_profile(user_id: str, authorization: Optional[str] = Header(None)):
     """Get user profile and preferences"""
     try:
+        assert_owner(user_id, authenticated_user(authorization))
         profile = await preference_service.get_user_profile(user_id)
         interactions = await preference_service.get_user_interactions(user_id)
         
@@ -88,9 +96,10 @@ async def get_user_profile(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/user/recommendations")
-async def get_personalized_recommendations(request: RecommendationRequest):
+async def get_personalized_recommendations(request: RecommendationRequest, authorization: Optional[str] = Header(None)):
     """Get AI-powered personalized recommendations using the recommendation engine"""
     try:
+        assert_owner(request.user_id, authenticated_user(authorization))
         user_id = request.user_id
         print(f"🎯 Getting personalized recommendations for user: {user_id}")
         
@@ -124,9 +133,10 @@ async def get_personalized_recommendations(request: RecommendationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/user/{user_id}/liked")
-async def get_user_liked_content(user_id: str):
+async def get_user_liked_content(user_id: str, authorization: Optional[str] = Header(None)):
     """Get all content liked by the user"""
     try:
+        assert_owner(user_id, authenticated_user(authorization))
         interactions = await preference_service.get_user_interactions(user_id, action="liked")
         
         return {
@@ -139,9 +149,10 @@ async def get_user_liked_content(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/user/{user_id}/watchlist")
-async def get_user_watchlist(user_id: str):
+async def get_user_watchlist(user_id: str, authorization: Optional[str] = Header(None)):
     """Get user's watchlist"""
     try:
+        assert_owner(user_id, authenticated_user(authorization))
         interactions = await preference_service.get_user_interactions(user_id, action="watchlisted")
         
         return {
@@ -154,9 +165,10 @@ async def get_user_watchlist(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/user/{user_id}/history")
-async def get_user_history(user_id: str):
+async def get_user_history(user_id: str, authorization: Optional[str] = Header(None)):
     """Get user's watch history"""
     try:
+        assert_owner(user_id, authenticated_user(authorization))
         interactions = await preference_service.get_user_interactions(user_id)
         
         return {
@@ -168,10 +180,23 @@ async def get_user_history(user_id: str):
         print(f"❌ Error getting history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/user/{user_id}/data-export")
+async def export_user_data(user_id: str, authorization: Optional[str] = Header(None)):
+    assert_owner(user_id, authenticated_user(authorization))
+    return await preference_service.export_user_data(user_id)
+
+@router.delete("/user/{user_id}/data")
+async def delete_user_data(user_id: str, authorization: Optional[str] = Header(None)):
+    assert_owner(user_id, authenticated_user(authorization))
+    if not await preference_service.delete_user_data(user_id):
+        raise HTTPException(status_code=500, detail="Unable to delete user data")
+    return {"status": "deleted", "user_id": user_id}
+
 @router.delete("/user/{user_id}/interaction/{content_id}")
-async def remove_user_interaction(user_id: str, content_id: int, content_type: str, action: str = None):
+async def remove_user_interaction(user_id: str, content_id: int, content_type: str, action: str = None, authorization: Optional[str] = Header(None)):
     """Remove a specific user interaction from Supabase"""
     try:
+        assert_owner(user_id, authenticated_user(authorization))
         success = await preference_service.remove_interaction(user_id, content_id, content_type, action)
         
         if success:
@@ -203,9 +228,10 @@ async def get_watch_providers(region: str = "IN"):
 
 
 @router.post("/user/{user_id}/subscriptions")
-async def save_user_subscriptions(user_id: str, provider_ids: List[int]):
+async def save_user_subscriptions(user_id: str, provider_ids: List[int], authorization: Optional[str] = Header(None)):
     """Save the OTT platforms a user is subscribed to."""
     try:
+        assert_owner(user_id, authenticated_user(authorization))
         success = await preference_service.save_user_subscriptions(user_id, provider_ids)
         if success:
             return {"status": "success", "saved": len(provider_ids)}

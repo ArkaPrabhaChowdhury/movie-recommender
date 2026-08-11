@@ -1,5 +1,6 @@
 import random
 import asyncio
+import json
 from typing import List, Dict
 from utils.observability import observe, langfuse_context
 from utils.analytics_tracker import tracker
