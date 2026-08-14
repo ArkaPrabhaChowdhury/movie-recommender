@@ -47,36 +47,40 @@ class StreamingService:
                         india_providers = providers_data.get('IN', {})
                         
                         streaming_platforms = []
-                        
-                        # Check flatrate (streaming subscription) providers
-                        if 'flatrate' in india_providers:
-                            for provider in india_providers['flatrate']:
-                                provider_id = provider['provider_id']
-                                provider_name = provider['provider_name']
-                                
-                                if provider_id in INDIAN_OTT_PLATFORMS:
-                                    ott_info = INDIAN_OTT_PLATFORMS[provider_id]
-                                    streaming_platforms.append({
-                                        "id": provider_id,
-                                        "name": ott_info["name"],
-                                        "logo": provider.get('logo_path', ''),
-                                        "color": ott_info["color"],
-                                        "is_rent": False
-                                    })
-                                else:
-                                    streaming_platforms.append({
-                                        "id": provider_id,
-                                        "name": provider_name,
-                                        "logo": provider.get('logo_path', ''),
-                                        "color": "#6B7280",
-                                        "is_rent": False
-                                    })
+                        seen_provider_ids = set()
+
+                        def add_streaming_provider(provider):
+                            """Add one channel once, regardless of availability type."""
+                            provider_id = provider['provider_id']
+                            if provider_id in seen_provider_ids:
+                                return
+
+                            seen_provider_ids.add(provider_id)
+                            provider_name = provider['provider_name']
+                            ott_info = INDIAN_OTT_PLATFORMS.get(provider_id, {})
+                            streaming_platforms.append({
+                                "id": provider_id,
+                                "name": ott_info.get("name", provider_name),
+                                "logo": provider.get('logo_path', ''),
+                                "color": ott_info.get("color", "#6B7280"),
+                                "is_rent": False
+                            })
+
+                        # Subscription and ad-supported availability represent the
+                        # same selectable channel in the user's profile.
+                        for availability_type in ('flatrate', 'ads'):
+                            for provider in india_providers.get(availability_type, []):
+                                add_streaming_provider(provider)
                         
                         # Include rent options as well for more content
                         if 'rent' in india_providers:
                             for provider in india_providers['rent']:
+                                provider_id = provider['provider_id']
+                                if provider_id in seen_provider_ids:
+                                    continue
+                                seen_provider_ids.add(provider_id)
                                 streaming_platforms.append({
-                                    "id": provider['provider_id'],
+                                    "id": provider_id,
                                     "name": f"{provider['provider_name']} (Rent)",
                                     "logo": provider.get('logo_path', ''),
                                     "color": "#F59E0B",
