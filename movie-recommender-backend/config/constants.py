@@ -139,6 +139,7 @@ INDIAN_OTT_PLATFORMS = {
     2: {"name": "Apple iTunes", "logo": "apple.png", "color": "#A855F7"},
     3: {"name": "Google Play", "logo": "google.png", "color": "#4285F4"},
     2100: {"name": "Amazon Prime (Ads)", "logo": "prime.png", "color": "#00A8E1"},
+    2336: {"name": "JioHotstar", "logo": "hotstar.png", "color": "#1F80E0"},
 }
 
 # API Limits and Timeouts

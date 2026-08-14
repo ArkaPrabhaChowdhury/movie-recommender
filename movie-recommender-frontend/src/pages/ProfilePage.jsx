@@ -184,8 +184,8 @@ const ProfilePage = ({
                                 Streaming Subscriptions
                             </h3>
                             <p className="text-sm mt-1 max-w-lg" style={{ color: 'var(--color-text-secondary)' }}>
-                                Select the platforms you're subscribed to — the app will only show you content
-                                available on those services.
+                                Select the channels you use. Subscription and ad-supported titles from the same
+                                channel are included together.
                             </p>
                         </div>
 
@@ -211,7 +211,7 @@ const ProfilePage = ({
                     {selectedProviders.length > 0 && (
                         <div className="mb-4 flex items-center gap-2">
                             <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/15 text-teal-400 border border-teal-500/30">
-                                {selectedProviders.length} platform{selectedProviders.length !== 1 ? 's' : ''} selected
+                                {selectedProviders.length} channel{selectedProviders.length !== 1 ? 's' : ''} selected
                             </span>
                             <button
                                 onClick={() => { setSelectedProviders([]); setSavedOk(false); }}
