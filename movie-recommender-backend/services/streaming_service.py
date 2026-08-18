@@ -1,6 +1,12 @@
 import httpx
 import asyncio
-from config.constants import TMDB_API_KEY, TMDB_API_URL, INDIAN_OTT_PLATFORMS, API_CONFIG
+from config.constants import (
+    TMDB_API_KEY,
+    TMDB_API_URL,
+    INDIAN_OTT_PLATFORMS,
+    INDIA_CONTENT_PROVIDER_OVERRIDES,
+    API_CONFIG,
+)
 from utils.analytics_tracker import tracker
 
 class StreamingService:
@@ -72,6 +78,10 @@ class StreamingService:
                         # same selectable channel in the user's profile.
                         for availability_type in ('flatrate', 'ads'):
                             for provider in india_providers.get(availability_type, []):
+                                add_streaming_provider(provider)
+
+                        if not streaming_platforms:
+                            for provider in INDIA_CONTENT_PROVIDER_OVERRIDES.get((itype, item['id']), []):
                                 add_streaming_provider(provider)
                         
                         # Include rent options as well for more content

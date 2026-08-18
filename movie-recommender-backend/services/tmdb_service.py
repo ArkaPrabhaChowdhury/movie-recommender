@@ -3,7 +3,7 @@ import asyncio
 from typing import Dict, List
 from config.constants import (
     TMDB_API_KEY, TMDB_API_URL, API_CONFIG, 
-    IMAGE_CONFIG, get_genre_id, get_date_range
+    IMAGE_CONFIG, get_genre_id, get_date_range, SEARCH_CONTENT_OVERRIDES
 )
 
 class TMDBService:
@@ -351,6 +351,28 @@ class TMDBService:
                             "release_date": show.get('first_air_date', '')
                         })
             except Exception as e: print(f"Error: {e}")
+        normalized_query = query.strip().lower()
+        for alias, (content_type, content_id) in SEARCH_CONTENT_OVERRIDES.items():
+            if content_type != "tv" or alias not in normalized_query:
+                continue
+            if any(show["id"] == content_id for show in tv_shows):
+                continue
+            try:
+                details = await TMDBService.get_content_details(content_id, content_type)
+                if details and details.get("poster"):
+                    tv_shows.append({
+                        "id": details["id"],
+                        "title": details["title"],
+                        "poster": details["poster"],
+                        "rating": details.get("rating", 0),
+                        "year": details.get("year", ""),
+                        "overview": details.get("overview", ""),
+                        "content_type": content_type,
+                        "release_date": details.get("release_date", ""),
+                    })
+            except Exception as e:
+                print(f"Error loading search override for {alias}: {e}")
+
         return tv_shows
 
     @staticmethod

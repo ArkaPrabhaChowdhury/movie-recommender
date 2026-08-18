@@ -142,6 +142,22 @@ INDIAN_OTT_PLATFORMS = {
     2336: {"name": "JioHotstar", "logo": "hotstar.png", "color": "#1F80E0"},
 }
 
+# Temporary corrections for titles whose India availability is confirmed but
+# has not yet propagated to TMDB's regional watch-provider response.
+INDIA_CONTENT_PROVIDER_OVERRIDES = {
+    ("tv", 95350): [{
+        "provider_id": 2336,
+        "provider_name": "JioHotstar",
+        "logo_path": "",
+    }],
+}
+
+# TMDB text search can lag behind a newly released title whose detail record
+# is already available.
+SEARCH_CONTENT_OVERRIDES = {
+    "lanterns": ("tv", 95350),
+}
+
 # API Limits and Timeouts
 API_CONFIG = {
     'TIMEOUT': 30.0,
