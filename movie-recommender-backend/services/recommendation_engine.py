@@ -100,6 +100,11 @@ class RecommendationEngine:
                 ]
                 print(f"⚠️ No subscriptions, returning all {len(final_recommendations)} OTT items")
 
+            # Keep eligible TV shows from being crowded out by movie-heavy AI
+            # ranking. Availability and subscription filtering happen first so
+            # this only balances titles the user can actually watch.
+            final_recommendations = self._balance_content_types(final_recommendations, limit)
+
             latency_ms = (time.time() - _t0) * 1000
 
             # Collect token data from OllamaService if recorded
@@ -254,6 +259,35 @@ class RecommendationEngine:
         
         return candidates
 
+    @staticmethod
+    def _balance_content_types(items: List[Dict], limit: int) -> List[Dict]:
+        """Reserve a modest TV-show share when eligible candidates exist."""
+        items = list(items or [])
+        if limit < 2 or len(items) <= 1:
+            return items[:limit]
+
+        tv_items = [item for item in items if item.get("content_type") == "tv"]
+        movie_items = [item for item in items if item.get("content_type") == "movie"]
+        if not tv_items or not movie_items:
+            return items[:limit]
+
+        tv_quota = min(len(tv_items), max(1, limit // 3))
+        movie_quota = min(len(movie_items), limit - tv_quota)
+        selected = []
+        tv_index = 0
+        movie_index = 0
+
+        # Interleave the categories so TV shows are visible throughout the UI.
+        while len(selected) < limit and (tv_index < tv_quota or movie_index < movie_quota):
+            if movie_index < movie_quota:
+                selected.append(movie_items[movie_index])
+                movie_index += 1
+            if tv_index < tv_quota and len(selected) < limit:
+                selected.append(tv_items[tv_index])
+                tv_index += 1
+
+        return selected[:limit]
+
     @observe()
     async def _ai_rerank(self, context: Dict, candidates: List[Dict], limit: int) -> List[Dict]:
         """Use AI to rank candidates according to profile without artificial bias."""
@@ -277,7 +311,7 @@ class RecommendationEngine:
             candidate_list += f"[{i}] {title} ({year}) [{lang}] - {genre_str}. {overview}\n"
 
         prompt = f"""
-        You are a premium movie recommendation AI.
+        You are a premium movie and TV-show recommendation AI.
         User Profile:
         - Liked: {", ".join(liked_titles) or "None"}
         - Watched: {", ".join(watched_titles) or "None"}
@@ -291,7 +325,7 @@ class RecommendationEngine:
         Respect the language preferences equally as listed in the profile.
         
         Provide a CRISP recommendation reason for each (MAX 5-6 words).
-        If it's similar to a specific movie they liked, use: "Because you liked [Movie Title]".
+        If it's similar to a specific movie or TV show they liked, use: "Because you liked [Title]".
         Otherwise, use a 2-3 word genre reason (e.g., "Gritty crime thriller").
         Keep it short so it fits in a single line on a small UI card.
 
@@ -305,7 +339,7 @@ class RecommendationEngine:
                 ...
             ]
         }}
-        Example reasons: "Because you liked Inception", "Dark psychological drama", "Because you liked Interstellar".
+        Example reasons: "Because you liked Inception", "Dark psychological drama", "Because you liked Lanterns".
         """
 
         print(f"🤖 AI Reranking {len(candidates[:100])} candidates...")
