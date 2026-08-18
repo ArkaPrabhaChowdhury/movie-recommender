@@ -390,7 +390,7 @@ class TMDBService:
                     f"{TMDB_API_URL}/{content_type}/{content_id}", 
                     params={
                         "api_key": TMDB_API_KEY,
-                        "append_to_response": "credits,videos,similar,recommendations"
+                        "append_to_response": "credits,videos,similar,recommendations,keywords"
                     }
                 )
                 
@@ -448,6 +448,7 @@ class TMDBService:
                         "status": data.get('status', ''),
                         "genres": data.get('genres', []),
                         "overview": data.get('overview', ''),
+                        "keyword_ids": [keyword['id'] for keyword in data.get('keywords', {}).get('keywords', data.get('keywords', {}).get('results', []))],
                         "tagline": data.get('tagline', ''),
                         "content_type": content_type,
                         "cast": [
@@ -509,6 +510,29 @@ class TMDBService:
             except Exception as e:
                 print(f"Error fetching trending {content_type}: {e}")
                 return []
+
+    @staticmethod
+    async def get_keywords_batch(content_items: List[Dict]) -> List[Dict]:
+        """Attach TMDB keyword metadata to candidates in parallel."""
+        if not content_items:
+            return []
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            tasks = [
+                client.get(
+                    f"{TMDB_API_URL}/{item.get('content_type', 'movie')}/{item['id']}/keywords",
+                    params={"api_key": TMDB_API_KEY},
+                ) for item in content_items
+            ]
+            responses = await asyncio.gather(*tasks, return_exceptions=True)
+            enriched = []
+            for item, response in zip(content_items, responses):
+                candidate = item.copy()
+                if not isinstance(response, Exception) and response.status_code == 200:
+                    data = response.json()
+                    keywords = data.get('keywords', data.get('results', []))
+                    candidate['keyword_ids'] = [keyword['id'] for keyword in keywords]
+                enriched.append(candidate)
+            return enriched
 
     @staticmethod
     async def get_watch_providers(region: str = "IN"):

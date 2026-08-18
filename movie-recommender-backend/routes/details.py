@@ -1,20 +1,7 @@
 from fastapi import APIRouter, HTTPException, Path
-import asyncio
 from services.tmdb_service import TMDBService
 from services.streaming_service import StreamingService
 from services.similarity_service import rank_similar_content
-from services.embedding_service import EmbeddingService
-
-
-def _cosine_similarity(left, right):
-    if not left or not right:
-        return None
-    dot = sum(a * b for a, b in zip(left, right))
-    left_norm = sum(value * value for value in left) ** 0.5
-    right_norm = sum(value * value for value in right) ** 0.5
-    if not left_norm or not right_norm:
-        return None
-    return max(0.0, min(1.0, dot / (left_norm * right_norm)))
 
 router = APIRouter()
 
@@ -48,15 +35,7 @@ async def get_details(
             # Trending titles may enter the pool, but the ranker requires
             # strong overview and genre fit before allowing them through.
             candidates = content_details['similar'] + trending
-
-            # Compare story meaning using overview embeddings only. Genre is
-            # scored separately, and cast/director metadata is intentionally excluded.
-            story_texts = [content_details.get('overview', '')] + [item.get('overview', '') for item in candidates]
-            embeddings = await asyncio.to_thread(EmbeddingService().generate_batch_embeddings, story_texts)
-            if embeddings and len(embeddings) == len(story_texts):
-                source_embedding = embeddings[0]
-                for candidate, candidate_embedding in zip(candidates, embeddings[1:]):
-                    candidate['_story_similarity'] = _cosine_similarity(source_embedding, candidate_embedding)
+            candidates = await TMDBService.get_keywords_batch(candidates)
 
             similar_movies = [s for s in candidates if s['content_type'] == 'movie']
             similar_tv = [s for s in candidates if s['content_type'] == 'tv']

@@ -63,14 +63,23 @@ def story_similarity(source: Dict, candidate: Dict) -> float:
     return (2 * len(source_tokens & candidate_tokens)) / (len(source_tokens) + len(candidate_tokens))
 
 
+def keyword_similarity(source: Dict, candidate: Dict) -> float:
+    source_keywords = set(source.get("keyword_ids") or [])
+    candidate_keywords = set(candidate.get("keyword_ids") or [])
+    if not source_keywords or not candidate_keywords:
+        return 0.0
+    return len(source_keywords & candidate_keywords) / max(len(source_keywords), 1)
+
+
 def similarity_score(source: Dict, candidate: Dict) -> float:
     """Score a relevant candidate, using trending only as a freshness boost."""
     genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
     story_fit = story_similarity(source, candidate)
+    keyword_fit = keyword_similarity(source, candidate)
     similar_rank = candidate.get("similar_rank")
     tmdb_fit = 1.0 - (min(float(similar_rank), 19) / 20) if similar_rank is not None else 0.0
-    content_fit = story_fit * 0.45 + genre_fit * 0.25 + tmdb_fit * 0.30
-    trend_boost = 0.08 if candidate.get("is_trending") else 0.0
+    content_fit = story_fit * 0.35 + keyword_fit * 0.35 + genre_fit * 0.20 + tmdb_fit * 0.10
+    trend_boost = 0.05 if candidate.get("is_trending") else 0.0
     return content_fit + trend_boost
 
 
@@ -86,14 +95,15 @@ def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 
             continue
         genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
         story_fit = story_similarity(source, candidate)
+        keyword_fit = keyword_similarity(source, candidate)
         similar_rank = candidate.get("similar_rank")
         tmdb_fit = 1.0 - (min(float(similar_rank), 19) / 20) if similar_rank is not None else 0.0
-        content_fit = story_fit * 0.45 + genre_fit * 0.25 + tmdb_fit * 0.30
+        content_fit = story_fit * 0.35 + keyword_fit * 0.35 + genre_fit * 0.20 + tmdb_fit * 0.10
         if genre_fit < MIN_GENRE_FIT:
             continue
-        if story_fit < MIN_STORY_SIMILARITY:
+        if story_fit < MIN_STORY_SIMILARITY and keyword_fit < 0.20:
             continue
-        if candidate.get("is_trending") and story_fit < MIN_TRENDING_STORY_SIMILARITY:
+        if candidate.get("is_trending") and story_fit < MIN_TRENDING_STORY_SIMILARITY and keyword_fit < 0.20:
             continue
         if content_fit < MIN_CONTENT_FIT:
             continue
