@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Star, Calendar, Clock, Film, Tv, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Play, Star, Calendar, Clock, Film, Tv, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import ApiService from '../../services/api';
 import { UI_CONFIG } from '../../config/constants';
 import InteractionButtons from './InteractionButtons';
 
-const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, onDislike, onWatchlist, onWatched, onWatching, userInteractions, interactionMap = {}, subscribedProviders = [] }) => {
+const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, onDislike, onWatchlist, onWatched, onWatching, onSelectContent, userInteractions, interactionMap = {}, subscribedProviders = [] }) => {
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -215,6 +215,33 @@ const ContentDetailsModal = ({ isOpen, onClose, contentId, contentType, onLike, 
                                             {details.overview || "No overview available."}
                                         </p>
                                     </div>
+
+                                    {details.similar && details.similar.length > 0 && (
+                                        <section className="mb-10" aria-labelledby="more-like-this-heading">
+                                            <div className="mb-4 flex items-center gap-2">
+                                                <Sparkles size={18} className="text-teal-400" />
+                                                <h3 id="more-like-this-heading" className="text-white text-lg font-semibold">More like this</h3>
+                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                {details.similar.map((item) => (
+                                                    <button
+                                                        type="button"
+                                                        key={`${item.content_type}-${item.id}`}
+                                                        onClick={() => onSelectContent?.(item)}
+                                                        className="group text-left rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] transition-colors hover:border-teal-400/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
+                                                    >
+                                                        <div className="aspect-[2/3] bg-gray-900">
+                                                            {item.poster ? <img src={item.poster} alt={item.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" /> : <div className="flex h-full items-center justify-center text-xs text-gray-500">No image</div>}
+                                                        </div>
+                                                        <div className="p-2">
+                                                            <p className="line-clamp-2 text-xs font-semibold text-gray-100">{item.title}</p>
+                                                            <p className="mt-1 text-[11px] text-gray-400">{item.year}{item.rating ? ` · ${item.rating.toFixed(1)}` : ''}</p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    )}
 
                                     {/* Available On */}
                                     {displayedPlatforms.length > 0 && (

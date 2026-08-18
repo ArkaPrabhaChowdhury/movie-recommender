@@ -1,6 +1,20 @@
 from fastapi import APIRouter, HTTPException, Path
+import asyncio
 from services.tmdb_service import TMDBService
 from services.streaming_service import StreamingService
+from services.similarity_service import rank_similar_content
+from services.embedding_service import EmbeddingService
+
+
+def _cosine_similarity(left, right):
+    if not left or not right:
+        return None
+    dot = sum(a * b for a, b in zip(left, right))
+    left_norm = sum(value * value for value in left) ** 0.5
+    right_norm = sum(value * value for value in right) ** 0.5
+    if not left_norm or not right_norm:
+        return None
+    return max(0.0, min(1.0, dot / (left_norm * right_norm)))
 
 router = APIRouter()
 
@@ -30,8 +44,20 @@ async def get_details(
             
         # 3. For similar content, check their streaming availability (optional but helpful)
         if content_details.get('similar'):
-            similar_movies = [s for s in content_details['similar'] if s['content_type'] == 'movie']
-            similar_tv = [s for s in content_details['similar'] if s['content_type'] == 'tv']
+            trending = await TMDBService.get_trending_content(content_type)
+            candidates = content_details['similar'] + trending
+
+            # Compare story meaning using overview embeddings only. Genre is
+            # scored separately, and cast/director metadata is intentionally excluded.
+            story_texts = [content_details.get('overview', '')] + [item.get('overview', '') for item in candidates]
+            embeddings = await asyncio.to_thread(EmbeddingService().generate_batch_embeddings, story_texts)
+            if embeddings and len(embeddings) == len(story_texts):
+                source_embedding = embeddings[0]
+                for candidate, candidate_embedding in zip(candidates, embeddings[1:]):
+                    candidate['_story_similarity'] = _cosine_similarity(source_embedding, candidate_embedding)
+
+            similar_movies = [s for s in candidates if s['content_type'] == 'movie']
+            similar_tv = [s for s in candidates if s['content_type'] == 'tv']
             
             enrich_similar = []
             if similar_movies:
@@ -40,7 +66,9 @@ async def get_details(
                 enrich_similar.extend(await StreamingService.get_streaming_providers_batch(similar_tv, 'tv'))
                 
             if enrich_similar:
-                content_details['similar'] = enrich_similar
+                content_details['similar'] = rank_similar_content(content_details, enrich_similar, limit=12)
+            else:
+                content_details['similar'] = []
                 
         return content_details
         

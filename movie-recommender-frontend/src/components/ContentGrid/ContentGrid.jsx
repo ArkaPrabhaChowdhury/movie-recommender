@@ -34,6 +34,10 @@ const ContentGrid = ({
 }) => {
   const [selectedContent, setSelectedContent] = useState(null);
 
+  const openMoreLikeThis = (item) => {
+    setSelectedContent({ ...item, showRecommendations: true });
+  };
+
   // Set up initial content from deep link if present
   useEffect(() => {
     if (initialContentType && initialContentId) {
@@ -107,6 +111,7 @@ const ContentGrid = ({
                 userInteractions={userInteractions}
                 interactionMap={interactionMap}
                 subscribedProviders={subscribedProviders}
+                onMoreLikeThis={openMoreLikeThis}
               />
             </div>
           ))}
@@ -143,6 +148,7 @@ const ContentGrid = ({
           userInteractions={userInteractions}
           interactionMap={interactionMap}
           subscribedProviders={subscribedProviders}
+          onSelectContent={setSelectedContent}
         />
       )}
     </>

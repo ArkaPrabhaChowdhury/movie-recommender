@@ -1,6 +1,6 @@
 import { UI_CONFIG } from '../../config/constants';
 import InteractionButtons from '../ContentCard/InteractionButtons';
-import { Star, Film, Tv } from 'lucide-react';
+import { Star, Film, Tv, Sparkles } from 'lucide-react';
 
 const ContentCard = ({
   item,
@@ -12,7 +12,8 @@ const ContentCard = ({
   userInteractions = [],
   interactionMap = {},
   showInteractionButtons = false,
-  subscribedProviders = []
+  subscribedProviders = [],
+  onMoreLikeThis
 }) => {
   const displayedPlatforms = item.streaming?.available_on?.filter(p =>
     subscribedProviders.length === 0 || subscribedProviders.includes(p.id)
@@ -56,6 +57,19 @@ const ContentCard = ({
               {item.title}
             </h3>
             <p className="text-xs text-gray-300 mb-2">{item.year}</p>
+
+            <button
+              type="button"
+              aria-label={`More like ${item.title}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onMoreLikeThis?.(item);
+              }}
+              className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-teal-300/40 bg-teal-400/15 px-2.5 py-1.5 text-xs font-semibold text-teal-100 transition-colors hover:bg-teal-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
+            >
+              <Sparkles size={12} />
+              More like this
+            </button>
 
             {displayedPlatforms.length > 0 && (
               <div className="mb-2">

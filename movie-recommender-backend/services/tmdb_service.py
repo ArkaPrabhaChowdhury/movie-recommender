@@ -406,7 +406,7 @@ class TMDBService:
                     else:
                         director = [crew for crew in data.get('created_by', [])]
                         
-                    similar_raw = data.get('similar', {}).get('results', [])[:6]
+                    similar_raw = data.get('similar', {}).get('results', [])[:20]
                     similar = []
                     for item in similar_raw:
                         similar.append({
@@ -414,6 +414,11 @@ class TMDBService:
                             "title": item.get('title') if content_type == 'movie' else item.get('name'),
                             "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{item['poster_path']}" if item.get('poster_path') else None,
                             "rating": item.get('vote_average', 0),
+                            "overview": item.get('overview', ''),
+                            "vote_count": item.get('vote_count', 0),
+                            "popularity": item.get('popularity', 0),
+                            "genre_ids": item.get('genre_ids', []),
+                            "original_language": item.get('original_language', ''),
                             "year": item.get('release_date', '')[:4] if item.get('release_date', '') else (item.get('first_air_date', '')[:4] if item.get('first_air_date', '') else ''),
                             "content_type": content_type
                         })
@@ -458,6 +463,40 @@ class TMDBService:
             except Exception as e:
                 print(f"Error fetching details: {e}")
                 return None
+
+    @staticmethod
+    async def get_trending_content(content_type: str) -> List[Dict]:
+        """Fetch this week's trending titles for the requested content type."""
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            try:
+                response = await client.get(
+                    f"{TMDB_API_URL}/trending/{content_type}/week",
+                    params={"api_key": TMDB_API_KEY},
+                )
+                if response.status_code != 200:
+                    return []
+
+                items = []
+                for item in response.json().get('results', [])[:20]:
+                    if IMAGE_CONFIG['REQUIRE_POSTER'] and not item.get('poster_path'):
+                        continue
+                    items.append({
+                        "id": item['id'],
+                        "title": item.get('title') or item.get('name', ''),
+                        "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{item['poster_path']}",
+                        "rating": item.get('vote_average', 0),
+                        "overview": item.get('overview', ''),
+                        "genre_ids": item.get('genre_ids', []),
+                        "original_language": item.get('original_language', ''),
+                        "popularity": item.get('popularity', 0),
+                        "year": (item.get('release_date') or item.get('first_air_date') or '')[:4],
+                        "content_type": content_type,
+                        "is_trending": True,
+                    })
+                return items
+            except Exception as e:
+                print(f"Error fetching trending {content_type}: {e}")
+                return []
 
     @staticmethod
     async def get_watch_providers(region: str = "IN"):
