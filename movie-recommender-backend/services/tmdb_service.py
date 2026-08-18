@@ -408,7 +408,7 @@ class TMDBService:
                         
                     similar_raw = data.get('similar', {}).get('results', [])[:20]
                     similar = []
-                    for item in similar_raw:
+                    for rank, item in enumerate(similar_raw):
                         similar.append({
                             "id": item['id'],
                             "title": item.get('title') if content_type == 'movie' else item.get('name'),
@@ -421,6 +421,8 @@ class TMDBService:
                             "original_language": item.get('original_language', ''),
                             "year": item.get('release_date', '')[:4] if item.get('release_date', '') else (item.get('first_air_date', '')[:4] if item.get('first_air_date', '') else ''),
                             "content_type": content_type
+                            ,"source": "tmdb_similar"
+                            ,"similar_rank": rank
                         })
                         
                     return {

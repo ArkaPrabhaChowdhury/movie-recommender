@@ -45,7 +45,12 @@ async def get_details(
         # 3. For similar content, check their streaming availability (optional but helpful)
         if content_details.get('similar'):
             trending = await TMDBService.get_trending_content(content_type)
-            candidates = content_details['similar'] + trending
+            trending_ids = {item['id'] for item in trending}
+            # Trending is a freshness signal only. It must never introduce a
+            # title that TMDB did not already consider similar to the source.
+            candidates = content_details['similar']
+            for candidate in candidates:
+                candidate['is_trending'] = candidate['id'] in trending_ids
 
             # Compare story meaning using overview embeddings only. Genre is
             # scored separately, and cast/director metadata is intentionally excluded.

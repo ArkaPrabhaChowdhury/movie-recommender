@@ -24,10 +24,8 @@ STORY_CONCEPTS = {
 }
 # The production function may fall back to lexical overview matching when the
 # embedding provider is unavailable, so keep this gate conservative but usable.
-MIN_STORY_SIMILARITY = 0.05
 MIN_GENRE_FIT = 0.25
-MIN_CONTENT_FIT = 0.18
-MIN_TRENDING_CONTENT_FIT = 0.10
+MIN_CONTENT_FIT = 0.24
 
 
 def _genre_ids(item: Dict) -> set:
@@ -66,12 +64,14 @@ def story_similarity(source: Dict, candidate: Dict) -> float:
 
 
 def similarity_score(source: Dict, candidate: Dict) -> float:
-    """Score a candidate: story first, genre second, trending third."""
+    """Score a relevant candidate, using trending only as a freshness boost."""
     genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
     story_fit = story_similarity(source, candidate)
-    content_fit = story_fit * 0.65 + genre_fit * 0.35
-    trend_fit = 1.0 if candidate.get("is_trending") else 0.0
-    return content_fit * 0.85 + trend_fit * 0.15
+    similar_rank = candidate.get("similar_rank")
+    tmdb_fit = 1.0 - (min(float(similar_rank), 19) / 20) if similar_rank is not None else 0.0
+    content_fit = story_fit * 0.45 + genre_fit * 0.25 + tmdb_fit * 0.30
+    trend_boost = 0.08 if candidate.get("is_trending") else 0.0
+    return content_fit + trend_boost
 
 
 def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 12) -> List[Dict]:
@@ -86,13 +86,12 @@ def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 
             continue
         genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
         story_fit = story_similarity(source, candidate)
-        content_fit = story_fit * 0.65 + genre_fit * 0.35
+        similar_rank = candidate.get("similar_rank")
+        tmdb_fit = 1.0 - (min(float(similar_rank), 19) / 20) if similar_rank is not None else 0.0
+        content_fit = story_fit * 0.45 + genre_fit * 0.25 + tmdb_fit * 0.30
         if genre_fit < MIN_GENRE_FIT:
             continue
-        if candidate.get("is_trending"):
-            if story_fit < MIN_STORY_SIMILARITY or content_fit < MIN_TRENDING_CONTENT_FIT:
-                continue
-        elif story_fit < MIN_STORY_SIMILARITY or content_fit < MIN_CONTENT_FIT:
+        if content_fit < MIN_CONTENT_FIT:
             continue
         unique[key] = candidate
     ranked = sorted(unique.values(), key=lambda item: (similarity_score(source, item), float(item.get("popularity", 0) or 0)), reverse=True)[:limit]
