@@ -32,9 +32,11 @@ async def get_details(
         # 3. For similar content, check their streaming availability (optional but helpful)
         if content_details.get('similar'):
             trending = await TMDBService.get_trending_content(content_type)
+            source_genres = [genre.get('id') for genre in content_details.get('genres', []) if genre.get('id')]
+            genre_candidates = await TMDBService.get_genre_candidates(content_type, source_genres)
             # Trending titles may enter the pool, but the ranker requires
             # strong overview and genre fit before allowing them through.
-            candidates = content_details['similar'] + trending
+            candidates = content_details['similar'] + trending + genre_candidates
             candidates = await TMDBService.get_keywords_batch(candidates)
 
             similar_movies = [s for s in candidates if s['content_type'] == 'movie']

@@ -535,6 +535,44 @@ class TMDBService:
             return enriched
 
     @staticmethod
+    async def get_genre_candidates(content_type: str, genre_ids: List[int]) -> List[Dict]:
+        """Fetch a broad, genre-constrained fallback pool for sparse titles."""
+        if not genre_ids:
+            return []
+        async with httpx.AsyncClient(timeout=API_CONFIG['TIMEOUT']) as client:
+            try:
+                response = await client.get(
+                    f"{TMDB_API_URL}/discover/{content_type}",
+                    params={
+                        "api_key": TMDB_API_KEY,
+                        "with_genres": "|".join(str(genre_id) for genre_id in genre_ids),
+                        "sort_by": "popularity.desc",
+                        "vote_count.gte": 50,
+                        "include_adult": False,
+                        "page": 1,
+                    },
+                )
+                if response.status_code != 200:
+                    return []
+                results = response.json().get('results', [])[:20]
+                return [{
+                    "id": item['id'],
+                    "title": item.get('title') or item.get('name', ''),
+                    "poster": f"{IMAGE_CONFIG['TMDB_BASE_URL']}{item['poster_path']}" if item.get('poster_path') else None,
+                    "rating": item.get('vote_average', 0),
+                    "overview": item.get('overview', ''),
+                    "genre_ids": item.get('genre_ids', []),
+                    "original_language": item.get('original_language', ''),
+                    "popularity": item.get('popularity', 0),
+                    "year": (item.get('release_date') or item.get('first_air_date') or '')[:4],
+                    "content_type": content_type,
+                    "source": "tmdb_genre_discovery",
+                } for item in results if item.get('poster_path')]
+            except Exception as e:
+                print(f"Error fetching genre candidates: {e}")
+                return []
+
+    @staticmethod
     async def get_watch_providers(region: str = "IN"):
         """Fetch all streaming platforms available in a region from TMDB."""
         logo_base = "https://image.tmdb.org/t/p/w92"
