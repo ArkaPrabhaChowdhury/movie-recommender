@@ -4,7 +4,7 @@ from models.request_models import SearchRequest
 from services.tmdb_service import TMDBService
 from services.streaming_service import StreamingService
 from services.user_preference_service import UserPreferenceService
-from config.constants import MESSAGES
+from config.constants import MESSAGES, SEARCH_CONTENT_OVERRIDES
 
 router = APIRouter()
 _pref_service = UserPreferenceService()
@@ -19,6 +19,31 @@ async def global_search_with_ott_filtering(query: str, user_id: str = None):
     persons_task = TMDBService.search_person_globally(query)
     
     titles, tv_shows, person_credits = await asyncio.gather(titles_task, tv_task, persons_task)
+
+    # Newly released titles may exist in TMDB by ID before text search and
+    # regional provider metadata are indexed. Load known title overrides by ID
+    # so they still flow through the normal OTT filtering and sorting pipeline.
+    normalized_query = query.strip().lower()
+    for alias, (content_type, content_id) in SEARCH_CONTENT_OVERRIDES.items():
+        if content_type != 'tv' or alias not in normalized_query:
+            continue
+        if any(item.get('id') == content_id for item in tv_shows):
+            continue
+        try:
+            details = await TMDBService.get_content_details(content_id, content_type)
+            if details and details.get('poster'):
+                tv_shows.append({
+                    'id': details['id'],
+                    'title': details['title'],
+                    'poster': details['poster'],
+                    'rating': details.get('rating', 0),
+                    'year': details.get('year', ''),
+                    'overview': details.get('overview', ''),
+                    'content_type': content_type,
+                    'release_date': details.get('release_date', ''),
+                })
+        except Exception as override_error:
+            print(f"Error loading search override for {alias}: {override_error}")
     
     all_content = []
     seen = set()
