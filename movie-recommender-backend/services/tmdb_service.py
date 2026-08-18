@@ -497,6 +497,7 @@ class TMDBService:
                         "year": (item.get('release_date') or item.get('first_air_date') or '')[:4],
                         "content_type": content_type,
                         "is_trending": True,
+                        "source": "tmdb_trending",
                     })
                 return items
             except Exception as e:

@@ -38,6 +38,19 @@ class SimilarityServiceTests(unittest.TestCase):
         result = rank_similar_content(self.source, candidates)
         self.assertEqual([item["id"] for item in result], [4])
 
+    def test_trending_candidate_still_needs_strong_story_match(self):
+        relevant = {
+            "id": 5, "content_type": "movie", "poster": "relevant.jpg",
+            "genre_ids": [28], "_story_similarity": 0.45, "is_trending": True,
+            "streaming": {"platform_found": True},
+        }
+        unrelated = {
+            "id": 6, "content_type": "movie", "poster": "unrelated.jpg",
+            "genre_ids": [28], "_story_similarity": 0.12, "is_trending": True,
+            "streaming": {"platform_found": True},
+        }
+        self.assertEqual([item["id"] for item in rank_similar_content(self.source, [unrelated, relevant])], [5])
+
 
 if __name__ == "__main__":
     unittest.main()

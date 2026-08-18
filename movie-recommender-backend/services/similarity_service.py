@@ -26,6 +26,7 @@ STORY_CONCEPTS = {
 # embedding provider is unavailable, so keep this gate conservative but usable.
 MIN_GENRE_FIT = 0.25
 MIN_CONTENT_FIT = 0.24
+MIN_TRENDING_STORY_SIMILARITY = 0.35
 
 
 def _genre_ids(item: Dict) -> set:
@@ -90,6 +91,8 @@ def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 
         tmdb_fit = 1.0 - (min(float(similar_rank), 19) / 20) if similar_rank is not None else 0.0
         content_fit = story_fit * 0.45 + genre_fit * 0.25 + tmdb_fit * 0.30
         if genre_fit < MIN_GENRE_FIT:
+            continue
+        if candidate.get("is_trending") and story_fit < MIN_TRENDING_STORY_SIMILARITY:
             continue
         if content_fit < MIN_CONTENT_FIT:
             continue
