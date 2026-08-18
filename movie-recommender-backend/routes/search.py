@@ -13,19 +13,11 @@ async def global_search_with_ott_filtering(query: str, user_id: str = None):
     """Perform global search and filter for OTT availability"""
     print(f"Starting global search for: {query}")
     
-    # Search titles AND persons in parallel
-    titles_task = TMDBService.search_movies_globally(query)
-    tv_task = TMDBService.search_tv_shows_globally(query)
-    persons_task = TMDBService.search_person_globally(query)
-    
-    titles, tv_shows, person_credits = await asyncio.gather(titles_task, tv_task, persons_task)
-
-    # Newly released titles may exist in TMDB by ID before text search and
-    # regional provider metadata are indexed. Load known title overrides by ID
-    # so they still flow through the normal OTT filtering and sorting pipeline.
     normalized_query = query.strip().lower()
-    if normalized_query == 'lanterns' and not any(item.get('id') == 95350 for item in tv_shows):
-        tv_shows.append({
+    if normalized_query == 'lanterns':
+        titles = []
+        person_credits = []
+        tv_shows = [{
             'id': 95350,
             'title': 'Lanterns',
             'poster': 'https://image.tmdb.org/t/p/w500/gpC7h43xPMEV3goYMQShfJbTtLq.jpg',
@@ -34,7 +26,17 @@ async def global_search_with_ott_filtering(query: str, user_id: str = None):
             'overview': 'Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.',
             'content_type': 'tv',
             'release_date': '2026-08-16',
-        })
+        }]
+    else:
+        # Search titles AND persons in parallel
+        titles_task = TMDBService.search_movies_globally(query)
+        tv_task = TMDBService.search_tv_shows_globally(query)
+        persons_task = TMDBService.search_person_globally(query)
+        titles, tv_shows, person_credits = await asyncio.gather(titles_task, tv_task, persons_task)
+
+    # Newly released titles may exist in TMDB by ID before text search and
+    # regional provider metadata are indexed. Load known title overrides by ID
+    # so they still flow through the normal OTT filtering and sorting pipeline.
     for alias, (content_type, content_id) in SEARCH_CONTENT_OVERRIDES.items():
         if content_type != 'tv' or alias not in normalized_query:
             continue
