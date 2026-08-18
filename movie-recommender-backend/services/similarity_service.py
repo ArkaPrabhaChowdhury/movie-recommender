@@ -10,6 +10,9 @@ STOPWORDS = {
     "they", "this", "through", "when", "where", "which", "with", "while", "will",
     "you", "your", "the", "for", "its", "who", "what", "then", "than", "them",
 }
+MIN_STORY_SIMILARITY = 0.15
+MIN_GENRE_FIT = 0.25
+MIN_CONTENT_FIT = 0.32
 
 
 def _genre_ids(item: Dict) -> set:
@@ -36,8 +39,10 @@ def story_similarity(source: Dict, candidate: Dict) -> float:
 def similarity_score(source: Dict, candidate: Dict) -> float:
     """Score a candidate: story first, genre second, trending third."""
     genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
+    story_fit = story_similarity(source, candidate)
+    content_fit = story_fit * 0.65 + genre_fit * 0.35
     trend_fit = 1.0 if candidate.get("is_trending") else 0.0
-    return story_similarity(source, candidate) * 0.55 + genre_fit * 0.30 + trend_fit * 0.15
+    return content_fit * 0.85 + trend_fit * 0.15
 
 
 def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 12) -> List[Dict]:
@@ -49,6 +54,11 @@ def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 
         if not key[1] or key == source_key or key in unique or not candidate.get("poster"):
             continue
         if candidate.get("streaming") and not candidate["streaming"].get("platform_found"):
+            continue
+        genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
+        story_fit = story_similarity(source, candidate)
+        content_fit = story_fit * 0.65 + genre_fit * 0.35
+        if story_fit < MIN_STORY_SIMILARITY or genre_fit < MIN_GENRE_FIT or content_fit < MIN_CONTENT_FIT:
             continue
         unique[key] = candidate
     ranked = sorted(unique.values(), key=lambda item: (similarity_score(source, item), float(item.get("popularity", 0) or 0)), reverse=True)[:limit]
