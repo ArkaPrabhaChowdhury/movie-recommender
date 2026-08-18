@@ -46,7 +46,7 @@ class SimilarityServiceTests(unittest.TestCase):
         }
         unrelated = {
             "id": 6, "content_type": "movie", "poster": "unrelated.jpg",
-            "genre_ids": [28], "_story_similarity": 0.12, "is_trending": True,
+            "genre_ids": [28], "_story_similarity": 0.10, "is_trending": True,
             "streaming": {"platform_found": True},
         }
         self.assertEqual([item["id"] for item in rank_similar_content(self.source, [unrelated, relevant])], [5])

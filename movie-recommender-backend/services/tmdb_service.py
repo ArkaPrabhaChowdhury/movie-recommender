@@ -406,12 +406,18 @@ class TMDBService:
                     else:
                         director = [crew for crew in data.get('created_by', [])]
                         
-                    recommendation_results = data.get('recommendations', {}).get('results', [])
-                    similar_results = data.get('similar', {}).get('results', [])
-                    similar_raw = (recommendation_results or similar_results)[:20]
-                    recommendation_source = bool(recommendation_results)
+                    recommendation_results = data.get('recommendations', {}).get('results', [])[:12]
+                    similar_results = data.get('similar', {}).get('results', [])[:12]
+                    similar_raw = []
+                    seen_ids = set()
+                    for result_source, result_items in (("tmdb_recommendation", recommendation_results), ("tmdb_similar", similar_results)):
+                        for rank, item in enumerate(result_items):
+                            if item['id'] in seen_ids:
+                                continue
+                            seen_ids.add(item['id'])
+                            similar_raw.append((result_source, rank, item))
                     similar = []
-                    for rank, item in enumerate(similar_raw):
+                    for result_source, rank, item in similar_raw:
                         similar.append({
                             "id": item['id'],
                             "title": item.get('title') if content_type == 'movie' else item.get('name'),
@@ -424,7 +430,7 @@ class TMDBService:
                             "original_language": item.get('original_language', ''),
                             "year": item.get('release_date', '')[:4] if item.get('release_date', '') else (item.get('first_air_date', '')[:4] if item.get('first_air_date', '') else ''),
                             "content_type": content_type
-                            ,"source": "tmdb_recommendation" if recommendation_source else "tmdb_similar"
+                            ,"source": result_source
                             ,"similar_rank": rank
                         })
                         
