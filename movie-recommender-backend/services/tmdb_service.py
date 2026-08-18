@@ -390,7 +390,7 @@ class TMDBService:
                     f"{TMDB_API_URL}/{content_type}/{content_id}", 
                     params={
                         "api_key": TMDB_API_KEY,
-                        "append_to_response": "credits,videos,similar"
+                        "append_to_response": "credits,videos,similar,recommendations"
                     }
                 )
                 
@@ -406,7 +406,10 @@ class TMDBService:
                     else:
                         director = [crew for crew in data.get('created_by', [])]
                         
-                    similar_raw = data.get('similar', {}).get('results', [])[:20]
+                    recommendation_results = data.get('recommendations', {}).get('results', [])
+                    similar_results = data.get('similar', {}).get('results', [])
+                    similar_raw = (recommendation_results or similar_results)[:20]
+                    recommendation_source = bool(recommendation_results)
                     similar = []
                     for rank, item in enumerate(similar_raw):
                         similar.append({
@@ -421,7 +424,7 @@ class TMDBService:
                             "original_language": item.get('original_language', ''),
                             "year": item.get('release_date', '')[:4] if item.get('release_date', '') else (item.get('first_air_date', '')[:4] if item.get('first_air_date', '') else ''),
                             "content_type": content_type
-                            ,"source": "tmdb_similar"
+                            ,"source": "tmdb_recommendation" if recommendation_source else "tmdb_similar"
                             ,"similar_rank": rank
                         })
                         
