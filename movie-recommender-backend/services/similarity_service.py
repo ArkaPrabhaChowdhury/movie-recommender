@@ -10,9 +10,11 @@ STOPWORDS = {
     "they", "this", "through", "when", "where", "which", "with", "while", "will",
     "you", "your", "the", "for", "its", "who", "what", "then", "than", "them",
 }
-MIN_STORY_SIMILARITY = 0.15
+# The production function may fall back to lexical overview matching when the
+# embedding provider is unavailable, so keep this gate conservative but usable.
+MIN_STORY_SIMILARITY = 0.05
 MIN_GENRE_FIT = 0.25
-MIN_CONTENT_FIT = 0.32
+MIN_CONTENT_FIT = 0.22
 
 
 def _genre_ids(item: Dict) -> set:
