@@ -10,11 +10,20 @@ STOPWORDS = {
     "they", "this", "through", "when", "where", "which", "with", "while", "will",
     "you", "your", "the", "for", "its", "who", "what", "then", "than", "them",
 }
+STORY_CONCEPTS = {
+    "survival": "survive", "survivors": "survive", "surviving": "survive",
+    "house": "home", "houses": "home", "home": "home",
+    "trapped": "trapped", "sealed": "trapped", "isolated": "trapped", "stranded": "trapped",
+    "threat": "danger", "threats": "danger", "ominous": "danger", "danger": "danger",
+    "family": "group", "people": "group", "group": "group",
+    "resource": "resource", "resources": "resource",
+    "protect": "protect", "protected": "protect", "defend": "protect", "defending": "protect",
+}
 # The production function may fall back to lexical overview matching when the
 # embedding provider is unavailable, so keep this gate conservative but usable.
 MIN_STORY_SIMILARITY = 0.05
 MIN_GENRE_FIT = 0.25
-MIN_CONTENT_FIT = 0.22
+MIN_CONTENT_FIT = 0.18
 
 
 def _genre_ids(item: Dict) -> set:
@@ -24,7 +33,21 @@ def _genre_ids(item: Dict) -> set:
 
 def _story_tokens(item: Dict) -> set:
     words = re.findall(r"[a-z0-9]+", (item.get("overview") or "").lower())
-    return {word for word in words if len(word) > 2 and word not in STOPWORDS}
+    tokens = set()
+    for word in words:
+        if len(word) <= 2 or word in STOPWORDS:
+            continue
+        if word in STORY_CONCEPTS:
+            tokens.add(STORY_CONCEPTS[word])
+            continue
+        if word.endswith("ing") and len(word) > 5:
+            word = word[:-3]
+        elif word.endswith("ed") and len(word) > 4:
+            word = word[:-2]
+        elif word.endswith("s") and len(word) > 4:
+            word = word[:-1]
+        tokens.add(word)
+    return tokens
 
 
 def story_similarity(source: Dict, candidate: Dict) -> float:
