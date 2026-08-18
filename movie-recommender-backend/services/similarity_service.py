@@ -15,9 +15,12 @@ STORY_CONCEPTS = {
     "house": "home", "houses": "home", "home": "home",
     "trapped": "trapped", "sealed": "trapped", "isolated": "trapped", "stranded": "trapped",
     "threat": "danger", "threats": "danger", "ominous": "danger", "danger": "danger",
+    "adversary": "danger", "sinister": "danger", "ruthless": "danger", "infected": "danger",
     "family": "group", "people": "group", "group": "group",
     "resource": "resource", "resources": "resource",
     "protect": "protect", "protected": "protect", "defend": "protect", "defending": "protect",
+    "fight": "survive", "fights": "survive", "struggle": "survive", "save": "protect",
+    "earth": "world", "planet": "world", "world": "world", "extinction": "danger",
 }
 # The production function may fall back to lexical overview matching when the
 # embedding provider is unavailable, so keep this gate conservative but usable.
@@ -87,7 +90,7 @@ def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 
         if genre_fit < MIN_GENRE_FIT:
             continue
         if candidate.get("is_trending"):
-            if content_fit < MIN_TRENDING_CONTENT_FIT:
+            if story_fit < MIN_STORY_SIMILARITY or content_fit < MIN_TRENDING_CONTENT_FIT:
                 continue
         elif story_fit < MIN_STORY_SIMILARITY or content_fit < MIN_CONTENT_FIT:
             continue
