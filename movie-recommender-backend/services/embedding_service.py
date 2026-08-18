@@ -15,7 +15,7 @@ class EmbeddingService:
         if cls._instance is None:
             cls._instance = super(EmbeddingService, cls).__new__(cls)
             cls._instance.model_id = "sentence-transformers/all-MiniLM-L6-v2"
-            cls._instance.api_url = f"https://api-inference.huggingface.co/models/{cls._instance.model_id}"
+            cls._instance.api_url = f"https://router.huggingface.co/hf-inference/models/{cls._instance.model_id}"
             
             # Get token from environment
             from config.constants import SUPABASE_KEY # We can reuse keys if needed, but better to have HF_TOKEN
