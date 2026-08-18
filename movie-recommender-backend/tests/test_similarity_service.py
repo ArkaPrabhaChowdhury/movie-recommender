@@ -20,7 +20,7 @@ class SimilarityServiceTests(unittest.TestCase):
         }
         weak = {
             "id": 3, "content_type": "movie", "poster": "weak.jpg",
-            "genre_ids": [28, 53], "overview": "A time traveller returns to the future and changes history.",
+            "genre_ids": [35], "overview": "A time traveller returns to the future and changes history.",
             "is_trending": True, "streaming": {"platform_found": True},
         }
         self.assertGreater(story_similarity(self.source | {"overview": strong["overview"]}, strong), 0)

@@ -24,6 +24,7 @@ STORY_CONCEPTS = {
 MIN_STORY_SIMILARITY = 0.05
 MIN_GENRE_FIT = 0.25
 MIN_CONTENT_FIT = 0.18
+MIN_TRENDING_CONTENT_FIT = 0.10
 
 
 def _genre_ids(item: Dict) -> set:
@@ -83,7 +84,12 @@ def rank_similar_content(source: Dict, candidates: Iterable[Dict], limit: int = 
         genre_fit = len(_genre_ids(source) & _genre_ids(candidate)) / max(len(_genre_ids(source)), 1)
         story_fit = story_similarity(source, candidate)
         content_fit = story_fit * 0.65 + genre_fit * 0.35
-        if story_fit < MIN_STORY_SIMILARITY or genre_fit < MIN_GENRE_FIT or content_fit < MIN_CONTENT_FIT:
+        if genre_fit < MIN_GENRE_FIT:
+            continue
+        if candidate.get("is_trending"):
+            if content_fit < MIN_TRENDING_CONTENT_FIT:
+                continue
+        elif story_fit < MIN_STORY_SIMILARITY or content_fit < MIN_CONTENT_FIT:
             continue
         unique[key] = candidate
     ranked = sorted(unique.values(), key=lambda item: (similarity_score(source, item), float(item.get("popularity", 0) or 0)), reverse=True)[:limit]
