@@ -39,14 +39,14 @@ class AnalyticsTracker:
     """
     Singleton in-memory metrics store.
     Keeps the last 500 traces in a sliding deque.
-    Groq pricing (as of 2025): $0.59 / 1M input tokens, $0.79 / 1M output tokens
-    for llama-3.3-70b-versatile.
+    Groq pricing (as of August 2026): $0.15 / 1M input tokens, $0.60 / 1M output tokens
+    for openai/gpt-oss-120b.
     """
     _instance = None
     _lock = threading.Lock()
 
-    GROQ_INPUT_PRICE_PER_1M  = 0.59   # USD per 1M input tokens
-    GROQ_OUTPUT_PRICE_PER_1M = 0.79   # USD per 1M output tokens
+    GROQ_INPUT_PRICE_PER_1M  = 0.15   # USD per 1M input tokens
+    GROQ_OUTPUT_PRICE_PER_1M = 0.60   # USD per 1M output tokens
 
     def __new__(cls):
         with cls._lock:

@@ -6,6 +6,8 @@ import time
 from utils.observability import observe, langfuse_context
 from config.constants import OLLAMA_API_URL
 
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+
 # lazy import to avoid circular imports at module load time
 def _get_tracker():
     from utils.analytics_tracker import tracker
@@ -20,7 +22,7 @@ class OllamaService:
         # Set span information for Langfuse
         langfuse_context.update_current_observation(
             name="Groq-Completion",
-            metadata={"temperature": temperature, "model": "llama-3.3-70b-versatile"}
+            metadata={"temperature": temperature, "model": GROQ_MODEL}
         )
         langfuse_context.update_current_trace(
             tags=["llm-call", "groq"]
@@ -40,7 +42,7 @@ class OllamaService:
             }
             
             payload = {
-                "model": "llama-3.3-70b-versatile",
+                "model": GROQ_MODEL,
                 "messages": [
                     {"role": "system", "content": "You are a premium AI entertainment critic and recommendation engine. You provide insightful, accurate, and diverse content suggestions based on specific user data and constraints."},
                     {"role": "user", "content": prompt}
