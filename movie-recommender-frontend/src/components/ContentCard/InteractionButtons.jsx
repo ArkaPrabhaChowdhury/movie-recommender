@@ -146,7 +146,7 @@ const InteractionButtons = ({
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${hasAction('watched') ? 'bg-green-500/10 text-green-400 font-medium' : 'text-gray-300 hover:bg-white/5'
               }`}
           >
-            <CheckCircle size={16} fill={hasAction('watched') ? "currentColor" : "none"} />
+            <CheckCircle size={16} />
             <span>Watched</span>
           </button>
 
