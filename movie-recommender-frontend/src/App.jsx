@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
 import HomePage from './pages/HomePage';
@@ -8,6 +8,7 @@ import SystemHealthPage from './pages/SystemHealthPage';
 import { useGlobalSearch } from './hooks/useGlobalSearch';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { API_CONFIG } from './config/constants';
+import { registerWebMCPTools } from './services/webmcp';
 
 function App() {
   // Search state
@@ -46,6 +47,13 @@ function App() {
     hasPreferences,
     thinkingProcess
   } = useUserPreferences();
+
+  useEffect(() => registerWebMCPTools({
+    userId,
+    addToWatchlist,
+    markAsWatched,
+    likeContent
+  }), [userId, addToWatchlist, markAsWatched, likeContent]);
 
   const handleSearchChange = (e) => {
     const query = e.target.value;

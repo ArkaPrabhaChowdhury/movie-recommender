@@ -18,6 +18,22 @@ flowchart LR
   API --> Email[Resend]
 ```
 
+## WebMCP support
+
+OTT Scout exposes structured WebMCP tools so an agent can search the catalog, inspect title and streaming details, get personalized recommendations, and manage a user's watchlist and viewing history. The tools are registered from the frontend with `document.modelContext.registerTool(...)` and use the same API and preference actions as the human UI.
+
+The app can be tested in ChatGPT's in-app browser or in Google Chrome 149+ after enabling `chrome://flags/#enable-webmcp-testing`. The public demo URL is [https://ottscout.vercel.app](https://ottscout.vercel.app).
+
+Available tools:
+
+- `search_movies`
+- `get_movie_details`
+- `get_recommendations`
+- `find_streaming_options`
+- `add_to_watchlist`
+- `mark_as_watched`
+- `like_title`
+
 ## Offline evaluation
 
 Run the reproducible benchmark:
