@@ -1,15 +1,5 @@
 import ApiService from './api';
 
-const TOOL_NAMES = [
-  'search_movies',
-  'get_movie_details',
-  'get_recommendations',
-  'find_streaming_options',
-  'add_to_watchlist',
-  'mark_as_watched',
-  'like_title'
-];
-
 const contentSchema = {
   type: 'object',
   properties: {
@@ -53,9 +43,10 @@ const result = (message, data = {}) => ({
  * Registers OTT Scout's real product capabilities with the WebMCP browser API.
  * The API is experimental, so the app remains fully usable in browsers without it.
  */
-export const registerWebMCPTools = ({ userId, addToWatchlist, markAsWatched, likeContent }) => {
+export const registerWebMCPTools = (getApi) => {
   const modelContext = typeof document !== 'undefined' ? document.modelContext : null;
   if (!modelContext?.registerTool) return () => {};
+  const controller = new AbortController();
 
   const tools = [
     {
@@ -96,6 +87,7 @@ export const registerWebMCPTools = ({ userId, addToWatchlist, markAsWatched, lik
       },
       annotations: { readOnlyHint: true },
       execute: async ({ mood, specific_request, limit = 10 } = {}) => {
+        const { userId } = getApi();
         if (!userId) return result('A user profile is still loading. Try again in a moment.', { results: [] });
         const data = await ApiService.getPersonalizedRecommendations(userId, {
           mood,
@@ -133,16 +125,20 @@ export const registerWebMCPTools = ({ userId, addToWatchlist, markAsWatched, lik
       }
     },
     ...[
-      ['add_to_watchlist', 'Add a movie or TV show to the user’s OTT Scout watchlist.', addToWatchlist, 'watchlisted'],
-      ['mark_as_watched', 'Mark a movie or TV show as watched in the user’s OTT Scout history.', markAsWatched, 'watched'],
-      ['like_title', 'Like a movie or TV show to improve future personalized recommendations.', likeContent, 'liked']
-    ].map(([name, description, action, actionName]) => ({
+      ['add_to_watchlist', 'Add a movie or TV show to the user’s OTT Scout watchlist.', 'addToWatchlist', 'watchlisted'],
+      ['mark_as_watched', 'Mark a movie or TV show as watched in the user’s OTT Scout history.', 'markAsWatched', 'watched'],
+      ['like_title', 'Like a movie or TV show to improve future personalized recommendations.', 'likeContent', 'liked']
+    ].map(([name, description, actionKey, actionName]) => ({
       name,
       description,
       inputSchema: contentSchema,
       annotations: { readOnlyHint: false },
       execute: async (input) => {
+        const api = getApi();
+        const action = api[actionKey];
+        const { userId } = api;
         if (!userId) return result('A user profile is still loading. Try again in a moment.');
+        if (typeof action !== 'function') return result('This action is not available yet. Try again in a moment.');
         const item = await getActionItem(input);
         const saved = await action(item);
         return result(saved ? `${item.title} was ${actionName === 'watchlisted' ? 'added to your watchlist' : actionName}.` : `Unable to update ${item.title}.`, {
@@ -156,10 +152,11 @@ export const registerWebMCPTools = ({ userId, addToWatchlist, markAsWatched, lik
     }))
   ];
 
-  tools.forEach((tool) => modelContext.registerTool(tool));
-  return () => {
-    if (typeof modelContext.unregisterTool === 'function') {
-      TOOL_NAMES.forEach((name) => modelContext.unregisterTool(name));
-    }
-  };
+  tools.forEach((tool) => {
+    Promise.resolve(modelContext.registerTool(tool, { signal: controller.signal })).catch((error) => {
+      if (error?.name !== 'AbortError') console.warn(`Unable to register WebMCP tool ${tool.name}:`, error);
+    });
+  });
+
+  return () => controller.abort();
 };

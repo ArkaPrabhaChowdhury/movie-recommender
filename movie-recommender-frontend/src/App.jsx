@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
 import HomePage from './pages/HomePage';
@@ -48,12 +48,15 @@ function App() {
     thinkingProcess
   } = useUserPreferences();
 
-  useEffect(() => registerWebMCPTools({
+  const webMCPApiRef = useRef({});
+  webMCPApiRef.current = {
     userId,
     addToWatchlist,
     markAsWatched,
     likeContent
-  }), [userId, addToWatchlist, markAsWatched, likeContent]);
+  };
+
+  useEffect(() => registerWebMCPTools(() => webMCPApiRef.current), []);
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
